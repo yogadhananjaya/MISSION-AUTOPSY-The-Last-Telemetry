@@ -136,11 +136,11 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
         <div className="flex items-center gap-3">
           {/* Avatar Box with Angled Frame (matching Image 2 top-left) */}
           <div className="relative group cursor-pointer">
-            <div className="w-11 h-11 bg-[#1a202c] border-2 border-cyan-400/90 flex items-center justify-center font-bold text-cyan-300 font-display text-lg clip-chamfer-sm shadow-md shadow-cyan-500/20">
+            <div className="w-11 h-11 bg-[#14171E] border-2 border-orange-500 flex items-center justify-center font-bold text-orange-400 font-display text-lg clip-chamfer-sm shadow-md shadow-orange-500/20">
               {astronautName ? astronautName.charAt(0).toUpperCase() : 'M'}
             </div>
             {/* Level Tag (e.g. Lv.26 in gold) */}
-            <span className="absolute -top-1 -right-2 px-1.5 py-0.2 bg-amber-500 text-black font-black text-[9px] font-mono clip-chamfer-sm">
+            <span className="absolute -top-1 -right-2 px-1.5 py-0.2 bg-orange-500 text-black font-black text-[9px] font-mono clip-chamfer-sm">
               Lv.26
             </span>
           </div>
@@ -150,15 +150,15 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
               <span className="font-bold text-sm tracking-wider font-display uppercase text-white">
                 {astronautName || 'Mister'}
               </span>
-              <span className="text-[9px] font-mono px-1.5 py-0.2 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-bold clip-chamfer-sm">
+              <span className="text-[9px] font-mono px-1.5 py-0.2 bg-orange-500/15 text-orange-400 border border-orange-500/40 font-bold clip-chamfer-sm">
                 NASA INVESTIGATOR
               </span>
             </div>
             
             {/* EXP Progress Bar with Numbers */}
             <div className="flex items-center gap-2 mt-1">
-              <div className="w-32 bg-black/80 h-1.5 border border-slate-700 overflow-hidden">
-                <div className="bg-gradient-to-r from-cyan-400 to-blue-500 h-full w-[65%]" />
+              <div className="w-32 bg-black h-1.5 border border-black overflow-hidden">
+                <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-400 h-full w-[65%]" />
               </div>
               <span className="text-[9px] font-mono text-slate-300 font-bold">1560 / 5000</span>
             </div>
@@ -169,22 +169,22 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
         <div className="flex items-center gap-2 sm:gap-3">
           
           {/* Credit / Funds Counter */}
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-[#161c26] border border-slate-700/80 rounded-full text-xs font-mono shadow-inner">
-            <span className="text-amber-400 font-bold">$</span>
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-[#14171E] border border-black rounded-full text-xs font-mono shadow-inner">
+            <span className="text-orange-400 font-bold">$</span>
             <span className="font-bold text-slate-100 font-mono-tech">$65,000,000</span>
             <span className="text-slate-400 hover:text-white cursor-pointer ml-1 font-bold">+</span>
           </div>
 
-          {/* Energy / Stamina Counter (matching Image 2 "586/120 +") */}
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#161c26] border border-slate-700/80 rounded-full text-xs font-mono shadow-inner">
-            <span className="w-3.5 h-3.5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[9px] font-bold">⚡</span>
+          {/* Energy / Stamina Counter */}
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#14171E] border border-black rounded-full text-xs font-mono shadow-inner">
+            <span className="w-3.5 h-3.5 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[9px] font-bold">⚡</span>
             <span className="font-bold text-slate-100 font-mono-tech">586/120</span>
             <span className="text-slate-400 hover:text-white cursor-pointer ml-1 font-bold">+</span>
           </div>
 
-          {/* Signal / Tickets Counter (matching Image 2 "165 +") */}
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-[#161c26] border border-slate-700/80 rounded-full text-xs font-mono shadow-inner">
-            <Radio className="w-3.5 h-3.5 text-amber-400" />
+          {/* Signal / Tickets Counter */}
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-[#14171E] border border-black rounded-full text-xs font-mono shadow-inner">
+            <Radio className="w-3.5 h-3.5 text-orange-400" />
             <span className="font-bold text-slate-100 font-mono-tech">165</span>
             <span className="text-slate-400 hover:text-white cursor-pointer ml-1 font-bold">+</span>
           </div>
@@ -192,33 +192,33 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
           {/* Mail icon with notification badge */}
           <div 
             onClick={() => setShowAchievementModal(true)}
-            className="relative p-2 bg-[#161c26] border border-slate-700 rounded text-slate-300 hover:text-white cursor-pointer transition-colors"
+            className="relative p-2 bg-[#14171E] border border-black rounded text-slate-300 hover:text-white cursor-pointer transition-colors"
             title="Pesan & Laporan"
           >
             <Mail className="w-4 h-4" />
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-ping" />
           </div>
 
           {/* Settings cog */}
           <div 
             onClick={() => setShowSettingsModal(true)}
-            className="p-2 bg-[#161c26] border border-slate-700 rounded text-slate-300 hover:text-white cursor-pointer transition-colors"
+            className="p-2 bg-[#14171E] border border-black rounded text-slate-300 hover:text-white cursor-pointer transition-colors"
             title="Pengaturan"
           >
             <Settings className="w-4 h-4" />
           </div>
 
           {/* Audio & Fullscreen buttons */}
-          <div className="hidden sm:flex items-center gap-1 pl-1 border-l border-slate-800">
+          <div className="hidden sm:flex items-center gap-1 pl-1 border-l border-black">
             <button 
               onClick={toggleAudio}
-              className="p-2 bg-[#161c26] border border-slate-700 rounded text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
+              className="p-2 bg-[#14171E] border border-black rounded text-slate-300 hover:text-orange-400 transition-colors cursor-pointer"
             >
-              {audioEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              {audioEnabled ? <Volume2 className="w-4 h-4 text-orange-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
             </button>
             <button 
               onClick={toggleFullscreen}
-              className="p-2 bg-[#161c26] border border-slate-700 rounded text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
+              className="p-2 bg-[#14171E] border border-black rounded text-slate-300 hover:text-orange-400 transition-colors cursor-pointer"
             >
               <Maximize2 className="w-4 h-4" />
             </button>
@@ -237,7 +237,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
         <div className="relative z-30 w-full lg:w-72 flex flex-col justify-between self-stretch py-2">
           
           {/* Vertical Menu Items */}
-          <div className="space-y-4 pt-2">
+          <div className="space-y-3.5 pt-2">
             {[
               { id: 'new_game', title: 'GAME BARU', subtitle: 'KASUS PERDANA', icon: Sparkles, onClick: () => onStartNewGame() },
               { id: 'missions', title: 'TUGAS', subtitle: 'MISI INVESTIGASI', icon: Compass, onClick: () => setShowMissionModal(true) },
@@ -249,13 +249,13 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
                 <div
                   key={item.id}
                   onClick={item.onClick}
-                  className="group flex items-center gap-3 p-2 bg-[#10141d]/70 hover:bg-[#161c28] border-l-4 border-slate-700 hover:border-cyan-400 backdrop-blur-sm cursor-pointer transition-all duration-200 hover:translate-x-1.5 shadow-md"
+                  className="group flex items-center gap-3 p-2.5 bg-[#14171E]/90 hover:bg-[#1E232E] border border-black border-l-4 border-l-orange-500 backdrop-blur-sm cursor-pointer transition-all duration-200 hover:translate-x-1.5 shadow-lg clip-chamfer-sm"
                 >
-                  <div className="p-2 bg-[#18202d] text-cyan-400 group-hover:text-cyan-200 transition-colors">
+                  <div className="p-2 bg-[#0B0D12] text-orange-400 group-hover:text-white transition-colors">
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="font-display font-black text-base text-white tracking-wider group-hover:text-cyan-300 transition-colors">
+                    <div className="font-display font-black text-base text-white tracking-wider group-hover:text-orange-400 transition-colors">
                       {item.title}
                     </div>
                     <div className="text-[10px] font-mono text-slate-400 tracking-wider">
@@ -267,16 +267,16 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
             })}
           </div>
 
-          {/* Bottom Left Banner Ad / Case Dossier with Character Switch (matching Image 2 bottom-left) */}
+          {/* Bottom Left Banner Ad / Case Dossier with Character Switch */}
           <div className="mt-auto pt-4">
-            <div className="p-3 bg-[#131924]/90 border border-slate-700/80 backdrop-blur-md clip-chamfer-sm shadow-xl space-y-2">
+            <div className="p-3.5 bg-[#14171E]/95 border border-black border-l-4 border-l-orange-500 backdrop-blur-md clip-chamfer-sm shadow-2xl space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[9px] font-mono font-bold text-amber-400 tracking-widest uppercase">
+                <span className="text-[9px] font-mono font-bold text-orange-400 tracking-widest uppercase">
                   KASUS AKTIF : ASTER-9
                 </span>
                 <button
                   onClick={cycleCharacter}
-                  className="flex items-center gap-1 px-2 py-0.5 bg-[#1e2637] hover:bg-cyan-500 hover:text-black border border-slate-600 text-cyan-300 text-[10px] font-mono font-bold rounded transition-colors cursor-pointer"
+                  className="flex items-center gap-1 px-2 py-0.5 bg-[#1C202A] hover:bg-orange-500 hover:text-black border border-black text-orange-400 text-[10px] font-mono font-bold rounded transition-colors cursor-pointer"
                   title="Ganti Karakter Tampilan"
                 >
                   <Repeat className="w-3 h-3" />
@@ -285,7 +285,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="w-1 h-7 bg-amber-500 shrink-0" />
+                <div className="w-1 h-7 bg-orange-500 shrink-0" />
                 <div>
                   <div className="font-display font-bold text-sm text-white uppercase leading-tight">
                     {currentCrew.name}
@@ -300,7 +300,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
 
         </div>
 
-        {/* ── CENTER: Hero Standee Character Standing on Floor (matching Image 2) ── */}
+        {/* ── CENTER: Hero Standee Character Standing on Floor ── */}
         <div className="relative flex-1 flex flex-col items-center justify-center my-auto min-h-[420px] lg:min-h-[580px] pointer-events-none">
           
           {/* Active Character Full Illustration Standee */}
@@ -308,38 +308,38 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
             <img
               src={currentCrew.image}
               alt={currentCrew.name}
-              className="h-[380px] sm:h-[480px] lg:h-[540px] object-contain drop-shadow-[0_24px_48px_rgba(0,0,0,0.7)]"
+              className="h-[380px] sm:h-[480px] lg:h-[540px] object-contain drop-shadow-[0_24px_48px_rgba(0,0,0,0.8)]"
             />
           </div>
 
           {/* Character Footing Ambient Ground Shadow */}
-          <div className="w-64 h-8 bg-black/60 rounded-full blur-xl -mt-6" />
+          <div className="w-64 h-8 bg-black/70 rounded-full blur-xl -mt-6" />
 
         </div>
 
-        {/* ── RIGHT ASYMMETRIC COMMAND BLOCK (MATCHING IMAGE 2 RIGHT HUD) ── */}
+        {/* ── RIGHT ASYMMETRIC COMMAND BLOCK ── */}
         <div className="relative z-30 w-full lg:w-96 flex flex-col gap-3.5">
           
-          {/* Top Rank Badge (matching Image 2 "见习 / TRAINEE") */}
+          {/* Top Rank Badge */}
           <div className="flex items-center justify-end">
-            <div className="px-3 py-1 bg-[#151c27]/90 border border-slate-700/80 text-cyan-300 text-xs font-mono font-bold flex items-center gap-2 clip-chamfer-sm shadow-md">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+            <div className="px-3 py-1 bg-[#14171E] border border-black text-orange-400 text-xs font-mono font-bold flex items-center gap-2 clip-chamfer-sm shadow-md">
+              <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping" />
               <span>ORBITA NOVA : KADET AKTIF</span>
             </div>
           </div>
 
-          {/* Main Incident Dossier & Primary DEPLOY Bar (matching Image 2 "出击 / 执行任务") */}
-          <div className="bg-[#121722]/90 border border-slate-700/90 p-4 clip-chamfer-md shadow-2xl backdrop-blur-md space-y-3">
+          {/* Main Incident Dossier & Primary DEPLOY Bar */}
+          <div className="bg-[#14171E]/95 border border-black p-4 clip-chamfer-md shadow-2xl backdrop-blur-md space-y-3">
             
             {/* Progres Tag */}
-            <div className="flex items-center justify-between text-xs font-mono border-b border-slate-800 pb-2">
+            <div className="flex items-center justify-between text-xs font-mono border-b border-black/80 pb-2">
               <span className="text-slate-400">PROGRES AKTIF : KASUS 01</span>
-              <span className="text-emerald-400 font-bold">FASE FORENSIK</span>
+              <span className="text-orange-400 font-bold">FASE FORENSIK</span>
             </div>
 
             {/* Target Title & Insignia */}
             <div className="flex items-center gap-3 py-1">
-              <div className="w-12 h-12 bg-black/60 border border-amber-500/60 rounded flex items-center justify-center text-amber-400 text-xl font-bold shrink-0 shadow-lg">
+              <div className="w-12 h-12 bg-black border border-orange-500/60 rounded flex items-center justify-center text-orange-400 text-xl font-bold shrink-0 shadow-lg">
                 ☄️
               </div>
               <div>
@@ -352,16 +352,16 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
               </div>
             </div>
 
-            {/* Prominent Chamfered Action Bar (出击 Style from Image 2) */}
+            {/* Prominent Action Bar (Orange Tactical with Black Outline) */}
             <button
               onClick={onResumeGame}
-              className="w-full py-3.5 px-5 bg-white hover:bg-slate-100 text-black font-display font-black text-sm tracking-wider flex items-center justify-between cursor-pointer shadow-xl transition-all hover:scale-[1.01] clip-chamfer-sm"
+              className="w-full py-3.5 px-5 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-black font-display font-black text-sm tracking-wider flex items-center justify-between cursor-pointer shadow-xl transition-all hover:scale-[1.01] border border-black clip-chamfer-sm"
             >
               <div className="text-left leading-tight">
-                <div className="text-base font-black uppercase text-slate-950">
+                <div className="text-base font-black uppercase text-black">
                   LUNCURKAN
                 </div>
-                <div className="text-[9px] font-mono text-slate-600 font-bold tracking-widest uppercase">
+                <div className="text-[9px] font-mono text-black/90 font-bold tracking-widest uppercase">
                   MULAI INVESTIGASI
                 </div>
               </div>
@@ -369,19 +369,19 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
             </button>
           </div>
 
-          {/* Tactical Action Grid: 2-Column Grid (matching Image 2 Right Blocks) */}
+          {/* Tactical Action Grid: 2-Column Grid */}
           <div className="grid grid-cols-2 gap-2.5">
             
-            {/* Tile 1: SKUAD AWAK (Opens Gambar 1 Character Album!) */}
+            {/* Tile 1: SKUAD AWAK (Opens Character Album) */}
             <div 
               onClick={() => setShowCharacterModal(true)}
-              className="group p-3 bg-[#131924]/90 border border-slate-700/80 hover:border-cyan-400 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
+              className="group p-3 bg-[#14171E] border border-black hover:border-orange-500 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
             >
-              <div className="p-2 bg-[#1b2333] group-hover:bg-cyan-500 group-hover:text-black text-cyan-400 rounded transition-colors">
+              <div className="p-2 bg-[#0B0D12] group-hover:bg-orange-500 group-hover:text-black text-orange-400 rounded transition-colors">
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <div className="font-display font-bold text-xs text-white uppercase tracking-wide">
+                <div className="font-display font-bold text-xs text-white uppercase tracking-wide group-hover:text-orange-400 transition-colors">
                   AWAK
                 </div>
                 <div className="text-[9px] font-mono text-slate-400">
@@ -390,19 +390,19 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
               </div>
             </div>
 
-            {/* Tile 2: GUDANG / SUKU CADANG (Spacecraft Redesign) */}
+            {/* Tile 2: GUDANG (Spacecraft Redesign) */}
             <div 
               onClick={() => {
                 setPhase('redesign');
                 setCurrentView('mission');
               }}
-              className="group p-3 bg-[#131924]/90 border border-slate-700/80 hover:border-amber-400 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
+              className="group p-3 bg-[#14171E] border border-black hover:border-orange-500 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
             >
-              <div className="p-2 bg-[#1b2333] group-hover:bg-amber-500 group-hover:text-black text-amber-400 rounded transition-colors">
+              <div className="p-2 bg-[#0B0D12] group-hover:bg-orange-500 group-hover:text-black text-orange-400 rounded transition-colors">
                 <Wrench className="w-5 h-5" />
               </div>
               <div>
-                <div className="font-display font-bold text-xs text-white uppercase tracking-wide">
+                <div className="font-display font-bold text-xs text-white uppercase tracking-wide group-hover:text-orange-400 transition-colors">
                   GUDANG
                 </div>
                 <div className="text-[9px] font-mono text-slate-400">
@@ -411,19 +411,19 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
               </div>
             </div>
 
-            {/* Tile 3: LAB TELEMETRI (Direct jump into Telemetry Studio) */}
+            {/* Tile 3: LAB TELEMETRI */}
             <div 
               onClick={() => {
                 setPhase('investigation');
                 setCurrentView('mission');
               }}
-              className="group p-3 bg-[#131924]/90 border border-slate-700/80 hover:border-cyan-400 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
+              className="group p-3 bg-[#14171E] border border-black hover:border-orange-500 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
             >
-              <div className="p-2 bg-[#1b2333] group-hover:bg-cyan-500 group-hover:text-black text-cyan-400 rounded transition-colors">
+              <div className="p-2 bg-[#0B0D12] group-hover:bg-orange-500 group-hover:text-black text-orange-400 rounded transition-colors">
                 <Activity className="w-5 h-5" />
               </div>
               <div>
-                <div className="font-display font-bold text-xs text-white uppercase tracking-wide">
+                <div className="font-display font-bold text-xs text-white uppercase tracking-wide group-hover:text-orange-400 transition-colors">
                   LAB TELEMETRI
                 </div>
                 <div className="text-[9px] font-mono text-slate-400">
@@ -432,16 +432,16 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
               </div>
             </div>
 
-            {/* Tile 4: RUANG BERSAMA (Co-op Multiplayer Lobby) */}
+            {/* Tile 4: RUANG BERSAMA (Co-op) */}
             <div 
               onClick={() => setShowCoopModal(true)}
-              className="group p-3 bg-[#131924]/90 border border-slate-700/80 hover:border-purple-400 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
+              className="group p-3 bg-[#14171E] border border-black hover:border-orange-500 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
             >
-              <div className="p-2 bg-[#1b2333] group-hover:bg-purple-500 group-hover:text-black text-purple-400 rounded transition-colors">
+              <div className="p-2 bg-[#0B0D12] group-hover:bg-orange-500 group-hover:text-black text-orange-400 rounded transition-colors">
                 <Rocket className="w-5 h-5" />
               </div>
               <div>
-                <div className="font-display font-bold text-xs text-white uppercase tracking-wide">
+                <div className="font-display font-bold text-xs text-white uppercase tracking-wide group-hover:text-orange-400 transition-colors">
                   CO-OP
                 </div>
                 <div className="text-[9px] font-mono text-slate-400">
@@ -453,10 +453,10 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
           </div>
 
           {/* Quick Bottom Dock Bar */}
-          <div className="bg-[#10141d]/90 border border-slate-800 text-slate-300 px-3 py-2 flex items-center justify-between rounded clip-chamfer-sm text-[10px] font-mono">
+          <div className="bg-[#14171E] border border-black text-slate-300 px-3 py-2 flex items-center justify-between rounded clip-chamfer-sm text-[10px] font-mono">
             <button 
               onClick={() => setShowCharacterModal(true)}
-              className="flex items-center gap-1 text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-slate-300 hover:text-orange-400 transition-colors cursor-pointer"
             >
               <Users className="w-3.5 h-3.5" />
               <span>KRU</span>
@@ -467,7 +467,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
                 setPhase('redesign');
                 setCurrentView('mission');
               }}
-              className="flex items-center gap-1 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-slate-300 hover:text-orange-400 transition-colors cursor-pointer"
             >
               <Wrench className="w-3.5 h-3.5" />
               <span>MODUL</span>
@@ -475,7 +475,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
             <div className="w-[1px] h-3 bg-slate-700" />
             <button 
               onClick={() => setShowMissionModal(true)}
-              className="flex items-center gap-1 text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-slate-300 hover:text-orange-400 transition-colors cursor-pointer"
             >
               <Compass className="w-3.5 h-3.5" />
               <span>BERKAS</span>
@@ -483,7 +483,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
             <div className="w-[1px] h-3 bg-slate-700" />
             <button 
               onClick={() => setShowAchievementModal(true)}
-              className="flex items-center gap-1 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-slate-300 hover:text-orange-400 transition-colors cursor-pointer"
             >
               <Trophy className="w-3.5 h-3.5" />
               <span>PRESTASI</span>

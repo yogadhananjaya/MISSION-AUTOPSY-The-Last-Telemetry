@@ -132,34 +132,34 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
         <div className="flex items-center gap-2 sm:gap-3">
           
           {/* Credit / Funds Pill */}
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-[#1E232B] border border-slate-700/80 rounded-full text-xs font-mono">
-            <span className="w-4 h-4 rounded-full bg-blue-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">⚡</span>
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-[#1E232B] border border-black rounded-full text-xs font-mono">
+            <span className="w-4 h-4 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px] font-bold">⚡</span>
             <span className="font-bold text-slate-100 font-mono-tech">356,000</span>
             <span className="text-slate-400 hover:text-white cursor-pointer ml-1 font-bold">+</span>
           </div>
 
           {/* Energy / Serum Pill */}
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#1E232B] border border-slate-700/80 rounded-full text-xs font-mono">
-            <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[10px]">🧪</span>
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#1E232B] border border-black rounded-full text-xs font-mono">
+            <span className="w-4 h-4 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-[10px]">🧪</span>
             <span className="font-bold text-slate-100 font-mono-tech">150/300</span>
             <span className="text-slate-400 hover:text-white cursor-pointer ml-1 font-bold">+</span>
           </div>
 
           {/* Ticket / Signal Pill */}
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-[#1E232B] border border-slate-700/80 rounded-full text-xs font-mono">
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-[#1E232B] border border-black rounded-full text-xs font-mono">
             <span className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-[10px]">🎫</span>
             <span className="font-bold text-slate-100 font-mono-tech">30</span>
             <span className="text-slate-400 hover:text-white cursor-pointer ml-1 font-bold">+</span>
           </div>
 
           {/* Mail icon with unread indicator */}
-          <div className="relative p-1.5 bg-[#1C2027] border border-slate-700 rounded text-slate-300 hover:text-white cursor-pointer ml-1">
+          <div className="relative p-1.5 bg-[#1C2027] border border-black rounded text-slate-300 hover:text-white cursor-pointer ml-1">
             <Mail className="w-4 h-4" />
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
           </div>
 
           {/* Settings cog */}
-          <div className="p-1.5 bg-[#1C2027] border border-slate-700 rounded text-slate-300 hover:text-white cursor-pointer">
+          <div className="p-1.5 bg-[#1C2027] border border-black rounded text-slate-300 hover:text-white cursor-pointer">
             <Settings className="w-4 h-4" />
           </div>
         </div>
@@ -185,30 +185,30 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
                     onClick={() => { sounds.playClick(600); setSelectedDivision(div.id); }}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-mono font-bold transition-all cursor-pointer text-left ${
                       isActive 
-                        ? 'bg-[#1C2027] text-white border-l-4 border-cyan-400 shadow-md translate-x-1' 
+                        ? 'bg-[#1C2027] text-white border-l-4 border-orange-500 shadow-md translate-x-1' 
                         : 'text-slate-400 hover:text-slate-200 hover:bg-[#15181E] border-l-4 border-transparent'
                     }`}
                   >
-                    <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
+                    <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-orange-400' : 'text-slate-500'}`} />
                     <span className="truncate">{div.label}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Bottom Sort Dropdown Button (matching Image 1 bottom-left "등급별") */}
+            {/* Bottom Sort Dropdown Button */}
             <div className="pt-2 border-t border-slate-800">
               <button
                 onClick={toggleSort}
-                className="w-full flex items-center justify-between px-3 py-2 bg-[#181B22] border border-slate-700 rounded-full text-xs font-mono text-slate-300 hover:text-white hover:border-slate-500 transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between px-3 py-2 bg-[#181B22] border border-black rounded-full text-xs font-mono text-slate-300 hover:text-white hover:border-orange-500 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-1.5">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-cyan-400" />
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-orange-400" />
                   <span className="text-[11px] font-bold">
                     {sortOrder === 'level' ? 'URUTAN LEVEL' : 'URUTAN RARITAS'}
                   </span>
                 </div>
-                <span className="text-[10px] text-cyan-400">▲</span>
+                <span className="text-[10px] text-orange-400">▲</span>
               </button>
             </div>
           </aside>
@@ -221,7 +221,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
                   <div
                     key={crew.id}
                     onClick={() => handleCardClick(crew)}
-                    className="group relative flex flex-col justify-between h-72 sm:h-80 bg-[#161920] border border-slate-800 hover:border-cyan-400/90 rounded-lg overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-cyan-500/10 cursor-pointer select-none"
+                    className="group relative flex flex-col justify-between h-72 sm:h-80 bg-[#161920] border border-black hover:border-orange-500 rounded-lg overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-orange-500/20 cursor-pointer select-none"
                     style={{
                       background: 'radial-gradient(ellipse at 50% 30%, #1e2532 0%, #12151c 70%, #0c0e14 100%)',
                     }}
@@ -537,7 +537,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
                     sounds.playClick(850);
                     onOpenCoopRoom();
                   }}
-                  className="w-full py-2.5 bg-[#1C2027] border border-cyan-500/80 hover:border-cyan-300 text-cyan-300 hover:text-white font-mono text-[11px] font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors clip-chamfer-sm"
+                  className="w-full py-2.5 bg-[#161920] border border-black hover:border-orange-500 text-orange-400 hover:text-white font-mono text-[11px] font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors clip-chamfer-sm"
                 >
                   <span>MASUK RUANG BERSAMA</span>
                 </button>
