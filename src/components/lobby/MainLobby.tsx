@@ -3,16 +3,19 @@ import {
   Compass, 
   Users, 
   Trophy, 
-  ChevronUp, 
-  ChevronDown, 
   Volume2, 
   VolumeX, 
   Maximize2,
   Wrench,
   Radio,
   FolderGit2,
+  Repeat,
+  Mail,
+  Settings,
   ChevronRight,
-  ShieldCheck
+  Sparkles,
+  Rocket,
+  Activity
 } from 'lucide-react';
 import { CREW_MEMBERS } from '../../data/crewData';
 import { MissionSelector } from './MissionSelector';
@@ -29,7 +32,6 @@ interface MainLobbyProps {
 export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGame }) => {
   const { astronautName, audioEnabled, toggleAudio, setPhase, setCurrentView } = useMissionStore();
 
-  const [activeMenuIndex, setActiveMenuIndex] = useState<number>(1); // Default: 'CONTINUE'
   const [activeCrewIndex, setActiveCrewIndex] = useState<number>(0);  // Default: NOVA
   const [showMissionModal, setShowMissionModal] = useState<boolean>(false);
   const [showCharacterModal, setShowCharacterModal] = useState<boolean>(false);
@@ -37,51 +39,12 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
   const [showAchievementModal, setShowAchievementModal] = useState<boolean>(false);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
 
-  const MENU_ITEMS = [
-    { id: 'new_game', code: '01', label: 'NEW GAME', sublabel: 'CHRONICLE RE-ENTRY' },
-    { id: 'continue', code: '02', label: 'CONTINUE', sublabel: 'ACTIVE FORENSICS' },
-    { id: 'mission', code: '03', label: 'MISSION', sublabel: 'INCIDENT DOSSIER' },
-    { id: 'character', code: '04', label: 'CHARACTER', sublabel: 'MULTIPLAYER ROSTER' },
-    { id: 'coop', code: '05', label: 'CO-OP ROOM', sublabel: '3-OPERATOR SYNC' },
-    { id: 'achievement', code: '06', label: 'ACHIEVEMENT', sublabel: 'CITATION ARCHIVE' },
-    { id: 'settings', code: '07', label: 'SETTINGS', sublabel: 'SYSTEM SPEC' },
-  ];
-
   const currentCrew = CREW_MEMBERS[activeCrewIndex];
 
-  // Cycling character when navigating up or down
-  const cycleCharacter = (direction: 'up' | 'down') => {
-    sounds.playClick(600);
-    setActiveCrewIndex((prev) => {
-      if (direction === 'up') {
-        return (prev - 1 + CREW_MEMBERS.length) % CREW_MEMBERS.length;
-      } else {
-        return (prev + 1) % CREW_MEMBERS.length;
-      }
-    });
-  };
-
-  const handleMenuClick = (index: number) => {
-    sounds.playClick(750);
-    setActiveMenuIndex(index);
-    setActiveCrewIndex(index % CREW_MEMBERS.length);
-
-    const item = MENU_ITEMS[index];
-    if (item.id === 'new_game') {
-      onStartNewGame();
-    } else if (item.id === 'continue') {
-      onResumeGame();
-    } else if (item.id === 'mission') {
-      setShowMissionModal(true);
-    } else if (item.id === 'character') {
-      setShowCharacterModal(true);
-    } else if (item.id === 'coop') {
-      setShowCoopModal(true);
-    } else if (item.id === 'achievement') {
-      setShowAchievementModal(true);
-    } else if (item.id === 'settings') {
-      setShowSettingsModal(true);
-    }
+  // Cycling character with quick switch button
+  const cycleCharacter = () => {
+    sounds.playClick(650);
+    setActiveCrewIndex((prev) => (prev + 1) % CREW_MEMBERS.length);
   };
 
   const toggleFullscreen = () => {
@@ -94,482 +57,447 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
 
   return (
     <div 
-      className="fixed inset-0 z-40 flex flex-col justify-between overflow-hidden select-none bg-[#E4E7EC] text-slate-900"
-      onWheel={(e) => {
-        if (e.deltaY > 50) cycleCharacter('down');
-        else if (e.deltaY < -50) cycleCharacter('up');
-      }}
+      className="fixed inset-0 z-40 flex flex-col justify-between overflow-hidden select-none bg-[#0B0E14] text-white"
     >
       
-      {/* ─────────────────────────────────────────────────────────────
-          1. BACKGROUND & ARCHITECTURAL TYPOGRAPHY (IMAGE 1 STYLE)
-          ───────────────────────────────────────────────────────────── */}
+      {/* =========================================================================
+          1. CINEMATIC SCI-FI COMMAND DECK & HANGAR BACKGROUND (MATCHING IMAGE 2)
+          ========================================================================= */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden select-none">
         
-        {/* Subtle Industrial Blueprint Grid */}
+        {/* Deep Industrial Spaceport Atmosphere / Rainy Foggy Hangar Bay */}
         <div 
-          className="absolute inset-0 opacity-40" 
+          className="absolute inset-0"
           style={{
-            backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px)',
-            backgroundSize: '36px 36px',
+            background: 'radial-gradient(ellipse at 50% 40%, #162032 0%, #0d1422 45%, #06090f 90%)',
           }}
         />
 
-        {/* Diagonal Architectural Line */}
-        <div className="absolute top-0 right-1/3 w-[1px] h-full bg-slate-300/80 -rotate-12 pointer-events-none" />
-
-        {/* Micro-UI Technical Coordinate Headers */}
-        <div className="absolute top-16 left-8 font-mono text-[9px] text-slate-500/80 tracking-widest uppercase">
-          SEC 42-ALPHA : SYS.GRID 382.91 : 84.10
-        </div>
-        <div className="absolute top-16 right-8 font-mono text-[9px] text-slate-500/80 tracking-widest uppercase">
-          TELEMETRY DOWNLINK AKTIF : FREQ 8.4 GHz
-        </div>
-
-        {/* Giant Cropped Silhouette Typography (Matching Reference 1 "BOY MADE") */}
-        <div className="absolute top-8 left-[18%] text-[150px] sm:text-[240px] font-black tracking-tighter text-slate-900/[0.04] leading-none uppercase font-display select-none">
-          ORBITA
-        </div>
-        <div className="absolute top-60 left-[26%] text-[130px] sm:text-[210px] font-black tracking-tighter text-amber-500/[0.055] leading-none uppercase font-display select-none">
-          NOVA
-        </div>
-        <div className="absolute bottom-10 left-[45%] text-[110px] sm:text-[170px] font-black tracking-tighter text-slate-900/[0.03] leading-none uppercase font-display select-none">
-          2026
+        {/* Panoramic Observation Window Frame looking at Spaceport Gantries */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-30">
+          <svg viewBox="0 0 1920 1080" className="w-full h-full object-cover">
+            {/* Window vertical mullions */}
+            <line x1="450" y1="0" x2="380" y2="1080" stroke="#38bdf8" strokeWidth="2" opacity="0.3" />
+            <line x1="960" y1="0" x2="960" y2="1080" stroke="#38bdf8" strokeWidth="3" opacity="0.25" />
+            <line x1="1470" y1="0" x2="1540" y2="1080" stroke="#38bdf8" strokeWidth="2" opacity="0.3" />
+            {/* Distant orbital crane & launch gantry silhouettes */}
+            <path d="M 1200 450 L 1260 220 L 1320 220 L 1380 450 Z" fill="#0f172a" opacity="0.6" />
+            <line x1="1290" y1="220" x2="1290" y2="580" stroke="#1e293b" strokeWidth="4" />
+            <line x1="1100" y1="360" x2="1500" y2="360" stroke="#1e293b" strokeWidth="2" />
+            {/* Blinking signal beacon on gantry */}
+            <circle cx="1290" cy="220" r="3" fill="#ef4444" className="animate-ping" />
+          </svg>
         </div>
 
-        {/* Precision Crosshairs in screen corners */}
-        <div className="absolute top-3 left-4 text-slate-400 font-mono text-xs">+</div>
-        <div className="absolute top-3 right-4 text-slate-400 font-mono text-xs">+</div>
-        <div className="absolute bottom-3 left-4 text-slate-400 font-mono text-xs">+</div>
-        <div className="absolute bottom-3 right-4 text-slate-400 font-mono text-xs">+</div>
+        {/* Warm Overhead Industrial Strip Lights & Ceiling Trusses (matching Image 2) */}
+        <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#1E2638] via-[#101522]/80 to-transparent">
+          {/* Overhead industrial warm fluorescent beam */}
+          <div className="absolute top-0 left-1/4 right-1/4 h-3 bg-gradient-to-r from-transparent via-amber-200/40 to-transparent blur-sm" />
+          <div className="absolute top-1 left-1/3 right-1/3 h-1 bg-amber-100/70 shadow-[0_0_20px_#fef08a]" />
+        </div>
+
+        {/* Polished Hangar Deck Floor with Specular Floor Reflections */}
+        <div 
+          className="absolute bottom-0 inset-x-0 h-96"
+          style={{
+            background: 'linear-gradient(to top, #06090e 0%, #0d121c 50%, transparent 100%)',
+          }}
+        >
+          {/* Subtle grid lines on deck floor */}
+          <div 
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: 'linear-gradient(to right, rgba(56,189,248,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(56,189,248,0.2) 1px, transparent 1px)',
+              backgroundSize: '80px 40px',
+              transform: 'perspective(400px) rotateX(60deg) scale(2)',
+              transformOrigin: 'bottom center',
+            }}
+          />
+          {/* Soft floor amber reflection under character */}
+          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-96 h-28 bg-amber-400/10 rounded-full blur-3xl" />
+        </div>
+
+        {/* Atmospheric Floating Dust / Cyber Fog */}
+        <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#06090f]/20 to-[#06090f]/60 pointer-events-none" />
+
+        {/* Technical Coordinate Micro-Labels */}
+        <div className="absolute bottom-4 left-6 font-mono text-[9px] text-slate-500/80 tracking-widest uppercase">
+          DSN COMMAND BRIDGE : SECTOR 07 : HANGAR BAY 4
+        </div>
       </div>
 
-      {/* ─────────────────────────────────────────────────────────────
-          TOP HIGH-CONTRAST BAR (PROFILE & RESIDUAL RESOURCES)
-          ───────────────────────────────────────────────────────────── */}
-      <header className="relative z-30 flex items-center justify-between px-6 sm:px-10 py-2.5 bg-[#141619] border-b border-black text-white shadow-md">
+
+      {/* =========================================================================
+          2. TOP HIGH-CONTRAST TACTICAL HUD (MATCHING REFERENCE IMAGE 2)
+          ========================================================================= */}
+      <header className="relative z-30 flex items-center justify-between px-4 sm:px-8 py-3 bg-[#0d1117]/80 backdrop-blur-md border-b border-slate-800 text-white shadow-xl">
         
-        {/* Left: Player ID & Level Tag */}
+        {/* Left: Player Profile Badge with Chamfered Frame */}
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-9 h-9 bg-[#20242B] border border-amber-500/90 flex items-center justify-center font-bold text-amber-400 font-display text-base clip-chamfer-sm">
-              {astronautName ? astronautName.charAt(0).toUpperCase() : 'A'}
+          {/* Avatar Box with Angled Frame (matching Image 2 top-left) */}
+          <div className="relative group cursor-pointer">
+            <div className="w-11 h-11 bg-[#1a202c] border-2 border-cyan-400/90 flex items-center justify-center font-bold text-cyan-300 font-display text-lg clip-chamfer-sm shadow-md shadow-cyan-500/20">
+              {astronautName ? astronautName.charAt(0).toUpperCase() : 'M'}
             </div>
-            <span className="absolute -bottom-1 -right-1 px-1 bg-amber-500 text-black font-black text-[8px] font-mono">
-              26
+            {/* Level Tag (e.g. Lv.26 in gold) */}
+            <span className="absolute -top-1 -right-2 px-1.5 py-0.2 bg-amber-500 text-black font-black text-[9px] font-mono clip-chamfer-sm">
+              Lv.26
             </span>
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-xs tracking-wider font-display uppercase text-slate-100">
-                {astronautName || 'KOMANDAN OPERASI'}
+              <span className="font-bold text-sm tracking-wider font-display uppercase text-white">
+                {astronautName || 'Mister'}
               </span>
-              <span className="text-[9px] font-mono px-1.5 py-0.2 bg-amber-500/10 text-amber-400 border border-amber-500/40">
-                NASA FLIGHT OPS
+              <span className="text-[9px] font-mono px-1.5 py-0.2 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 font-bold clip-chamfer-sm">
+                NASA INVESTIGATOR
               </span>
             </div>
             
-            {/* Slim XP Bar */}
-            <div className="flex items-center gap-2 mt-0.5">
-              <div className="w-28 bg-black h-1 border border-slate-800">
-                <div className="bg-amber-400 h-full w-[65%]" />
+            {/* EXP Progress Bar with Numbers */}
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-32 bg-black/80 h-1.5 border border-slate-700 overflow-hidden">
+                <div className="bg-gradient-to-r from-cyan-400 to-blue-500 h-full w-[65%]" />
               </div>
-              <span className="text-[9px] font-mono text-slate-400">1560 / 5000 EXP</span>
+              <span className="text-[9px] font-mono text-slate-300 font-bold">1560 / 5000</span>
             </div>
           </div>
         </div>
 
-        {/* Right: Currency Counters in High-Contrast Dark Blocks */}
-        <div className="flex items-center gap-2 sm:gap-4">
+        {/* Right: Currency Counters in Dark Rounded Pills (matching Image 2 top-right) */}
+        <div className="flex items-center gap-2 sm:gap-3">
           
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-[#1A1D23] border border-slate-800 text-xs font-mono">
+          {/* Credit / Funds Counter */}
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-[#161c26] border border-slate-700/80 rounded-full text-xs font-mono shadow-inner">
             <span className="text-amber-400 font-bold">$</span>
             <span className="font-bold text-slate-100 font-mono-tech">$65,000,000</span>
+            <span className="text-slate-400 hover:text-white cursor-pointer ml-1 font-bold">+</span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#1A1D23] border border-slate-800 text-xs font-mono">
-            <span className="text-emerald-400">◆</span>
-            <span className="font-bold text-slate-100 font-mono-tech">8,600 DP</span>
+          {/* Energy / Stamina Counter (matching Image 2 "586/120 +") */}
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-[#161c26] border border-slate-700/80 rounded-full text-xs font-mono shadow-inner">
+            <span className="w-3.5 h-3.5 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[9px] font-bold">⚡</span>
+            <span className="font-bold text-slate-100 font-mono-tech">586/120</span>
+            <span className="text-slate-400 hover:text-white cursor-pointer ml-1 font-bold">+</span>
           </div>
 
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-[#1A1D23] border border-slate-800 text-xs font-mono">
-            <Radio className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="font-bold text-slate-100 font-mono-tech">940 SIG</span>
+          {/* Signal / Tickets Counter (matching Image 2 "165 +") */}
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-[#161c26] border border-slate-700/80 rounded-full text-xs font-mono shadow-inner">
+            <Radio className="w-3.5 h-3.5 text-amber-400" />
+            <span className="font-bold text-slate-100 font-mono-tech">165</span>
+            <span className="text-slate-400 hover:text-white cursor-pointer ml-1 font-bold">+</span>
           </div>
 
-          {/* Quick Audio & Display Toggles */}
-          <div className="flex items-center gap-1 pl-2 border-l border-slate-800">
+          {/* Mail icon with notification badge */}
+          <div 
+            onClick={() => setShowAchievementModal(true)}
+            className="relative p-2 bg-[#161c26] border border-slate-700 rounded text-slate-300 hover:text-white cursor-pointer transition-colors"
+            title="Pesan & Laporan"
+          >
+            <Mail className="w-4 h-4" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping" />
+          </div>
+
+          {/* Settings cog */}
+          <div 
+            onClick={() => setShowSettingsModal(true)}
+            className="p-2 bg-[#161c26] border border-slate-700 rounded text-slate-300 hover:text-white cursor-pointer transition-colors"
+            title="Pengaturan"
+          >
+            <Settings className="w-4 h-4" />
+          </div>
+
+          {/* Audio & Fullscreen buttons */}
+          <div className="hidden sm:flex items-center gap-1 pl-1 border-l border-slate-800">
             <button 
               onClick={toggleAudio}
-              className="p-1.5 bg-[#1A1D23] border border-slate-700 text-slate-300 hover:text-amber-400 hover:border-amber-500 transition-colors cursor-pointer"
-              title="Toggle Audio SFX"
+              className="p-2 bg-[#161c26] border border-slate-700 rounded text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
             >
-              {audioEnabled ? <Volume2 className="w-3.5 h-3.5 text-amber-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
+              {audioEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
             </button>
             <button 
               onClick={toggleFullscreen}
-              className="p-1.5 bg-[#1A1D23] border border-slate-700 text-slate-300 hover:text-amber-400 hover:border-amber-500 transition-colors hidden sm:block cursor-pointer"
-              title="Toggle Fullscreen"
+              className="p-2 bg-[#161c26] border border-slate-700 rounded text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
             >
-              <Maximize2 className="w-3.5 h-3.5" />
+              <Maximize2 className="w-4 h-4" />
             </button>
           </div>
         </div>
 
       </header>
 
-      {/* ─────────────────────────────────────────────────────────────
-          MAIN TACTICAL ARENA (ASYMMETRIC COMPOSITION)
-          ───────────────────────────────────────────────────────────── */}
-      <main className="relative flex-1 flex flex-col lg:flex-row items-center justify-between px-6 sm:px-12 py-3 z-20">
+
+      {/* =========================================================================
+          3. MAIN ARENA: CENTER CHARACTER & ASYMMETRIC HUD (IMAGE 2 REPLICA)
+          ========================================================================= */}
+      <main className="relative flex-1 flex flex-col lg:flex-row items-center justify-between px-4 sm:px-8 py-2 z-20">
         
-        {/* ─────────────────────────────────────────────────────────────
-            2. LEFT NAVIGATION: FLOATING OPEN-LIST & ACTIVE EMBLEM
-            ───────────────────────────────────────────────────────────── */}
-        <div className="relative z-30 w-full lg:w-80 flex flex-col items-start gap-4">
+        {/* ── LEFT NAVIGATION: Clean Vertical Menu (matching Image 2 Left Menu) ── */}
+        <div className="relative z-30 w-full lg:w-72 flex flex-col justify-between self-stretch py-2">
           
-          {/* Subtle Crew Switch Header */}
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-600 pb-1 border-b border-slate-300 w-full justify-between">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 bg-amber-500" />
-              <span className="font-bold text-[10px] tracking-widest uppercase text-slate-700">CREW SELECTOR</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <button 
-                onClick={() => cycleCharacter('up')} 
-                className="p-0.5 bg-white border border-slate-300 hover:bg-slate-900 hover:text-white transition-colors cursor-pointer"
-                title="Previous Crew"
-              >
-                <ChevronUp className="w-3.5 h-3.5" />
-              </button>
-              <span className="text-[10px] font-mono px-1">0{activeCrewIndex + 1}/0{CREW_MEMBERS.length}</span>
-              <button 
-                onClick={() => cycleCharacter('down')} 
-                className="p-0.5 bg-white border border-slate-300 hover:bg-slate-900 hover:text-white transition-colors cursor-pointer"
-                title="Next Crew"
-              >
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Open-List Navigation Items */}
-          <nav className="flex flex-col gap-5 w-full pt-1" aria-label="Main system navigation">
-            {MENU_ITEMS.map((item, idx) => {
-              const isSelected = activeMenuIndex === idx;
-
+          {/* Vertical Menu Items */}
+          <div className="space-y-4 pt-2">
+            {[
+              { id: 'new_game', title: 'GAME BARU', subtitle: 'KASUS PERDANA', icon: Sparkles, onClick: () => onStartNewGame() },
+              { id: 'missions', title: 'TUGAS', subtitle: 'MISI INVESTIGASI', icon: Compass, onClick: () => setShowMissionModal(true) },
+              { id: 'events', title: 'EVENT', subtitle: 'PROTOKOL DSN 2026', icon: Trophy, onClick: () => setShowAchievementModal(true) },
+              { id: 'logistics', title: 'LOGISTIK', subtitle: 'KLAIM HARIAN', icon: FolderGit2, onClick: () => setShowSettingsModal(true) },
+            ].map(item => {
+              const Icon = item.icon;
               return (
                 <div
                   key={item.id}
-                  onClick={() => handleMenuClick(idx)}
-                  className={`group relative flex items-center gap-3 transition-all duration-200 cursor-pointer ${
-                    isSelected ? 'translate-x-3' : 'hover:translate-x-1.5 opacity-75 hover:opacity-100'
-                  }`}
+                  onClick={item.onClick}
+                  className="group flex items-center gap-3 p-2 bg-[#10141d]/70 hover:bg-[#161c28] border-l-4 border-slate-700 hover:border-cyan-400 backdrop-blur-sm cursor-pointer transition-all duration-200 hover:translate-x-1.5 shadow-md"
                 >
-                  
-                  {/* Active Golden Hexagon / Seal Emblem (Image 1 Style) */}
-                  {isSelected ? (
-                    <div className="relative shrink-0 flex items-center justify-center">
-                      {/* Hexagon Amber Emblem */}
-                      <div className="w-9 h-9 sm:w-10 sm:h-10 bg-amber-500 border border-black shadow-[0_0_15px_rgba(245,158,11,0.6)] flex items-center justify-center clip-chamfer-sm">
-                        <svg viewBox="0 0 40 40" className="w-6 h-6 stroke-black fill-none stroke-[2.2]">
-                          <circle cx="20" cy="20" r="14" />
-                          <circle cx="20" cy="20" r="6" fill="#000" />
-                          <line x1="20" y1="2" x2="20" y2="8" />
-                          <line x1="20" y1="32" x2="20" y2="38" />
-                          <line x1="2" y1="20" x2="8" y2="20" />
-                          <line x1="32" y1="20" x2="38" y2="20" />
-                        </svg>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="w-3 h-3 border border-slate-400 rotate-45 shrink-0 group-hover:border-slate-900 transition-colors" />
-                  )}
-
-                  {/* Open Typography Menu Item */}
-                  <div className="flex flex-col">
-                    <div className="flex items-center gap-2">
-                      <span className={`font-display font-black text-xl sm:text-2xl tracking-wider uppercase ${
-                        isSelected ? 'text-slate-950 font-extrabold' : 'text-slate-800 group-hover:text-black'
-                      }`}>
-                        {item.label}
-                      </span>
-                      
-                      {isSelected && (
-                        <span className="px-2 py-0.2 bg-amber-500 text-black text-[10px] font-mono font-black clip-chamfer-sm">
-                          SANCTUARY
-                        </span>
-                      )}
-                    </div>
-
-                    <span className={`text-[10px] font-mono tracking-widest uppercase ${
-                      isSelected ? 'text-amber-700 font-bold' : 'text-slate-500'
-                    }`}>
-                      {item.code} : {item.sublabel}
-                    </span>
-
-                    {/* Horizontal Sharp Gold Line Running Under Active Text */}
-                    {isSelected && (
-                      <div className="mt-1 h-[2.5px] w-48 sm:w-56 bg-gradient-to-r from-amber-500 via-amber-400 to-transparent" />
-                    )}
+                  <div className="p-2 bg-[#18202d] text-cyan-400 group-hover:text-cyan-200 transition-colors">
+                    <Icon className="w-4 h-4" />
                   </div>
-
+                  <div>
+                    <div className="font-display font-black text-base text-white tracking-wider group-hover:text-cyan-300 transition-colors">
+                      {item.title}
+                    </div>
+                    <div className="text-[10px] font-mono text-slate-400 tracking-wider">
+                      {item.subtitle}
+                    </div>
+                  </div>
                 </div>
               );
             })}
-          </nav>
+          </div>
+
+          {/* Bottom Left Banner Ad / Case Dossier with Character Switch (matching Image 2 bottom-left) */}
+          <div className="mt-auto pt-4">
+            <div className="p-3 bg-[#131924]/90 border border-slate-700/80 backdrop-blur-md clip-chamfer-sm shadow-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-mono font-bold text-amber-400 tracking-widest uppercase">
+                  KASUS AKTIF : ASTER-9
+                </span>
+                <button
+                  onClick={cycleCharacter}
+                  className="flex items-center gap-1 px-2 py-0.5 bg-[#1e2637] hover:bg-cyan-500 hover:text-black border border-slate-600 text-cyan-300 text-[10px] font-mono font-bold rounded transition-colors cursor-pointer"
+                  title="Ganti Karakter Tampilan"
+                >
+                  <Repeat className="w-3 h-3" />
+                  <span>GANTI</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-7 bg-amber-500 shrink-0" />
+                <div>
+                  <div className="font-display font-bold text-sm text-white uppercase leading-tight">
+                    {currentCrew.name}
+                  </div>
+                  <div className="text-[10px] font-mono text-slate-300">
+                    {currentCrew.callsign} • {currentCrew.roleTitle}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
         </div>
 
-        {/* ─────────────────────────────────────────────────────────────
-            CENTER: UNCONSTRAINED FULL-BODY CHARACTER STANDEE
-            ───────────────────────────────────────────────────────────── */}
-        <div className="relative flex-1 flex flex-col items-center justify-center my-auto min-h-[420px] lg:min-h-[560px]">
+        {/* ── CENTER: Hero Standee Character Standing on Floor (matching Image 2) ── */}
+        <div className="relative flex-1 flex flex-col items-center justify-center my-auto min-h-[420px] lg:min-h-[580px] pointer-events-none">
           
-          {/* Active Character Illustration Standee (Free, Natural Standing) */}
+          {/* Active Character Full Illustration Standee */}
           <div className="relative z-10 flex flex-col items-center animate-nova-float transition-all duration-300">
             <img
               src={currentCrew.image}
               alt={currentCrew.name}
-              className="h-96 sm:h-[480px] lg:h-[540px] object-contain drop-shadow-[0_24px_36px_rgba(0,0,0,0.22)]"
+              className="h-[380px] sm:h-[480px] lg:h-[540px] object-contain drop-shadow-[0_24px_48px_rgba(0,0,0,0.7)]"
             />
           </div>
 
+          {/* Character Footing Ambient Ground Shadow */}
+          <div className="w-64 h-8 bg-black/60 rounded-full blur-xl -mt-6" />
+
         </div>
 
-        {/* ─────────────────────────────────────────────────────────────
-            4. RIGHT TACTICAL HUD: ASYMMETRIC GRID (IMAGE 1 REPLICA)
-            ───────────────────────────────────────────────────────────── */}
-        <div className="relative z-30 w-full lg:w-96 flex flex-col gap-3">
+        {/* ── RIGHT ASYMMETRIC COMMAND BLOCK (MATCHING IMAGE 2 RIGHT HUD) ── */}
+        <div className="relative z-30 w-full lg:w-96 flex flex-col gap-3.5">
           
-          {/* ── ROW A (Top Right): Circular Progress Dial + Active Mission Tag ── */}
-          <div className="flex items-center gap-3">
-            
-            {/* Circular Progress Dial (62% Sync Rate / 嵌合度) */}
-            <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
-              <svg viewBox="0 0 90 90" className="w-full h-full -rotate-90">
-                <circle cx="45" cy="45" r="36" fill="none" stroke="#D1D5DB" strokeWidth="7" />
-                <circle 
-                  cx="45" cy="45" r="36" fill="none" stroke="#EAB308" strokeWidth="7" 
-                  strokeDasharray="226" strokeDashoffset={226 - (226 * 0.62)}
-                  strokeLinecap="butt"
-                />
-              </svg>
-              <div className="absolute text-center leading-none">
-                <span className="text-2xl font-black font-display text-slate-900">62%</span>
-                <span className="block text-[8px] font-mono text-amber-600 font-bold tracking-wider uppercase">
-                  SYNC RATE
-                </span>
-              </div>
+          {/* Top Rank Badge (matching Image 2 "见习 / TRAINEE") */}
+          <div className="flex items-center justify-end">
+            <div className="px-3 py-1 bg-[#151c27]/90 border border-slate-700/80 text-cyan-300 text-xs font-mono font-bold flex items-center gap-2 clip-chamfer-sm shadow-md">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+              <span>ORBITA NOVA : KADET AKTIF</span>
             </div>
-
-            {/* Mission Information Block with Chamfered Dark Header */}
-            <div className="flex-1 bg-[#181A1F] border border-black text-white p-3 clip-chamfer-sm space-y-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-amber-400" />
-                  <span className="font-display font-bold text-xs tracking-wider text-amber-400 uppercase">
-                    CASE INVESTIGATION
-                  </span>
-                </div>
-                <span className="px-1.5 py-0.2 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-mono font-bold">
-                  IN PROGRESS
-                </span>
-              </div>
-
-              <div className="text-xs font-bold font-display text-slate-100 uppercase tracking-wide">
-                KASUS 01 : ASTER-9
-              </div>
-              <div className="text-[10px] font-mono text-slate-400">
-                T+03:15 : FASE BAYANGAN GELAP
-              </div>
-            </div>
-
           </div>
 
-          {/* ── ROW B (Middle Right): Wide Dossier Banner Card (任务 / MISSION) ── */}
-          <div 
-            onClick={() => setShowMissionModal(true)}
-            className="group relative bg-[#181A1F] border border-black hover:border-amber-500 text-white p-4 clip-chamfer-sm cursor-pointer shadow-lg transition-all"
-          >
-            {/* Background Texture / Subtle Mission Emblem */}
-            <div className="absolute top-2 right-4 opacity-15 pointer-events-none font-display font-black text-6xl text-slate-500">
-              01
+          {/* Main Incident Dossier & Primary DEPLOY Bar (matching Image 2 "出击 / 执行任务") */}
+          <div className="bg-[#121722]/90 border border-slate-700/90 p-4 clip-chamfer-md shadow-2xl backdrop-blur-md space-y-3">
+            
+            {/* Progres Tag */}
+            <div className="flex items-center justify-between text-xs font-mono border-b border-slate-800 pb-2">
+              <span className="text-slate-400">PROGRES AKTIF : KASUS 01</span>
+              <span className="text-emerald-400 font-bold">FASE FORENSIK</span>
             </div>
 
-            <div className="flex items-center justify-between relative z-10">
+            {/* Target Title & Insignia */}
+            <div className="flex items-center gap-3 py-1">
+              <div className="w-12 h-12 bg-black/60 border border-amber-500/60 rounded flex items-center justify-center text-amber-400 text-xl font-bold shrink-0 shadow-lg">
+                ☄️
+              </div>
               <div>
-                <div className="text-[10px] font-mono text-amber-400 tracking-widest uppercase">
-                  FASE REKAYASA AKTIF
+                <h3 className="font-display font-black text-base text-white uppercase tracking-wide">
+                  ASTER-9 : UMBRA ANTARIKSA
+                </h3>
+                <p className="text-[11px] text-slate-300 font-sans leading-tight mt-0.5">
+                  Wahana hilang kontak saat memasuki bayangan gerhana asteroid.
+                </p>
+              </div>
+            </div>
+
+            {/* Prominent Chamfered Action Bar (出击 Style from Image 2) */}
+            <button
+              onClick={onResumeGame}
+              className="w-full py-3.5 px-5 bg-white hover:bg-slate-100 text-black font-display font-black text-sm tracking-wider flex items-center justify-between cursor-pointer shadow-xl transition-all hover:scale-[1.01] clip-chamfer-sm"
+            >
+              <div className="text-left leading-tight">
+                <div className="text-base font-black uppercase text-slate-950">
+                  LUNCURKAN
                 </div>
-                <div className="font-display font-black text-3xl sm:text-4xl text-white tracking-wider uppercase group-hover:text-amber-400 transition-colors">
-                  MISI
+                <div className="text-[9px] font-mono text-slate-600 font-bold tracking-widest uppercase">
+                  MULAI INVESTIGASI
                 </div>
               </div>
-
-              <ChevronRight className="w-6 h-6 text-slate-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all" />
-            </div>
-
-            {/* Technical Index Line at Bottom Right of Banner */}
-            <div className="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] font-mono text-slate-400">
-              <span>TARGET : ASTEROID BENNU</span>
-              <span className="text-amber-400 font-bold">BAB 01 : FORENSIK UMBRA</span>
-            </div>
+              <ChevronRight className="w-6 h-6 text-black" />
+            </button>
           </div>
 
-          {/* ── ROW C (Bottom Right): 2 Square Mode Cards (05 改造 / 出征 DEPLOY) ── */}
-          <div className="grid grid-cols-2 gap-3">
+          {/* Tactical Action Grid: 2-Column Grid (matching Image 2 Right Blocks) */}
+          <div className="grid grid-cols-2 gap-2.5">
             
-            {/* Square Card 1: 05 REFIT / TELEMETRY LAB */}
+            {/* Tile 1: SKUAD AWAK (Opens Gambar 1 Character Album!) */}
+            <div 
+              onClick={() => setShowCharacterModal(true)}
+              className="group p-3 bg-[#131924]/90 border border-slate-700/80 hover:border-cyan-400 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
+            >
+              <div className="p-2 bg-[#1b2333] group-hover:bg-cyan-500 group-hover:text-black text-cyan-400 rounded transition-colors">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-xs text-white uppercase tracking-wide">
+                  AWAK
+                </div>
+                <div className="text-[9px] font-mono text-slate-400">
+                  ALBUM SPESIALIS
+                </div>
+              </div>
+            </div>
+
+            {/* Tile 2: GUDANG / SUKU CADANG (Spacecraft Redesign) */}
             <div 
               onClick={() => {
                 setPhase('redesign');
                 setCurrentView('mission');
               }}
-              className="group relative bg-[#141619] border border-black hover:border-slate-500 text-white p-3.5 h-36 flex flex-col justify-between clip-chamfer-sm cursor-pointer shadow-md transition-all"
+              className="group p-3 bg-[#131924]/90 border border-slate-700/80 hover:border-amber-400 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] text-slate-400 font-bold">05</span>
-                <Wrench className="w-4 h-4 text-slate-400 group-hover:text-amber-400 transition-colors" />
+              <div className="p-2 bg-[#1b2333] group-hover:bg-amber-500 group-hover:text-black text-amber-400 rounded transition-colors">
+                <Wrench className="w-5 h-5" />
               </div>
-
-              {/* Giant White Stamped Typography */}
               <div>
-                <div className="font-display font-black text-2xl sm:text-3xl text-white leading-none tracking-tight uppercase group-hover:text-amber-400 transition-colors">
-                  REFIT
+                <div className="font-display font-bold text-xs text-white uppercase tracking-wide">
+                  GUDANG
                 </div>
-                <div className="text-[9px] font-mono text-slate-400 mt-1 uppercase tracking-wider">
-                  TELEMETRY LAB
+                <div className="text-[9px] font-mono text-slate-400">
+                  REKAYASA MODUL
                 </div>
               </div>
             </div>
 
-            {/* Square Card 2: 出征 LAUNCH / DEPLOY (Primary Action Card) */}
+            {/* Tile 3: LAB TELEMETRI (Direct jump into Telemetry Studio) */}
             <div 
-              onClick={onResumeGame}
-              className="group relative bg-amber-500 border border-amber-600 hover:bg-amber-400 text-black p-3.5 h-36 flex flex-col justify-between clip-chamfer-sm cursor-pointer shadow-xl transition-all"
+              onClick={() => {
+                setPhase('investigation');
+                setCurrentView('mission');
+              }}
+              className="group p-3 bg-[#131924]/90 border border-slate-700/80 hover:border-cyan-400 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] text-black font-black uppercase tracking-wider">DEPLOY</span>
-                <span className="w-2.5 h-2.5 bg-black" />
+              <div className="p-2 bg-[#1b2333] group-hover:bg-cyan-500 group-hover:text-black text-cyan-400 rounded transition-colors">
+                <Activity className="w-5 h-5" />
               </div>
-
-              {/* Giant Stamped Typography (出征 Style) */}
               <div>
-                <div className="font-display font-black text-3xl sm:text-4xl text-black leading-none tracking-tight uppercase">
-                  LUNCURKAN
+                <div className="font-display font-bold text-xs text-white uppercase tracking-wide">
+                  LAB TELEMETRI
                 </div>
-                <div className="text-[10px] font-mono font-bold text-black/80 mt-1 uppercase tracking-wider">
-                  LANJUTKAN MISI
+                <div className="text-[9px] font-mono text-slate-400">
+                  ANALISIS KURVA
+                </div>
+              </div>
+            </div>
+
+            {/* Tile 4: RUANG BERSAMA (Co-op Multiplayer Lobby) */}
+            <div 
+              onClick={() => setShowCoopModal(true)}
+              className="group p-3 bg-[#131924]/90 border border-slate-700/80 hover:border-purple-400 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
+            >
+              <div className="p-2 bg-[#1b2333] group-hover:bg-purple-500 group-hover:text-black text-purple-400 rounded transition-colors">
+                <Rocket className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-display font-bold text-xs text-white uppercase tracking-wide">
+                  CO-OP
+                </div>
+                <div className="text-[9px] font-mono text-slate-400">
+                  RUANG BERSAMA
                 </div>
               </div>
             </div>
 
           </div>
 
-          {/* ─────────────────────────────────────────────────────────────
-              5. QUICK DOCK POJOK KANAN BAWAH (4 ICONS + MINIMAL LABELS)
-              ───────────────────────────────────────────────────────────── */}
-          <div className="bg-[#141619] border border-black text-slate-300 px-3 py-2 flex items-center justify-between clip-chamfer-sm">
-            
-            {/* Dock Item 1: Crew */}
+          {/* Quick Bottom Dock Bar */}
+          <div className="bg-[#10141d]/90 border border-slate-800 text-slate-300 px-3 py-2 flex items-center justify-between rounded clip-chamfer-sm text-[10px] font-mono">
             <button 
               onClick={() => setShowCharacterModal(true)}
-              className="flex items-center gap-1 text-[10px] font-mono text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
             >
               <Users className="w-3.5 h-3.5" />
               <span>KRU</span>
             </button>
-
             <div className="w-[1px] h-3 bg-slate-700" />
-
-            {/* Dock Item 2: Inventory / Refit */}
             <button 
               onClick={() => {
                 setPhase('redesign');
                 setCurrentView('mission');
               }}
-              className="flex items-center gap-1 text-[10px] font-mono text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
             >
-              <FolderGit2 className="w-3.5 h-3.5" />
-              <span>GUDANG</span>
+              <Wrench className="w-3.5 h-3.5" />
+              <span>MODUL</span>
             </button>
-
             <div className="w-[1px] h-3 bg-slate-700" />
-
-            {/* Dock Item 3: Database / Missions */}
             <button 
               onClick={() => setShowMissionModal(true)}
-              className="flex items-center gap-1 text-[10px] font-mono text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
             >
               <Compass className="w-3.5 h-3.5" />
-              <span>DATA</span>
+              <span>BERKAS</span>
             </button>
-
             <div className="w-[1px] h-3 bg-slate-700" />
-
-            {/* Dock Item 4: Missions / Citations */}
             <button 
               onClick={() => setShowAchievementModal(true)}
-              className="flex items-center gap-1 text-[10px] font-mono text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
+              className="flex items-center gap-1 text-slate-300 hover:text-amber-400 transition-colors cursor-pointer"
             >
               <Trophy className="w-3.5 h-3.5" />
               <span>PRESTASI</span>
             </button>
-
           </div>
 
         </div>
 
       </main>
 
-      {/* ─────────────────────────────────────────────────────────────
-          3. CHARACTER BIO (BOTTOM LEFT CORNER OPEN LAYOUT)
-          ───────────────────────────────────────────────────────────── */}
-      <footer className="relative z-30 px-6 sm:px-12 pb-5 flex items-end justify-between pointer-events-none">
-        
-        {/* Open Clean Bio Section on Bottom-Left */}
-        <div className="max-w-md pointer-events-auto space-y-1">
-          <div className="flex items-center gap-2.5">
-            {/* Thick Vertical Accent Bar */}
-            <div className="w-1.5 h-8 bg-amber-500 shrink-0" />
-            
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-display font-black text-xl sm:text-2xl text-slate-950 uppercase tracking-wide leading-none">
-                  {currentCrew.name}
-                </h3>
-                <span className="text-xs font-mono font-bold text-amber-600 uppercase">
-                  {currentCrew.callsign}
-                </span>
-                <span className="px-1.5 py-0.2 bg-slate-900 text-amber-400 text-[9px] font-mono font-black clip-chamfer-sm">
-                  {currentCrew.rarity}
-                </span>
-              </div>
-              <div className="text-[10px] font-mono text-slate-600 uppercase tracking-wider">
-                {currentCrew.roleTitle} : {currentCrew.department}
-              </div>
-            </div>
-          </div>
 
-          {/* Clean 2-3 Line Description */}
-          <p className="text-xs font-sans text-slate-700 font-medium leading-relaxed pl-4 line-clamp-2">
-            {currentCrew.bio}
-          </p>
-        </div>
-
-        {/* Global NASA Space Apps Tagline on Bottom Center-Right */}
-        <div className="hidden lg:flex items-center gap-3 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-          <span>NASA SPACE APPS CHALLENGE 2026 : ORBITA NOVA</span>
-        </div>
-
-      </footer>
-
-      {/* ─────────────────────────────────────────────────────────────
-          MODAL DIALOGS (MISSION DOSSIERS & CHARACTER ROSTER)
-          ───────────────────────────────────────────────────────────── */}
+      {/* =========================================================================
+          MODAL DIALOGS (MISSION DOSSIERS, CHARACTER ALBUM, CO-OP, ETC.)
+          ========================================================================= */}
       {showMissionModal && (
         <MissionSelector 
           onBack={() => setShowMissionModal(false)}
@@ -609,8 +537,8 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
 
       {/* Settings Modal Dialog */}
       {showSettingsModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="max-w-md w-full p-6 bg-[#141619] border border-amber-500/60 text-white space-y-5 clip-chamfer-md">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="max-w-md w-full p-6 bg-[#14171e] border border-cyan-500/60 text-white space-y-5 clip-chamfer-md shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="font-bold font-display text-lg tracking-wider text-white">SPESIFIKASI SISTEM</h3>
               <button onClick={() => setShowSettingsModal(false)} className="text-slate-400 hover:text-white font-mono text-xs cursor-pointer">
@@ -619,16 +547,16 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
             </div>
 
             <div className="space-y-4 text-xs font-mono">
-              <div className="flex items-center justify-between p-3 bg-[#1C1F24] border border-slate-800">
+              <div className="flex items-center justify-between p-3 bg-[#1C2028] border border-slate-800">
                 <span>Audio Prosedural Web Audio</span>
-                <button onClick={toggleAudio} className="px-3 py-1 bg-amber-500 text-black font-bold cursor-pointer">
+                <button onClick={toggleAudio} className="px-3 py-1 bg-cyan-500 text-black font-bold cursor-pointer rounded">
                   {audioEnabled ? 'AKTIF' : 'SENYAP'}
                 </button>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-[#1C1F24] border border-slate-800">
-                <span>Layar Penuh Layar Perangkat</span>
-                <button onClick={toggleFullscreen} className="px-3 py-1 bg-slate-800 text-slate-200 hover:bg-slate-700 cursor-pointer">
+              <div className="flex items-center justify-between p-3 bg-[#1C2028] border border-slate-800">
+                <span>Mode Tampilan Layar Penuh</span>
+                <button onClick={toggleFullscreen} className="px-3 py-1 bg-slate-800 text-slate-200 hover:bg-slate-700 cursor-pointer rounded">
                   TOGEL
                 </button>
               </div>
@@ -639,8 +567,8 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
 
       {/* Achievement Modal Dialog */}
       {showAchievementModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="max-w-md w-full p-6 bg-[#141619] border border-amber-500/60 text-white space-y-5 clip-chamfer-md">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="max-w-md w-full p-6 bg-[#14171e] border border-amber-500/60 text-white space-y-5 clip-chamfer-md shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="font-bold font-display text-lg tracking-wider text-white">ARSIP PRESTASI</h3>
               <button onClick={() => setShowAchievementModal(false)} className="text-slate-400 hover:text-white font-mono text-xs cursor-pointer">
@@ -649,14 +577,14 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
             </div>
 
             <div className="space-y-2.5 text-xs">
-              <div className="p-3 bg-[#1C1F24] border border-amber-500/40 flex items-center gap-3">
+              <div className="p-3 bg-[#1C2028] border border-amber-500/40 flex items-center gap-3">
                 <span className="w-3 h-3 bg-amber-400 shrink-0" />
                 <div>
                   <div className="font-bold font-display text-white text-sm">FORENSIK PERDANA</div>
                   <div className="text-[11px] text-slate-400 font-mono">Selesaikan investigasi telemetri kotak hitam ASTER-9.</div>
                 </div>
               </div>
-              <div className="p-3 bg-[#1C1F24] border border-slate-800 flex items-center gap-3 opacity-60">
+              <div className="p-3 bg-[#1C2028] border border-slate-800 flex items-center gap-3 opacity-60">
                 <span className="w-3 h-3 bg-slate-600 shrink-0" />
                 <div>
                   <div className="font-bold font-display text-slate-300 text-sm">PENYINTAS GERHANA</div>
