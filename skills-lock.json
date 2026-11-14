@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "skills": {
+    "antislop": {
+      "source": "miqdadbadjuber/anti-slop",
+      "sourceType": "github",
+      "skillPath": "skills/antislop/SKILL.md",
+      "computedHash": "5db1f692cb9722e0f642e9a378d8c44b011a102726efb41bf0003c8c37f0a137"
+    },
+    "game-design-core": {
+      "source": "omer-metin/skills-for-antigravity",
+      "sourceType": "github",
+      "skillPath": "skills/game-design-core/SKILL.md",
+      "computedHash": "96ed879c24e173f4a888815c96465ddfb9c9b57b1e8b90d17e94c2350b73a00d"
+    }
+  }
+}
