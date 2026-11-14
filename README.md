@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
@@ -30,3 +31,7 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+=======
+# MISSION-AUTOPSY-The-Last-Telemetry
+MISSION AUTOPSY: The Last Telemetry is a sci-fi space systems engineering and forensic investigation simulation game developed for the NASA Space Apps Challenge 2026.
+>>>>>>> 4d20aa434cdf3afe2cc3552990a4fb48ededbd55
