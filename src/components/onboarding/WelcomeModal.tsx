@@ -86,7 +86,7 @@ export const WelcomeModal: React.FC = () => {
       color: 'text-cyan-400',
       description: 
         'Geser penanda waktu untuk memeriksa 4 kanal data telemetri. Temukan anomali daya dan suhu. Sematkan data janggal sebagai bukti forensik.',
-      tip: 'Perhatikan saat wahana memasuki bayangan gerhana pada T+03:15.',
+      tip: 'Perhatikan saat wahana memasuki bayangan gerhana pada T+03:20.',
     },
     {
       title: '3 : MATRIKS AKAR MASALAH',

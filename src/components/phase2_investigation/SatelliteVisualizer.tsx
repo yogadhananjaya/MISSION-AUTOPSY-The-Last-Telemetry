@@ -10,14 +10,16 @@ import type { TelemetryPoint } from '../../types/mission';
 
 interface SatelliteVisualizerProps {
   currentPoint: TelemetryPoint;
+  solarW?: number;
 }
 
-export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ currentPoint }) => {
+export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ currentPoint, solarW = 160 }) => {
   const isFreezing = currentPoint.batteryTemp < 0;
   const isCryoDanger = currentPoint.batteryTemp < -10;
   const isUVLOBlackout = currentPoint.busVoltage < 22.0;
   const isCarrierLost = currentPoint.signalSNR <= 0;
   const isEclipse = currentPoint.isEclipse;
+  const halfSolarW = Math.round(solarW / 2);
 
   return (
     <div className="bg-[#141619] border border-black p-4 clip-chamfer-md shadow-2xl relative text-white space-y-4">
@@ -73,7 +75,7 @@ export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ curren
           ) : (
             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-950/60 border border-amber-600 text-amber-200">
               <Sun className="w-4 h-4 text-yellow-400 animate-spin" style={{ animationDuration: '12s' }} />
-              <span>DIRECT SUNLIGHT: 160 W GENERATION</span>
+              <span>DIRECT SUNLIGHT: {solarW} W GENERATION</span>
             </div>
           )}
         </div>
@@ -154,7 +156,7 @@ export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ curren
             <line x1="0" y1="25" x2="100" y2="25" stroke="#000000" strokeWidth="1" opacity="0.4" />
             
             <text x="50" y="30" fill={isEclipse ? "#94A3B8" : "#FFFFFF"} fontSize="9" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
-              {isEclipse ? "0 W BAYANGAN" : "SURYA +80W"}
+              {isEclipse ? "0 W BAYANGAN" : `SURYA +${halfSolarW}W`}
             </text>
           </g>
 
@@ -181,7 +183,7 @@ export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ curren
             <line x1="40" y1="25" x2="140" y2="25" stroke="#000000" strokeWidth="1" opacity="0.4" />
 
             <text x="90" y="30" fill={isEclipse ? "#94A3B8" : "#FFFFFF"} fontSize="9" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
-              {isEclipse ? "0 W BAYANGAN" : "SURYA +80W"}
+              {isEclipse ? "0 W BAYANGAN" : `SURYA +${halfSolarW}W`}
             </text>
           </g>
 
@@ -216,7 +218,7 @@ export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ curren
               stroke={isUVLOBlackout ? "#EF4444" : "#334155"} 
             />
             <text x="50" y="24" fill={isUVLOBlackout ? "#FCA5A5" : "#10B981"} fontSize="9" fontFamily="monospace" textAnchor="middle" fontWeight="bold">
-              {isUVLOBlackout ? "BUS 21.9V MATI" : `BUS ${currentPoint.busVoltage}V AMAN`}
+              {isUVLOBlackout ? "BUS 21.0V MATI" : `BUS ${currentPoint.busVoltage}V AMAN`}
             </text>
             <text x="50" y="32" fill="#94A3B8" fontSize="7" fontFamily="monospace" textAnchor="middle">
               {isUVLOBlackout ? "PEMUTUSAN DAYA" : "DISTRIBUSI DAYA"}
@@ -354,7 +356,7 @@ export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ curren
               {isUVLOBlackout ? 'PADAM TOTAL' : 'BUS DAYA 28V'}
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">
-              {isUVLOBlackout ? 'Tegangan jatuh ke 21.9 volt.' : 'Tegangan bus listrik stabil normal.'}
+              {isUVLOBlackout ? 'Tegangan jatuh ke 21.0 volt.' : 'Tegangan bus listrik stabil normal.'}
             </div>
           </div>
         </div>

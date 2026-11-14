@@ -6,14 +6,12 @@ import {
   Zap, 
   Activity, 
   UserCheck, 
-  Filter, 
   SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
   Mail,
   Settings,
-  Grid,
-  Radio
+  Grid
 } from 'lucide-react';
 import { CREW_MEMBERS, type CrewMember } from '../../data/crewData';
 import { sounds } from '../../utils/soundEngine';
@@ -27,27 +25,21 @@ interface CharacterRosterProps {
 export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSelectRole, onOpenCoopRoom }) => {
   // View mode: 'album' (Grid view matching Image 1) or 'detail' (Full specification view)
   const [viewMode, setViewMode] = useState<'album' | 'detail'>('album');
-  const [selectedCrewId, setSelectedCrewId] = useState<string>('nova');
+  const [selectedCrewId, setSelectedCrewId] = useState<string>('sarah');
   const [selectedDivision, setSelectedDivision] = useState<string>('ALL');
-  const [sortOrder, setSortOrder] = useState<'level' | 'rarity'>('level');
+  const [sortOrder, setSortOrder] = useState<'default' | 'level' | 'rarity'>('default');
   const [activeTab, setActiveTab] = useState<'status' | 'skills' | 'equipment' | 'breakthrough'>('status');
 
   const selectedIndex = CREW_MEMBERS.findIndex(c => c.id === selectedCrewId);
   const selectedCrew = CREW_MEMBERS[selectedIndex] || CREW_MEMBERS[0];
 
-  // Division Filter list
+  // 4 Core Role Divisions (Essential NASA Disciplines)
   const DIVISIONS = [
     { id: 'ALL', label: 'SEMUA AWAK', icon: Grid },
-    { id: 'TELEMETRI', label: 'TELEMETRI', icon: Activity },
-    { id: 'REKAYASA', label: 'REKAYASA', icon: Shield },
-    { id: 'DAYA EPS', label: 'DAYA EPS', icon: Zap },
-    { id: 'MEDIS', label: 'MEDIS BIOME', icon: Activity },
     { id: 'KOMANDO', label: 'KOMANDO', icon: Award },
-    { id: 'SPEKTRA', label: 'SPEKTRA', icon: Radio },
-    { id: 'DSN NET', label: 'DSN NET', icon: Radio },
-    { id: 'KRIOGENIK', label: 'KRIOGENIK', icon: Shield },
-    { id: 'GEOLOGI', label: 'GEOLOGI', icon: Filter },
-    { id: 'LASER DSOC', label: 'LASER DSOC', icon: Zap },
+    { id: 'TELEMETRI', label: 'TELEMETRI', icon: Activity },
+    { id: 'DAYA EPS', label: 'DAYA EPS', icon: Zap },
+    { id: 'REKAYASA', label: 'REKAYASA', icon: Shield },
   ];
 
   // Filtered and sorted crew members
@@ -56,7 +48,8 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
     return c.divisionCode === selectedDivision;
   }).sort((a, b) => {
     if (sortOrder === 'level') return b.level - a.level;
-    return (b.rarity === 'SSR' ? 2 : 1) - (a.rarity === 'SSR' ? 2 : 1);
+    if (sortOrder === 'rarity') return (b.rarity === 'SSR' ? 2 : 1) - (a.rarity === 'SSR' ? 2 : 1);
+    return 0; // Default: maintains exact array order (Sarah, Marcus, Ryan, Kaito)
   });
 
   const handleCardClick = (crew: CrewMember) => {
@@ -86,7 +79,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
 
   const toggleSort = () => {
     sounds.playClick(500);
-    setSortOrder(prev => prev === 'level' ? 'rarity' : 'level');
+    setSortOrder(prev => prev === 'default' ? 'level' : prev === 'level' ? 'rarity' : 'default');
   };
 
   return (
@@ -205,7 +198,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
                 <div className="flex items-center gap-1.5">
                   <SlidersHorizontal className="w-3.5 h-3.5 text-orange-400" />
                   <span className="text-[11px] font-bold">
-                    {sortOrder === 'level' ? 'URUTAN LEVEL' : 'URUTAN RARITAS'}
+                    {sortOrder === 'default' ? 'URUTAN DAFTAR' : sortOrder === 'level' ? 'URUTAN LEVEL' : 'URUTAN RARITAS'}
                   </span>
                 </div>
                 <span className="text-[10px] text-orange-400">▲</span>
@@ -221,74 +214,84 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
                   <div
                     key={crew.id}
                     onClick={() => handleCardClick(crew)}
-                    className="group relative flex flex-col justify-between h-72 sm:h-80 bg-[#161920] border border-black hover:border-orange-500 rounded-lg overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-xl hover:shadow-orange-500/20 cursor-pointer select-none"
-                    style={{
-                      background: 'radial-gradient(ellipse at 50% 30%, #1e2532 0%, #12151c 70%, #0c0e14 100%)',
-                    }}
+                    className="group relative h-80 sm:h-96 rounded-md overflow-hidden border border-slate-700/80 hover:border-amber-400 bg-[#161D27] cursor-pointer select-none transition-all duration-300 hover:scale-[1.02] shadow-xl hover:shadow-amber-500/20"
                   >
-                    {/* Top Bar inside Card: Division Icon Badge (Left) & Star Tag (Right) */}
-                    <div className="relative z-20 flex items-center justify-between p-2 pointer-events-none">
-                      {/* Top Left Faction Badge */}
+                    {/* 1. Full Card Character Artwork (Edge-to-Edge with Atmospheric Sci-Fi Backdrop) */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#3A4759] via-[#202936] to-[#0E131A] overflow-hidden">
+                      {/* Subtle mesh pattern in background */}
                       <div 
-                        className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold shadow-md"
-                        style={{ background: crew.badgeBgColor }}
-                      >
-                        <span>{crew.badgeIcon}</span>
-                      </div>
-
-                      {/* Top Right Sub-marker */}
-                      <span className="font-mono text-[9px] font-black px-1.5 py-0.5 rounded bg-black/60 text-slate-300 border border-slate-700/80">
-                        {crew.rarity}
-                      </span>
-                    </div>
-
-                    {/* Character Knee-Up / Portrait Artwork */}
-                    <div className="relative flex-1 flex items-center justify-center overflow-hidden -my-4">
+                        className="absolute inset-0 opacity-20 pointer-events-none"
+                        style={{
+                          backgroundImage: 'radial-gradient(circle at 50% 25%, rgba(255,255,255,0.2) 0%, transparent 60%)',
+                        }}
+                      />
+                      
+                      {/* Character Illustration completely filling the card */}
                       <img 
                         src={crew.image} 
                         alt={crew.name}
-                        className="w-full h-full object-contain object-bottom scale-110 group-hover:scale-115 transition-transform duration-300 drop-shadow-[0_10px_20px_rgba(0,0,0,0.6)]"
+                        className="w-full h-full object-cover object-[center_12%] transition-transform duration-300 group-hover:scale-105"
                       />
-                      {/* Subtle ambient light gradient at bottom of art */}
-                      <div 
-                        className="absolute inset-x-0 bottom-0 h-16 pointer-events-none"
-                        style={{
-                          background: `linear-gradient(to top, rgba(14,17,22,0.95), transparent)`
-                        }}
-                      />
+                      
+                      {/* Bottom rich dark gradient overlay for text readability */}
+                      <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none" />
+                      
+                      {/* Top soft shadow */}
+                      <div className="absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
                     </div>
 
-                    {/* Bottom Status Banner (matching Image 1 card footers) */}
-                    <div className="relative z-20 flex items-stretch border-t border-slate-800/80 font-mono">
-                      {/* Left: Level Box */}
-                      <div className="bg-[#0B0D11] px-2.5 py-2 flex flex-col justify-center border-r border-slate-800">
-                        <span className="text-[9px] text-slate-400 font-bold leading-none">LV.</span>
-                        <span className="text-base font-black text-white font-display leading-tight">{crew.level}</span>
+                    {/* 2. Top-Left: Black Ribbon / Chevron Banner (matching reference card) */}
+                    <div className="absolute top-0 left-2.5 z-20 pointer-events-none">
+                      <div className="w-8 pt-1.5 pb-2.5 bg-[#0C1017] border-x border-b border-black clip-ribbon flex flex-col items-center justify-center shadow-lg">
+                        <span className="text-sm leading-none drop-shadow-md">{crew.badgeIcon}</span>
+                      </div>
+                    </div>
+
+                    {/* 3. Top-Right: Red Diamond Element Icon (matching reference card) */}
+                    <div className="absolute top-2.5 right-2.5 z-20 pointer-events-none flex items-center gap-1.5">
+                      <div className="w-3.5 h-3.5 rotate-45 bg-red-600 border border-amber-300/80 shadow-[0_0_8px_rgba(239,68,68,0.7)] flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 bg-white/90" />
+                      </div>
+                    </div>
+
+                    {/* 4. Bottom Overlay HUD: Level on left, Stars and Name on right */}
+                    <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between p-2.5 pb-2 pointer-events-none">
+                      
+                      {/* Bottom-Left: Angled Level Box (matching reference card) */}
+                      <div className="bg-[#0A0D12]/95 border-t border-r border-slate-700/80 pl-2.5 pr-4 py-1 text-left clip-level-badge shadow-2xl backdrop-blur-sm min-w-[58px]">
+                        <div className="text-[9px] font-mono font-bold text-slate-300 uppercase leading-none tracking-wider">
+                          LV.
+                        </div>
+                        <div className="text-xl sm:text-2xl font-black font-display text-white leading-tight tracking-tight">
+                          {crew.level}
+                        </div>
                       </div>
 
-                      {/* Right: Character Name + Stars Colored Banner */}
-                      <div 
-                        className="flex-1 px-2.5 py-1.5 flex flex-col justify-center text-white"
-                        style={{ background: crew.badgeBgColor }}
-                      >
-                        {/* 5-Star / 4-Star Rating */}
-                        <div className="flex items-center gap-0.5 text-[10px] text-amber-200">
+                      {/* Bottom-Right: Stars & Name (matching reference card) */}
+                      <div className="flex-1 flex flex-col items-end justify-end text-right pl-2 pb-0.5">
+                        {/* 5-Star White Glowing Stars */}
+                        <div className="flex items-center gap-0.5 text-xs text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.9)]">
                           {Array.from({ length: crew.stars }).map((_, i) => (
-                            <span key={i}>★</span>
+                            <span key={i} className="text-white">✦</span>
                           ))}
                         </div>
 
-                        {/* Character Name in Bold Display */}
-                        <div className="font-display font-black text-xs sm:text-sm tracking-wider uppercase truncate">
+                        {/* Character Name in Bold Display Typography */}
+                        <div className="font-display font-black text-sm sm:text-base tracking-wide text-white uppercase truncate max-w-[125px] sm:max-w-[155px] drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">
                           {crew.name}
                         </div>
                       </div>
+
                     </div>
 
-                    {/* Hover Glow Border Accent */}
+                    {/* 5. Thin Bottom Accent Line */}
                     <div 
-                      className="absolute inset-0 border-2 border-transparent group-hover:border-cyan-400/80 rounded-lg pointer-events-none transition-colors"
+                      className="absolute inset-x-0 bottom-0 h-1 z-30 pointer-events-none"
+                      style={{ background: crew.badgeBgColor || '#f97316' }}
                     />
+
+                    {/* 6. Active / Hover Border Accent */}
+                    <div className="absolute inset-0 border-2 border-transparent group-hover:border-amber-400/90 rounded-md pointer-events-none transition-colors duration-200" />
                   </div>
                 );
               })}
@@ -389,8 +392,13 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
                 </div>
               </div>
               
-              <div className="text-sm font-mono text-slate-200 font-bold uppercase">
-                {selectedCrew.roleTitle}
+              <div className="flex items-center gap-2 pt-0.5">
+                <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 border border-orange-500/40 text-[10px] font-mono font-bold uppercase clip-chamfer-sm shrink-0">
+                  {selectedCrew.divisionCode}
+                </span>
+                <span className="text-xs sm:text-sm font-mono text-slate-200 font-bold uppercase truncate">
+                  {selectedCrew.roleTitle}
+                </span>
               </div>
               <div className="text-xs font-mono text-slate-400">
                 {selectedCrew.department}
@@ -427,6 +435,10 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
             {/* Tab 1: Attributes Bars */}
             {activeTab === 'status' && (
               <div className="space-y-3 font-mono text-xs flex-1">
+                <div className="flex items-center justify-between pb-1 border-b border-slate-800 text-[10px] text-slate-400">
+                  <span>STATISTIK KEMAMPUAN AWAK</span>
+                  <span className="px-1.5 py-0.5 bg-slate-800 text-amber-400 font-bold">KOSMETIK</span>
+                </div>
                 <div>
                   <div className="flex justify-between text-slate-300 mb-1">
                     <span>ANALISIS FORENSIK</span>
@@ -472,6 +484,10 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
             {/* Tab 2: Skills Matrix */}
             {activeTab === 'skills' && (
               <div className="space-y-2 flex-1 overflow-y-auto max-h-56 pr-1">
+                <div className="flex items-center justify-between pb-1 border-b border-slate-800 text-[10px] text-slate-400 mb-2">
+                  <span>POHON KEAHLIAN SPESIALIS</span>
+                  <span className="px-1.5 py-0.5 bg-slate-800 text-amber-400 font-bold">KOSMETIK</span>
+                </div>
                 {selectedCrew.skills.map((s, idx) => (
                   <div key={idx} className="p-2.5 bg-[#181B22] border border-slate-800 space-y-1">
                     <div className="flex items-center justify-between text-xs font-display font-bold text-white uppercase">

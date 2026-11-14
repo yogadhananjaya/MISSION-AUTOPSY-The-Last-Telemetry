@@ -25,6 +25,8 @@ interface MissionState {
   selectedHypothesisId: string | null;
   hypothesisSubmitted: boolean;
   isHypothesisCorrect: boolean;
+  lastSubmitMissingCount: number;
+  missionStartedAt: number | null;
 
   // Phase 4 & 5 State
   redesignConfig: RedesignConfiguration;
@@ -55,6 +57,56 @@ interface MissionState {
   resetMission: () => void;
 }
 
+export const checkPhaseAccess = (
+  targetPhase: GamePhase,
+  state: {
+    pinnedEvidences: AnomalyEvidence[];
+    hypothesisSubmitted: boolean;
+    simulationResult: SimulationResult | null;
+  }
+): { allowed: boolean; reason: string } => {
+  if (targetPhase === 'briefing' || targetPhase === 'investigation') {
+    return { allowed: true, reason: '' };
+  }
+  if (targetPhase === 'root_cause') {
+    if (state.pinnedEvidences.length === 0) {
+      return { 
+        allowed: false, 
+        reason: 'Sematkan minimal 1 bukti telemetri terlebih dahulu.' 
+      };
+    }
+    return { allowed: true, reason: '' };
+  }
+  if (targetPhase === 'redesign') {
+    if (!state.hypothesisSubmitted) {
+      return { 
+        allowed: false, 
+        reason: 'Selesaikan diagnosis akar masalah terlebih dahulu.' 
+      };
+    }
+    return { allowed: true, reason: '' };
+  }
+  if (targetPhase === 'simulation') {
+    if (!state.hypothesisSubmitted) {
+      return { 
+        allowed: false, 
+        reason: 'Selesaikan diagnosis akar masalah sebelum simulasi.' 
+      };
+    }
+    return { allowed: true, reason: '' };
+  }
+  if (targetPhase === 'debrief') {
+    if (!state.simulationResult) {
+      return { 
+        allowed: false, 
+        reason: 'Luncurkan uji simulasi penerbangan terlebih dahulu.' 
+      };
+    }
+    return { allowed: true, reason: '' };
+  }
+  return { allowed: true, reason: '' };
+};
+
 export const useMissionStore = create<MissionState>((set, get) => ({
   // Onboarding Initial State
   gameStarted: false,
@@ -75,6 +127,8 @@ export const useMissionStore = create<MissionState>((set, get) => ({
   selectedHypothesisId: null,
   hypothesisSubmitted: false,
   isHypothesisCorrect: false,
+  lastSubmitMissingCount: 0,
+  missionStartedAt: null,
 
   redesignConfig: {
     solar: CASE_FILES[0].legacyConfiguration.solar,
@@ -128,8 +182,19 @@ export const useMissionStore = create<MissionState>((set, get) => ({
   },
 
   setPhase: (phase) => {
+    const state = get();
+    const access = checkPhaseAccess(phase, state);
+    if (!access.allowed) {
+      sounds.playAlarm();
+      return;
+    }
     sounds.playClick(600);
-    set({ currentPhase: phase });
+    const { missionStartedAt } = state;
+    if (phase === 'investigation' && missionStartedAt === null) {
+      set({ currentPhase: phase, missionStartedAt: Date.now() });
+    } else {
+      set({ currentPhase: phase });
+    }
   },
 
   setRole: (role) => {
@@ -172,11 +237,11 @@ export const useMissionStore = create<MissionState>((set, get) => ({
   },
 
   submitHypothesis: () => {
-    const { activeCase, selectedHypothesisId } = get();
+    const { activeCase, selectedHypothesisId, pinnedEvidences } = get();
     const hyp = activeCase.hypotheses.find((h) => h.id === selectedHypothesisId);
     if (!hyp) return false;
 
-    // Check if required evidences are attached or pinned
+    const missing = hyp.requiredEvidenceIds.filter(id => !pinnedEvidences.some(e => e.id === id));
     const isCorrect = hyp.isCorrect;
     if (isCorrect) {
       sounds.playSuccess();
@@ -187,6 +252,7 @@ export const useMissionStore = create<MissionState>((set, get) => ({
     set({
       hypothesisSubmitted: true,
       isHypothesisCorrect: isCorrect,
+      lastSubmitMissingCount: missing.length,
     });
     return isCorrect;
   },
@@ -205,13 +271,17 @@ export const useMissionStore = create<MissionState>((set, get) => ({
     sounds.playClick(500);
     set({ simulationRunning: true, simulationProgress: 0 });
 
-    const { redesignConfig, activeCase, isHypothesisCorrect, pinnedEvidences } = get();
-    const result = runMissionSimulation(
-      redesignConfig,
-      activeCase.budgetCapMillion,
+    const { redesignConfig, activeCase, isHypothesisCorrect, pinnedEvidences, missionStartedAt } = get();
+    const timeTakenSeconds = missionStartedAt ? Math.round((Date.now() - missionStartedAt) / 1000) : 180;
+    const result = runMissionSimulation({
+      config: redesignConfig,
+      budgetCapMillion: activeCase.budgetCapMillion,
       isHypothesisCorrect,
-      pinnedEvidences.length
-    );
+      pinnedEvidenceIds: pinnedEvidences.map((e) => e.id),
+      requiredEvidenceIds: activeCase.hypotheses.find((h) => h.isCorrect)?.requiredEvidenceIds ?? [],
+      redHerringEvidenceIds: activeCase.keyEvidencePool.filter((e) => e.isRedHerring).map((e) => e.id),
+      timeTakenSeconds,
+    });
 
     // Simulated progress tick
     let progress = 0;
@@ -246,6 +316,8 @@ export const useMissionStore = create<MissionState>((set, get) => ({
       selectedHypothesisId: null,
       hypothesisSubmitted: false,
       isHypothesisCorrect: false,
+      lastSubmitMissingCount: 0,
+      missionStartedAt: null,
       redesignConfig: { ...initialCase.legacyConfiguration },
       simulationResult: null,
       simulationRunning: false,

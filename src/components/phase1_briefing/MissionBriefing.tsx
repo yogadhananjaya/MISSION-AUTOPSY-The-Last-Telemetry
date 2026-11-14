@@ -3,9 +3,10 @@ import * as THREE from 'three';
 import { Play } from 'lucide-react';
 import { useMissionStore } from '../../store/useMissionStore';
 import { sounds } from '../../utils/soundEngine';
+import { getLauncherCapKg } from '../../utils/simulationEngine';
 
 export const MissionBriefing: React.FC = () => {
-  const { setPhase } = useMissionStore();
+  const { setPhase, activeCase } = useMissionStore();
   const mountRef = useRef<HTMLDivElement>(null);
 
   // Holographic 3D Satellite Pedestal Rendering (matching Image 4 Center)
@@ -205,7 +206,7 @@ export const MissionBriefing: React.FC = () => {
               TARGET : ASTEROID BENNU
             </div>
             <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-rose-950/80 border border-rose-600 font-mono-tech text-[9px] text-rose-300">
-              SINYAL PUTUS : T+05:00:00
+              SINYAL PUTUS : T+04:20:00
             </div>
           </div>
 
@@ -262,7 +263,7 @@ export const MissionBriefing: React.FC = () => {
           {/* Bottom telemetry indicators */}
           <div className="absolute bottom-2 inset-x-4 flex items-center justify-between text-[9px] font-mono-tech text-slate-500">
             <span>ROT: 0.008 RAD/S</span>
-            <span>MASS: 820 KG</span>
+            <span>MASS: {getLauncherCapKg('launch_smallsat_rideshare')} KG</span>
             <span>BUS: 28.0V NOMINAL</span>
           </div>
         </div>
@@ -284,22 +285,22 @@ export const MissionBriefing: React.FC = () => {
           </div>
 
           <div className="space-y-4 font-mono-tech text-xs">
-            {/* 1. Budget: $250M */}
+            {/* 1. Budget: $65M */}
             <div className="space-y-1.5 bg-[#1C1F24] p-3 border border-slate-800">
               <div className="flex items-center justify-between text-white font-medium">
                 <span className="text-slate-300">01 : BATAS ANGGARAN</span>
-                <span className="font-bold text-[#EAB308]">$250M MAX</span>
+                <span className="font-bold text-[#EAB308]">${activeCase.budgetCapMillion}M MAX</span>
               </div>
               <div className="w-full bg-black h-2 overflow-hidden border border-slate-700">
                 <div className="bg-[#EAB308] h-full w-[70%]" />
               </div>
             </div>
 
-            {/* 2. Mass: 820 kg */}
+            {/* 2. Mass: 140 kg */}
             <div className="space-y-1.5 bg-[#1C1F24] p-3 border border-slate-800">
               <div className="flex items-center justify-between text-white font-medium">
                 <span className="text-slate-300">02 : MASSA PELUNCURAN</span>
-                <span className="font-bold text-cyan-400">820 KG</span>
+                <span className="font-bold text-cyan-400">{getLauncherCapKg('launch_smallsat_rideshare')} KG</span>
               </div>
               <div className="w-full bg-black h-2 overflow-hidden border border-slate-700">
                 <div className="bg-cyan-400 h-full w-[65%]" />

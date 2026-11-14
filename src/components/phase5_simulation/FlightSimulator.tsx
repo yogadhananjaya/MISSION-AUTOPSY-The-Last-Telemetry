@@ -14,6 +14,7 @@ import {
 import { useMissionStore } from '../../store/useMissionStore';
 import { Spacecraft3D } from './Spacecraft3D';
 import { sounds } from '../../utils/soundEngine';
+import type { TelemetryPoint } from '../../types/mission';
 
 export const FlightSimulator: React.FC = () => {
   const { 
@@ -34,15 +35,22 @@ export const FlightSimulator: React.FC = () => {
     trace.length - 1, 
     Math.floor((simulationProgress / 100) * (trace.length - 1))
   );
-  const currentPt = trace[currentIdx] || {
+  const fallbackPt: TelemetryPoint = {
+    timeMinutes: 0,
     timeStr: 'T+00:00',
     busVoltage: 28.2,
     solarOutput: 160,
     batterySOC: 100,
     batteryTemp: 18,
+    powerConsumption: 120,
+    dataBuffered: 0,
+    downlinkRate: 256,
+    signalSNR: 15.0,
     isEclipse: false,
-    signalSNR: 14.5,
   };
+  const currentPt: TelemetryPoint = trace.length > 0
+    ? (trace[currentIdx] || trace[0])
+    : fallbackPt;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -101,15 +109,51 @@ export const FlightSimulator: React.FC = () => {
         </div>
       </div>
 
+      {/* Active Event Log from Telemetry Point */}
+      {currentPt.eventLog && (
+        <div className={`p-3 border font-mono-tech text-xs flex items-center justify-between clip-chamfer-sm ${
+          currentPt.severity === 'fatal' || currentPt.severity === 'critical'
+            ? 'bg-red-950/80 border-red-600 text-red-300'
+            : currentPt.severity === 'warning'
+            ? 'bg-amber-950/80 border-amber-600 text-amber-300'
+            : 'bg-black border-[#EAB308] text-[#EAB308]'
+        }`}>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-current animate-ping" />
+            <span className="font-bold">LOG PERISTIWA ORBIT:</span>
+            <span className="text-white font-sans text-xs">{currentPt.eventLog}</span>
+          </div>
+          <span className="text-[10px] text-slate-400">{currentPt.timeStr}</span>
+        </div>
+      )}
+
       {/* 3D WebGL Spacecraft View with Tactical HUD Frame */}
       <div className="relative border border-black bg-black clip-chamfer-md overflow-hidden shadow-2xl">
-        <div className="absolute top-3 left-4 z-20 font-mono-tech text-[10px] text-slate-400 bg-black/80 px-2 py-0.5 border border-slate-800 flex items-center gap-2">
-          <span className={`w-2 h-2 ${currentPt.isEclipse ? 'bg-purple-500' : 'bg-amber-400'} animate-pulse`} />
-          <span>ZONA : {currentPt.isEclipse ? 'BAYANGAN GERHANA' : 'SEKTOR TERANG MATAHARI'}</span>
+        {/* Top-Left Corner HUD */}
+        <div className="absolute top-3 left-4 z-20 flex flex-col items-start gap-1 pointer-events-none">
+          <div className="font-mono-tech text-[10px] text-slate-300 bg-black/85 px-2 py-0.5 border border-slate-800 flex items-center gap-2">
+            <span className={`w-2 h-2 ${currentPt.isEclipse ? 'bg-purple-500' : 'bg-amber-400'} animate-pulse`} />
+            <span>ZONA : {currentPt.isEclipse ? 'BAYANGAN GERHANA' : 'SEKTOR TERANG MATAHARI'}</span>
+          </div>
+          <div className="flex items-center gap-1.5 font-mono-tech text-[9px] bg-slate-950/85 px-2 py-0.5 border border-slate-800 text-cyan-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+            <span className="font-bold">SIMULASI 3D</span>
+            <span className="text-slate-400">: DRAG ROTASI</span>
+          </div>
         </div>
 
-        <div className="absolute top-3 right-4 z-20 font-mono-tech text-[10px] text-slate-400 bg-black/80 px-2 py-0.5 border border-slate-800">
-          DESAIN CAD : ASTER-9 MK2
+        {/* Top-Right Corner HUD */}
+        <div className="absolute top-3 right-4 z-20 flex flex-col items-end gap-1 pointer-events-none">
+          <div className={`font-mono-tech text-[10px] px-2 py-0.5 border font-bold flex items-center gap-1.5 ${
+            currentPt.isEclipse 
+              ? 'bg-purple-950/90 border-purple-600 text-purple-300 animate-pulse' 
+              : 'bg-yellow-950/90 border-yellow-600 text-yellow-300'
+          }`}>
+            <span>{currentPt.isEclipse ? '🌑 FASE BAYANGAN' : '☀️ FASE MATAHARI'}</span>
+          </div>
+          <div className="font-mono-tech text-[10px] text-slate-400 bg-black/85 px-2 py-0.5 border border-slate-800">
+            DESAIN CAD : ASTER-9 MK2
+          </div>
         </div>
 
         <Spacecraft3D 
@@ -117,11 +161,21 @@ export const FlightSimulator: React.FC = () => {
           isEclipse={currentPt.isEclipse} 
         />
 
-        <div className="absolute bottom-3 left-4 z-20 font-mono-tech text-[9px] text-slate-500">
-          TAUTAN BEACON : FREQ 8.4 GHz
+        {/* Bottom-Left Corner HUD */}
+        <div className="absolute bottom-3 left-4 z-20 flex flex-col items-start gap-0.5 pointer-events-none">
+          <div className="font-mono-tech text-[9px] bg-slate-950/85 px-2 py-0.5 border border-slate-800 text-slate-300">
+            TARGET: BENNU CLASS : ORBIT {redesignConfig.orbit.replace('orbit_', '').toUpperCase()}
+          </div>
+          <div className="font-mono-tech text-[9px] text-slate-400 bg-black/85 px-2 py-0.5 border border-slate-800">
+            TAUTAN BEACON : FREQ 8.4 GHz
+          </div>
         </div>
-        <div className="absolute bottom-3 right-4 z-20 font-mono-tech text-[9px] text-slate-500">
-          ORBIT : KEMUDI REAKSI 3 SUMBU
+
+        {/* Bottom-Right Corner HUD */}
+        <div className="absolute bottom-3 right-4 z-20 flex flex-col items-end gap-0.5 pointer-events-none">
+          <div className="font-mono-tech text-[9px] text-slate-400 bg-black/85 px-2 py-0.5 border border-slate-800">
+            ORBIT : KEMUDI REAKSI 3 SUMBU
+          </div>
         </div>
       </div>
 
@@ -243,7 +297,7 @@ export const FlightSimulator: React.FC = () => {
         <div className="p-3 bg-[#1C1F24] border border-slate-800 text-xs text-slate-400 flex items-center gap-2 font-mono-tech">
           <Sparkles className="w-4 h-4 text-[#EAB308] shrink-0" />
           <span>
-            Compare with the original ASTER-9 failure at T+05:00: in this refit configuration, bus voltage remains reliably above 23V throughout deep shadow.
+            Bandingkan dengan kegagalan ASTER-9 lama pada T+04:20: pada konfigurasi refit ini, tegangan bus bertahan aman di atas batas UVLO selama gerhana.
           </span>
         </div>
       )}

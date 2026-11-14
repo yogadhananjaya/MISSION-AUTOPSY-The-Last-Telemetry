@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { 
-  CheckCircle2, 
+  Moon, 
+  Zap, 
+  Thermometer, 
+  AlertTriangle, 
   RotateCcw, 
-  Sparkles, 
-  Layers,
-  Moon,
-  Zap,
-  Thermometer,
-  AlertTriangle
+  CheckCircle2, 
+  Sparkles,
+  Layers
 } from 'lucide-react';
 import { sounds } from '../../utils/soundEngine';
 
@@ -18,7 +18,7 @@ interface CausalityDominoBoardProps {
 
 interface DominoBlock {
   id: string;
-  step: number;
+  timeMinutes: number;
   timeTag: string;
   title: string;
   metric: string;
@@ -29,50 +29,53 @@ interface DominoBlock {
 
 const DOMINO_STEPS: DominoBlock[] = [
   {
-    id: 'step_1',
-    step: 1,
-    timeTag: 'T+03:15',
+    id: 'step_eclipse',
+    timeMinutes: 200,
+    timeTag: 'T+03:20',
     title: 'MASUK BAYANGAN ASTEROID',
-    metric: 'Gerhana Total 75 Menit',
+    metric: 'Gerhana 75 menit',
     icon: Moon,
     color: 'text-purple-400',
     bgActive: 'border-purple-500 bg-purple-950/40'
   },
   {
-    id: 'step_2',
-    step: 2,
-    timeTag: 'T+03:16',
+    id: 'step_solar_zero',
+    timeMinutes: 200,
+    timeTag: 'T+03:20',
     title: 'GENERASI SURYA PADAM',
-    metric: 'Fluks Daya Nol Watt',
+    metric: 'Pembangkit surya 0 W',
     icon: Zap,
     color: 'text-[#EAB308]',
     bgActive: 'border-amber-500 bg-amber-950/40'
   },
   {
-    id: 'step_3',
-    step: 3,
-    timeTag: 'T+04:10',
+    id: 'step_cryo_freeze',
+    timeMinutes: 230,
+    timeTag: 'T+03:50',
     title: 'BATERAI MEMBEKU',
-    metric: 'Suhu Sel Minus 28 Derajat',
+    metric: 'Suhu sel -11.6°C (< -10°C)',
     icon: Thermometer,
     color: 'text-cyan-400',
     bgActive: 'border-cyan-500 bg-cyan-950/40'
   },
   {
-    id: 'step_4',
-    step: 4,
-    timeTag: 'T+05:00',
+    id: 'step_uvlo_blackout',
+    timeMinutes: 260,
+    timeTag: 'T+04:20',
     title: 'BLACKOUT LISTRIK TOTAL',
-    metric: 'Batas Tegangan 21.9V',
+    metric: 'Bus 21.0 V < 22 V (UVLO)',
     icon: AlertTriangle,
     color: 'text-rose-400',
     bgActive: 'border-rose-500 bg-rose-950/40'
   }
 ];
 
+const CORRECT_SEQUENCE = DOMINO_STEPS.map((s) => s.id);
+const DISPLAY_ORDER = [2, 0, 3, 1];
+const AVAILABLE_BLOCKS = DISPLAY_ORDER.map((idx) => DOMINO_STEPS[idx]);
+
 export const CausalityDominoBoard: React.FC<CausalityDominoBoardProps> = ({ onSolved, isSolved }) => {
-  // Player-selected sequence of block IDs
-  const [selectedChain, setSelectedChain] = useState<string[]>(isSolved ? ['step_1', 'step_2', 'step_3', 'step_4'] : []);
+  const [selectedChain, setSelectedChain] = useState<string[]>(isSolved ? CORRECT_SEQUENCE : []);
   const [hasFailedAttempt, setHasFailedAttempt] = useState<boolean>(false);
 
   const handleSelectBlock = (blockId: string) => {
@@ -82,9 +85,8 @@ export const CausalityDominoBoard: React.FC<CausalityDominoBoardProps> = ({ onSo
     const newChain = [...selectedChain, blockId];
     setSelectedChain(newChain);
 
-    if (newChain.length === 4) {
-      // Validate correct sequence: step_1 -> step_2 -> step_3 -> step_4
-      const isCorrect = newChain[0] === 'step_1' && newChain[1] === 'step_2' && newChain[2] === 'step_3' && newChain[3] === 'step_4';
+    if (newChain.length === CORRECT_SEQUENCE.length) {
+      const isCorrect = newChain.every((id, idx) => id === CORRECT_SEQUENCE[idx]);
       if (isCorrect) {
         sounds.playSuccess();
         setHasFailedAttempt(false);
@@ -196,7 +198,7 @@ export const CausalityDominoBoard: React.FC<CausalityDominoBoardProps> = ({ onSo
         )}
       </div>
 
-      {/* Available Unselected Blocks to Click */}
+      {/* Available Unselected Blocks to Click in Fixed Seed Order [2,0,3,1] */}
       <div className="space-y-2">
         <div className="text-[10px] font-mono-tech text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
           <Layers className="w-3.5 h-3.5 text-[#EAB308]" />
@@ -204,7 +206,7 @@ export const CausalityDominoBoard: React.FC<CausalityDominoBoardProps> = ({ onSo
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {DOMINO_STEPS.map((block) => {
+          {AVAILABLE_BLOCKS.map((block) => {
             const Icon = block.icon;
             const isAlreadySelected = selectedChain.includes(block.id);
 
@@ -247,7 +249,7 @@ export const CausalityDominoBoard: React.FC<CausalityDominoBoardProps> = ({ onSo
           <div>
             <div className="font-bold text-emerald-300 uppercase">AKAR MASALAH TERBUKTI SECARA ILMIAH :</div>
             <div className="text-slate-200 text-[11px] font-sans">
-              Satelit masuk bayangan tebal. Panel surya mati total. Suhu sel jatuh ke minus 28 derajat. Tegangan bus anjlok ke 21.9V dan memicu pemadaman darurat.
+              Satelit masuk bayangan tebal. Pembangkit surya jatuh ke 0 W. Suhu sel anjlok ke -11.6°C di bawah batas aman. Tegangan bus anjlok ke 21.0 V dan memicu pemadaman darurat UVLO.
             </div>
           </div>
         </div>

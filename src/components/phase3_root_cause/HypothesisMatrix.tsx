@@ -8,7 +8,8 @@ import {
   Compass, 
   ShieldCheck, 
   Layers,
-  Wrench
+  Wrench,
+  AlertTriangle
 } from 'lucide-react';
 import { useMissionStore } from '../../store/useMissionStore';
 import { sounds } from '../../utils/soundEngine';
@@ -23,6 +24,7 @@ export const HypothesisMatrix: React.FC = () => {
     submitHypothesis, 
     hypothesisSubmitted, 
     isHypothesisCorrect, 
+    lastSubmitMissingCount,
     setPhase,
     guidedMode 
   } = useMissionStore();
@@ -76,7 +78,7 @@ export const HypothesisMatrix: React.FC = () => {
           <div>
             <p className="font-bold text-[#EAB308] font-mono-tech uppercase">ARAHAN KAUSALITAS TEKNIK:</p>
             <p className="text-slate-300 text-[11px] mt-0.5 font-sans leading-relaxed">
-              Pelajari urutan sebab akibat. Mengapa voltase bus jatuh ke 21.9V? Apakah panel surya hancur atau baterai membeku di dalam bayangan tanpa pemanas? Perhatikan suhu minus 28 derajat dan waktu masuk gerhana.
+              Pelajari urutan sebab akibat. Mengapa voltase bus jatuh ke 21.0V? Apakah panel surya hancur atau baterai membeku di dalam bayangan tanpa pemanas? Perhatikan suhu minus 11.6 derajat dan waktu masuk gerhana.
             </p>
           </div>
         </div>
@@ -133,6 +135,10 @@ export const HypothesisMatrix: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {activeCase.hypotheses.map((hyp, idx) => {
             const isSelected = selectedHypothesisId === hyp.id;
+            const terpenuhi = hyp.requiredEvidenceIds.filter((id) =>
+              pinnedEvidences.some((e) => e.id === id)
+            ).length;
+
             return (
               <div
                 key={hyp.id}
@@ -164,7 +170,7 @@ export const HypothesisMatrix: React.FC = () => {
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] font-mono-tech text-slate-400 flex items-center justify-between">
-                  <span>{hyp.requiredEvidenceIds.length} BUKTI DIBUTUHKAN</span>
+                  <span>{terpenuhi}/{hyp.requiredEvidenceIds.length} BUKTI TERPENUHI</span>
                   {isSelected && <span className="text-[#EAB308] font-bold">TERPILIH</span>}
                 </div>
               </div>
@@ -188,12 +194,17 @@ export const HypothesisMatrix: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            {pinnedEvidences.length === 0 && (
+              <span className="font-mono-tech text-[11px] text-amber-400">
+                Sematkan minimal 1 bukti telemetri sebelum mengirim.
+              </span>
+            )}
             <button
               onClick={handleSubmit}
-              disabled={!selectedHypothesisId}
+              disabled={!selectedHypothesisId || pinnedEvidences.length === 0}
               className={`flex items-center gap-2 px-6 py-2.5 font-display font-bold text-xs tracking-wider transition-all cursor-pointer ${
-                selectedHypothesisId
+                selectedHypothesisId && pinnedEvidences.length > 0
                   ? 'btn-tactical-primary text-black shadow-lg shadow-amber-500/20'
                   : 'bg-[#1C1F24] text-slate-600 border border-slate-800 cursor-not-allowed'
               }`}
@@ -224,6 +235,13 @@ export const HypothesisMatrix: React.FC = () => {
                 </>
               )}
             </div>
+
+            {lastSubmitMissingCount > 0 && (
+              <div className="p-3 bg-amber-950/70 border border-amber-600 text-amber-300 font-mono-tech text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Diagnosis dikirim dengan {lastSubmitMissingCount} bukti wajib belum disematkan (kehilangan poin).</span>
+              </div>
+            )}
 
             <p className="text-slate-200 leading-relaxed font-sans">
               {selectedHyp.engineeringExplanation}

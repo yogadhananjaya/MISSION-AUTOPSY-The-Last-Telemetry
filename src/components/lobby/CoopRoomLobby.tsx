@@ -84,7 +84,7 @@ export const CoopRoomLobby: React.FC<CoopRoomLobbyProps> = ({
         isHost: true,
         ping: '18ms',
         isReady: playerReadyState,
-        avatar: '/assets/nova/c40b7188/31_mascot.png'
+        avatar: '/assets/nova/nova_idle.png'
       }
     },
     {
@@ -112,7 +112,7 @@ export const CoopRoomLobby: React.FC<CoopRoomLobbyProps> = ({
         isHost: false,
         ping: '24ms',
         isReady: true,
-        avatar: '/assets/nova/c40b7188/31_mascot.png'
+        avatar: '/assets/nova/nova_idle.png'
       }
     },
     {
@@ -140,7 +140,7 @@ export const CoopRoomLobby: React.FC<CoopRoomLobbyProps> = ({
         isHost: false,
         ping: '31ms',
         isReady: true,
-        avatar: '/assets/nova/c40b7188/31_mascot.png'
+        avatar: '/assets/nova/nova_idle.png'
       }
     }
   ];
@@ -191,6 +191,11 @@ export const CoopRoomLobby: React.FC<CoopRoomLobbyProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-[#0E1013] flex flex-col overflow-hidden text-white select-none">
       
+      {/* Simulation Banner Notice */}
+      <div className="bg-amber-950/80 border-b border-amber-600/60 px-4 py-1.5 text-center text-xs font-mono text-amber-300">
+        SIMULASI — BUKAN MULTIPLAYER NYATA
+      </div>
+
       {/* Top Tactical Room Header */}
       <header className="relative z-20 flex items-center justify-between px-5 sm:px-8 py-3 bg-[#141619] border-b border-black">
         <div className="flex items-center gap-3 sm:gap-4">

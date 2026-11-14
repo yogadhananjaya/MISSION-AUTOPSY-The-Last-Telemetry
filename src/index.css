@@ -137,6 +137,27 @@ html {
   );
 }
 
+/* Gacha Character Card Ribbon Banner (Top-Left) */
+.clip-ribbon {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    50% calc(100% - 7px),
+    0 100%
+  );
+}
+
+/* Card Level Badge Cut (Bottom-Left) */
+.clip-level-badge {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 100%,
+    0 100%
+  );
+}
+
 /* ─────────────────────────────────────────────────────────────
    TACTICAL INDUSTRIAL UI PANELS
    ───────────────────────────────────────────────────────────── */

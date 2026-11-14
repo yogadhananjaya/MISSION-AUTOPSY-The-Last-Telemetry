@@ -25,37 +25,37 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
 
   const TRANSCRIPT_LINES = [
     {
-      time: 'T+04:58:12',
+      time: 'T+04:18:40',
       source: 'SENSOR SURYA',
       text: 'Fluks surya nol watt. Wahana memasuki bayangan tebal asteroid.',
       severity: 'normal'
     },
     {
-      time: 'T+04:59:04',
+      time: 'T+04:19:10',
       source: 'SENSOR TERMAL',
       text: 'Suhu baterai melewati minus 20 derajat. Terjadi pembekuan elektrolit ekstrem.',
       severity: 'warning'
     },
     {
-      time: 'T+04:59:35',
+      time: 'T+04:19:35',
       source: 'BUS DAYA EPS',
-      text: 'Elektrolit membeku. Hambatan dalam melonjak tinggi. Tegangan bus turun ke 22.4V.',
+      text: 'Elektrolit membeku. Hambatan dalam melonjak tinggi. Tegangan bus turun mendekati 22V.',
       severity: 'warning'
     },
     {
-      time: 'T+05:00:00',
+      time: 'T+04:20:00',
       source: 'KOMPUTER UTAMA',
-      text: 'PERINGATAN KRITIS: Tegangan anjlok ke 21.9V. Pemutusan darurat otomatis aktif.',
+      text: 'PERINGATAN KRITIS: Tegangan anjlok ke 21.0V. Pemutusan darurat otomatis aktif.',
       severity: 'critical'
     },
     {
-      time: 'T+05:00:14',
+      time: 'T+04:20:14',
       source: 'PEMANCAR DSN',
       text: 'Penguat sinyal kehilangan daya. Kuncian DSN terlepas. Kontak terputus total.',
       severity: 'critical'
     },
     {
-      time: 'T+05:00:20',
+      time: 'T+04:20:20',
       source: 'ARSIP TELEMETRI',
       text: 'SINYAL DERAU STATIS : PEREKAM PENERBANGAN PADAM',
       severity: 'fatal'
@@ -108,7 +108,7 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
         <div className="flex items-center gap-2">
           <Radio className="w-4 h-4 text-rose-500 animate-pulse" />
           <h3 className="font-display font-bold text-xs tracking-wider uppercase text-white">
-            REKAMAN AUDIO KOTAK HITAM : SUARA DARURAT T+05:00
+            REKAMAN AUDIO KOTAK HITAM : SUARA DARURAT T+04:20
           </h3>
         </div>
 
@@ -199,7 +199,7 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
         <div className="flex items-center justify-between pt-1 text-xs font-mono-tech">
           <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
             <AlertCircle className="w-3.5 h-3.5 text-[#EAB308]" />
-            <span>Rekaman audio membuktikan pemutusan kontak radio pada 21.9V.</span>
+            <span>Rekaman audio membuktikan pemutusan kontak radio pada 21.0V.</span>
           </div>
 
           <button

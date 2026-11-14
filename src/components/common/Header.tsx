@@ -8,10 +8,14 @@ import {
   VolumeX, 
   Maximize2,
   Home,
-  Plus
+  User,
+  Lock,
+  Activity,
+  Layers
 } from 'lucide-react';
-import { useMissionStore } from '../../store/useMissionStore';
+import { useMissionStore, checkPhaseAccess } from '../../store/useMissionStore';
 import type { GamePhase } from '../../types/mission';
+import { sounds } from '../../utils/soundEngine';
 
 export const Header: React.FC = () => {
   const { 
@@ -20,46 +24,79 @@ export const Header: React.FC = () => {
     audioEnabled, 
     toggleAudio, 
     astronautName,
+    activeCase,
+    pinnedEvidences,
+    hypothesisSubmitted,
+    simulationResult,
     setOnboardingStep,
     setCurrentView
   } = useMissionStore();
 
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [lockedNotice, setLockedNotice] = useState<string | null>(null);
 
   const NAV_TABS = [
     { 
-      id: 'investigation', 
+      id: 'briefing', 
       code: '01',
-      label: 'INVESTIGATION', 
+      label: 'BRIEFING', 
       icon: Search,
-      isActive: currentPhase === 'briefing' || currentPhase === 'investigation' || currentPhase === 'root_cause',
       targetPhase: 'briefing' as GamePhase,
     },
     { 
-      id: 'redesign', 
+      id: 'investigation', 
       code: '02',
-      label: 'REDESIGN', 
+      label: 'INVESTIGASI', 
+      icon: Activity,
+      targetPhase: 'investigation' as GamePhase,
+    },
+    { 
+      id: 'root_cause', 
+      code: '03',
+      label: 'AKAR MASALAH', 
+      icon: Layers,
+      targetPhase: 'root_cause' as GamePhase,
+    },
+    { 
+      id: 'redesign', 
+      code: '04',
+      label: 'DESAIN ULANG', 
       icon: Wrench,
-      isActive: currentPhase === 'redesign',
       targetPhase: 'redesign' as GamePhase,
     },
     { 
       id: 'simulation', 
-      code: '03',
-      label: 'SIMULATION', 
+      code: '05',
+      label: 'SIMULASI', 
       icon: Rocket,
-      isActive: currentPhase === 'simulation',
       targetPhase: 'simulation' as GamePhase,
     },
     { 
-      id: 'report', 
-      code: '04',
+      id: 'debrief', 
+      code: '06',
       label: 'DEBRIEF', 
       icon: FileText,
-      isActive: currentPhase === 'debrief',
       targetPhase: 'debrief' as GamePhase,
     },
   ];
+
+  const handleTabClick = (tab: typeof NAV_TABS[0]) => {
+    const access = checkPhaseAccess(tab.targetPhase, {
+      pinnedEvidences,
+      hypothesisSubmitted,
+      simulationResult,
+    });
+
+    if (!access.allowed) {
+      sounds.playAlarm();
+      setLockedNotice(access.reason);
+      setTimeout(() => setLockedNotice(null), 3500);
+      return;
+    }
+
+    setLockedNotice(null);
+    setPhase(tab.targetPhase);
+  };
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -83,77 +120,68 @@ export const Header: React.FC = () => {
             - Tag peran miring (NASA INVESTIGATOR)
             - Bar progres EXP tipis monospace 1560 / 5000
             ========================================================================= */}
-        <div className="flex items-center gap-3 select-none">
+        <div className="flex items-center gap-3 select-none min-w-0 max-w-[200px] sm:max-w-none">
           {/* Avatar Kotak Tajam */}
           <div 
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="relative w-10 h-10 bg-[#1C1F24] border border-[#EAB308] p-0.5 cursor-pointer group shadow-sm flex items-center justify-center shrink-0"
             title="Investigator Dossier"
           >
-            <img 
-              src="/assets/nova/c40b7188/31_mascot.png" 
-              alt="Avatar" 
-              className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all"
-              onError={(e) => {
-                // Fallback to text initials if image path fails
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-            <span className="font-display font-black text-sm text-[#EAB308] absolute">
-              {displayName.charAt(0)}
-            </span>
+            <User className="w-5 h-5 text-[#EAB308]" />
             <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#10B981] border border-black" />
           </div>
 
-          {/* Dossier Text & EXP Bar */}
-          <div className="flex flex-col justify-center">
-            {/* Top row: Name + LV.26 Badge */}
-            <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-sm tracking-wider text-[#F8FAFC] uppercase leading-none">
-                {displayName}
-              </span>
-              <span className="bg-[#EAB308] text-black font-mono-tech font-bold text-[10px] px-1.5 py-0.2 leading-tight uppercase tracking-tight">
-                LV.26
-              </span>
-            </div>
-
-            {/* Bottom row: Slanted Role Tag + Thin Monospace EXP Bar */}
-            <div className="flex items-center gap-2 mt-1">
-              <span className="clip-slanted bg-[#1F2329] border border-slate-700/80 px-2 py-0.5 text-[9px] font-mono-tech tracking-wider text-slate-300 uppercase">
+          {/* Dossier Text */}
+          <div className="flex flex-col justify-center min-w-0">
+            <span 
+              className="font-display font-bold text-sm tracking-wider text-[#F8FAFC] uppercase leading-none truncate max-w-[120px] sm:max-w-[200px]"
+              title={displayName}
+            >
+              {displayName}
+            </span>
+            <div className="mt-1">
+              <span className="clip-slanted bg-[#1F2329] border border-slate-700/80 px-2 py-0.5 text-[9px] font-mono-tech tracking-wider text-slate-300 uppercase truncate block">
                 NASA INVESTIGATOR
               </span>
-              <div className="hidden sm:flex items-center gap-1.5">
-                <div className="w-20 h-1.5 bg-black/60 border border-slate-800 overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[#EAB308] to-amber-300 w-[31%]" />
-                </div>
-                <span className="font-mono-tech text-[9px] text-slate-400 tracking-tighter">
-                  1560 / 5000 EXP
-                </span>
-              </div>
             </div>
           </div>
         </div>
 
         {/* =========================================================================
-            CENTER: TACTICAL PHASE TABS (Anti-Rounded)
+            CENTER: TACTICAL PHASE TABS (Anti-Rounded + Validation Gate)
             ========================================================================= */}
-        <nav className="hidden md:flex items-center bg-[#0D0F12] border border-slate-800/80 p-0.5 gap-0.5">
+        <nav className="hidden lg:flex items-center bg-[#0D0F12] border border-slate-800/80 p-0.5 gap-0.5">
           {NAV_TABS.map((tab) => {
             const Icon = tab.icon;
+            const access = checkPhaseAccess(tab.targetPhase, {
+              pinnedEvidences,
+              hypothesisSubmitted,
+              simulationResult,
+            });
+            const isLocked = !access.allowed;
+            const isActive = currentPhase === tab.targetPhase;
+
             return (
               <button
                 key={tab.id}
-                onClick={() => setPhase(tab.targetPhase)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold tracking-wider transition-all cursor-pointer ${
-                  tab.isActive
+                onClick={() => handleTabClick(tab)}
+                title={isLocked ? `DIKUNCI: ${access.reason}` : tab.label}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-mono font-bold tracking-wider transition-all cursor-pointer ${
+                  isActive
                     ? 'bg-[#1C2026] text-[#EAB308] border-b-2 border-[#EAB308]'
+                    : isLocked
+                    ? 'opacity-40 text-slate-500 hover:text-slate-400 hover:bg-black/40 cursor-not-allowed'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-[#15181D]'
                 }`}
               >
-                <span className={`text-[10px] ${tab.isActive ? 'text-[#EAB308]' : 'text-slate-600'}`}>
+                <span className={`text-[10px] ${isActive ? 'text-[#EAB308]' : 'text-slate-600'}`}>
                   {tab.code}
                 </span>
-                <Icon className={`w-3.5 h-3.5 ${tab.isActive ? 'text-[#EAB308]' : 'text-slate-500'}`} />
+                {isLocked ? (
+                  <Lock className="w-3 h-3 text-slate-500" />
+                ) : (
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#EAB308]' : 'text-slate-500'}`} />
+                )}
                 <span>{tab.label}</span>
               </button>
             );
@@ -169,38 +197,13 @@ export const Header: React.FC = () => {
             ========================================================================= */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
-          {/* Resource 1: Budget / Credits ($ 65,000,000) */}
+          {/* Resource: Real Mission Budget Cap */}
           <div className="flex items-center gap-1.5 bg-[#0D0F12] border border-slate-800/90 px-2 sm:px-2.5 py-1">
             <span className="w-2.5 h-2.5 bg-[#EAB308] rotate-45 shrink-0 inline-block" />
             <span className="font-mono-tech font-bold text-xs sm:text-sm text-[#F8FAFC] tracking-tight">
-              $ 65,000,000
+              ${activeCase.budgetCapMillion}M
             </span>
           </div>
-
-          {/* Resource 2: Data Points (8,600 DP) */}
-          <div className="hidden lg:flex items-center gap-1.5 bg-[#0D0F12] border border-slate-800/90 px-2.5 py-1">
-            <span className="w-2.5 h-2.5 bg-rose-500 shrink-0 inline-block" />
-            <span className="font-mono-tech font-bold text-xs sm:text-sm text-[#F8FAFC] tracking-tight">
-              8,600 DP
-            </span>
-          </div>
-
-          {/* Resource 3: Signal Units (940 SIG) */}
-          <div className="hidden sm:flex items-center gap-1.5 bg-[#0D0F12] border border-slate-800/90 px-2.5 py-1">
-            <span className="w-2.5 h-2.5 bg-cyan-400 rotate-45 shrink-0 inline-block" />
-            <span className="font-mono-tech font-bold text-xs sm:text-sm text-[#F8FAFC] tracking-tight">
-              940 SIG
-            </span>
-          </div>
-
-          {/* Tombol [+] Kotak Berlatar Gelap */}
-          <button
-            onClick={() => setOnboardingStep('tutorial')}
-            title="Refill / Tech Store"
-            className="w-7 h-7 bg-[#1F2329] border border-slate-700 hover:border-[#EAB308] hover:bg-[#282C34] text-slate-300 hover:text-[#EAB308] flex items-center justify-center font-bold text-xs transition-colors cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-          </button>
 
           {/* Divider tipis */}
           <div className="w-[1px] h-6 bg-slate-800 hidden sm:block" />
@@ -237,6 +240,15 @@ export const Header: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Locked Phase Notice Toast */}
+      {lockedNotice && (
+        <div className="bg-amber-500/10 border-t border-b border-amber-500/40 text-amber-300 py-1.5 px-4 text-center font-mono-tech text-xs flex items-center justify-center gap-2 animate-fadeIn">
+          <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <span className="font-bold">AKSES DITOLAK:</span>
+          <span>{lockedNotice}</span>
+        </div>
+      )}
 
       {/* User Dossier Dropdown */}
       {showUserMenu && (

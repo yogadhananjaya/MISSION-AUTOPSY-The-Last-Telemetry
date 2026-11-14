@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Lock, Play, Sparkles } from 'lucide-react';
 import { MISSIONS_LIST, type MissionDossier } from '../../data/missionsData';
 import { sounds } from '../../utils/soundEngine';
+import { useMissionStore } from '../../store/useMissionStore';
 
 interface MissionSelectorProps {
   onBack: () => void;
@@ -9,8 +10,19 @@ interface MissionSelectorProps {
 }
 
 export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSelectMission }) => {
+  const { currentPhase } = useMissionStore();
   const [hoveredMissionId, setHoveredMissionId] = useState<string>('aster-9');
   const [selectedMissionId, setSelectedMissionId] = useState<string>('aster-9');
+
+  const phaseProgressMap: Record<string, number> = {
+    briefing: 0,
+    investigation: 20,
+    root_cause: 40,
+    redesign: 60,
+    simulation: 80,
+    debrief: 100,
+  };
+  const aster9Progress = phaseProgressMap[currentPhase] ?? 0;
 
   const activeMission = MISSIONS_LIST.find(m => m.id === (hoveredMissionId || selectedMissionId)) || MISSIONS_LIST[0];
 
@@ -74,14 +86,18 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
             <div
               key={m.id}
               onMouseEnter={() => {
-                setHoveredMissionId(m.id);
-                sounds.playClick(850);
+                if (!isLocked) {
+                  setHoveredMissionId(m.id);
+                  sounds.playClick(850);
+                }
               }}
-              onClick={() => handleCardClick(m)}
-              className={`relative flex-1 transition-all duration-300 ease-out cursor-pointer overflow-hidden border flex flex-col justify-between p-6 ${
-                isHovered || isSelected 
-                  ? 'lg:flex-[2.2] border-amber-500 bg-[#16191F] shadow-2xl' 
-                  : 'lg:flex-1 border-slate-800/90 bg-[#121418] hover:border-slate-700 opacity-75 hover:opacity-100'
+              onClick={() => !isLocked && handleCardClick(m)}
+              className={`relative flex-1 transition-all duration-300 ease-out overflow-hidden border flex flex-col justify-between p-6 ${
+                isLocked 
+                  ? 'cursor-not-allowed border-slate-800/60 bg-[#0E1013] opacity-50'
+                  : isHovered || isSelected 
+                  ? 'cursor-pointer lg:flex-[2.2] border-amber-500 bg-[#16191F] shadow-2xl' 
+                  : 'cursor-pointer lg:flex-1 border-slate-800/90 bg-[#121418] hover:border-slate-700 opacity-75 hover:opacity-100'
               }`}
               style={{
                 clipPath: 'polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%)'
@@ -107,9 +123,9 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
                 </span>
 
                 {isLocked ? (
-                  <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-red-950/80 border border-red-800 text-[10px] font-mono text-red-400">
+                  <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400">
                     <Lock className="w-3 h-3" />
-                    <span>TERKUNCI</span>
+                    <span>SEGERA HADIR</span>
                   </span>
                 ) : (
                   <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500 text-[10px] font-mono text-amber-400 font-bold">
@@ -131,22 +147,24 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
                   {m.subtitle}
                 </p>
 
-                {/* Progress Bar (Tactical Solid Bar) */}
-                <div className="mt-6 space-y-1.5">
-                  <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-slate-400">SINKRONISASI INVESTIGASI</span>
-                    <span className="font-bold text-amber-400">{m.progressPercentage}%</span>
+                {/* Progress Bar (Active Mission Only) */}
+                {!isLocked && (
+                  <div className="mt-6 space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-slate-400">SINKRONISASI INVESTIGASI</span>
+                      <span className="font-bold text-amber-400">{aster9Progress}%</span>
+                    </div>
+                    <div className="w-full bg-black h-2 border border-slate-800">
+                      <div 
+                        className="h-full bg-amber-400 transition-all duration-500"
+                        style={{ width: `${aster9Progress}%` }} 
+                      />
+                    </div>
                   </div>
-                  <div className="w-full bg-black h-2 border border-slate-800">
-                    <div 
-                      className="h-full bg-amber-400 transition-all duration-500"
-                      style={{ width: `${m.progressPercentage}%` }} 
-                    />
-                  </div>
-                </div>
+                )}
 
                 {/* Expanded Details when Card is Hovered/Selected */}
-                {(isHovered || isSelected) && (
+                {(isHovered || isSelected) && !isLocked && (
                   <div className="mt-5 pt-4 border-t border-slate-800 space-y-3 text-xs animate-fadeIn">
                     <div className="text-slate-300 font-sans leading-relaxed bg-[#101215] p-3 border border-slate-800">
                       <strong className="text-amber-400 font-mono block mb-1">TELEMETRI INSIDEN:</strong>
@@ -169,7 +187,7 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
                   ANGGARAN: <span className="font-bold text-white">{m.budgetLimit}</span>
                 </div>
 
-                {m.status === 'active' ? (
+                {!isLocked ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -183,9 +201,9 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
                     </span>
                   </button>
                 ) : (
-                  <div className="text-xs font-mono text-slate-600 flex items-center gap-1.5">
+                  <div className="text-xs font-mono text-slate-500 flex items-center gap-1.5">
                     <Lock className="w-3.5 h-3.5" />
-                    <span>AKSES TERKUNCI</span>
+                    <span>SEGERA HADIR</span>
                   </div>
                 )}
               </div>

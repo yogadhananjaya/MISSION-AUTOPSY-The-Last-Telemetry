@@ -49,6 +49,13 @@ export const TelemetryStudio: React.FC = () => {
   }, [isPlaying, currentTimeMinute, setCurrentTimeMinute]);
 
   const telemetry = activeCase.telemetryLogs;
+
+  // Eclipse shading coordinates calculated dynamically from activeCase.telemetryLogs
+  const eclipsePoints = telemetry.filter((p) => p.isEclipse);
+  const eclipseStartMin = eclipsePoints.length > 0 ? eclipsePoints[0].timeMinutes : 200;
+  const eclipseEndMin = eclipsePoints.length > 0 ? eclipsePoints[eclipsePoints.length - 1].timeMinutes + 10 : 270;
+  const eclipseX1 = (eclipseStartMin / 360) * 720;
+  const eclipseWidth = ((eclipseEndMin - eclipseStartMin) / 360) * 720;
   
   // Find closest telemetry point to currentTimeMinute
   const currentPoint = telemetry.reduce((prev, curr) => 
@@ -75,28 +82,28 @@ export const TelemetryStudio: React.FC = () => {
       return {
         mood: 'explaining' as const,
         tag: 'TITIK ANOMALI 1 : T+02:30 LONJAKAN BEBAN',
-        text: 'Instrumen spektrometer dinyalakan pada T+02:30. Pemakaian daya melonjak tinggi ke 210W.',
+        text: 'Instrumen spektrometer dinyalakan pada T+02:30. Pemakaian daya melonjak tinggi ke 260W.',
         highlightColor: 'text-[#EAB308]'
       };
-    } else if (currentTimeMinute < 235) {
+    } else if (currentTimeMinute < 230) {
       return {
         mood: 'surprised' as const,
-        tag: 'TITIK ANOMALI 2 : T+03:15 MASUK BAYANGAN',
-        text: 'Satelit masuk ke bayangan tebal asteroid pada T+03:15. Daya surya turun ke nol watt.',
+        tag: 'TITIK ANOMALI 2 : T+03:20 MASUK BAYANGAN',
+        text: 'Satelit masuk ke bayangan tebal asteroid pada T+03:20. Daya surya turun ke nol watt.',
         highlightColor: 'text-purple-400'
       };
-    } else if (currentTimeMinute < 285) {
+    } else if (currentTimeMinute < 260) {
       return {
         mood: 'warning' as const,
-        tag: 'TITIK ANOMALI 3 : T+04:10 SUHU BEKU',
-        text: 'Temperatur baterai anjlok sampai minus 28 derajat. Baterai membeku tanpa pemanas aktif.',
+        tag: 'TITIK ANOMALI 3 : T+03:50 SUHU BEKU',
+        text: 'Temperatur baterai anjlok sampai minus 11.6 derajat. Baterai membeku tanpa pemanas aktif.',
         highlightColor: 'text-cyan-400'
       };
     } else {
       return {
         mood: 'sad' as const,
-        tag: 'TITIK ANOMALI 4 : T+05:00 MATI TOTAL',
-        text: 'Tegangan bus anjlok drastis ke 21.9V. Komputer utama mati dan sinyal terputus total.',
+        tag: 'TITIK ANOMALI 4 : T+04:20 MATI TOTAL',
+        text: 'Tegangan bus anjlok drastis ke 21.0V. Komputer utama mati dan sinyal terputus total.',
         highlightColor: 'text-rose-400'
       };
     }
@@ -105,10 +112,10 @@ export const TelemetryStudio: React.FC = () => {
   const novaCommentary = getNovaCommentary();
 
   const GLITCH_SNAPS = [
-    { min: 150, time: 'T+02:30', title: 'GLITCH 1', desc: 'Instrumen Nyala : 210W', icon: Zap, activeColor: 'border-[#EAB308] text-[#EAB308]' },
-    { min: 195, time: 'T+03:15', title: 'GLITCH 2', desc: 'Masuk Bayangan : 0W', icon: Moon, activeColor: 'border-purple-500 text-purple-400' },
-    { min: 250, time: 'T+04:10', title: 'GLITCH 3', desc: 'Baterai Beku : -28°C', icon: Thermometer, activeColor: 'border-cyan-400 text-cyan-300' },
-    { min: 300, time: 'T+05:00', title: 'GLITCH 4', desc: 'Mati Total : 21.9V', icon: AlertTriangle, activeColor: 'border-rose-500 text-rose-400' },
+    { min: 150, time: 'T+02:30', title: 'GLITCH 1', desc: 'Instrumen Nyala : 260W', icon: Zap, activeColor: 'border-[#EAB308] text-[#EAB308]' },
+    { min: 200, time: 'T+03:20', title: 'GLITCH 2', desc: 'Masuk Bayangan : 0W', icon: Moon, activeColor: 'border-purple-500 text-purple-400' },
+    { min: 230, time: 'T+03:50', title: 'GLITCH 3', desc: 'Baterai Beku : -11.6°C', icon: Thermometer, activeColor: 'border-cyan-400 text-cyan-300' },
+    { min: 260, time: 'T+04:20', title: 'GLITCH 4', desc: 'Mati Total : 21.0V', icon: AlertTriangle, activeColor: 'border-rose-500 text-rose-400' },
   ];
 
   return (
@@ -281,7 +288,10 @@ export const TelemetryStudio: React.FC = () => {
           FEATURE 3: PHYSICAL SATELLITE VISUAL METAPHOR (Schematic Diagnostic)
           Menampilkan dampak nyata di fisik wahana: sayap surya mati, baterai membeku, blackout
           ========================================================================= */}
-      <SatelliteVisualizer currentPoint={currentPoint} />
+      <SatelliteVisualizer 
+        currentPoint={currentPoint} 
+        solarW={currentPoint.solarOutput > 0 ? currentPoint.solarOutput : (telemetry.find(p => p.solarOutput > 0)?.solarOutput || 160)}
+      />
 
       {/* =========================================================================
           FEATURE 4: RECOVERED BLACK BOX AUDIO LOG PLAYER
@@ -454,39 +464,39 @@ export const TelemetryStudio: React.FC = () => {
           </button>
 
           <button
-            onClick={() => { sounds.playClick(); setCurrentTimeMinute(195); }}
+            onClick={() => { sounds.playClick(); setCurrentTimeMinute(200); }}
             className={`p-2 border text-left transition-colors cursor-pointer ${
-              Math.abs(currentTimeMinute - 195) <= 10 
+              Math.abs(currentTimeMinute - 200) <= 10 
                 ? 'bg-[#1C1F24] border-[#EAB308] text-[#EAB308]' 
                 : 'bg-black border-slate-800 text-slate-400 hover:text-slate-200'
             }`}
           >
-            <div className="font-bold text-purple-400">T+03:15</div>
+            <div className="font-bold text-purple-400">T+03:20</div>
             <div className="truncate">Masuk Bayangan</div>
           </button>
 
           <button
-            onClick={() => { sounds.playClick(); setCurrentTimeMinute(250); }}
+            onClick={() => { sounds.playClick(); setCurrentTimeMinute(230); }}
             className={`p-2 border text-left transition-colors cursor-pointer ${
-              Math.abs(currentTimeMinute - 250) <= 10 
+              Math.abs(currentTimeMinute - 230) <= 10 
                 ? 'bg-[#1C1F24] border-[#EAB308] text-[#EAB308]' 
                 : 'bg-black border-slate-800 text-slate-400 hover:text-slate-200'
             }`}
           >
-            <div className="font-bold text-cyan-400">T+04:10</div>
+            <div className="font-bold text-cyan-400">T+03:50</div>
             <div className="truncate">Baterai Membeku</div>
           </button>
 
           <button
-            onClick={() => { sounds.playClick(); setCurrentTimeMinute(300); }}
+            onClick={() => { sounds.playClick(); setCurrentTimeMinute(260); }}
             className={`p-2 border text-left transition-colors cursor-pointer ${
-              Math.abs(currentTimeMinute - 300) <= 10 
+              Math.abs(currentTimeMinute - 260) <= 10 
                 ? 'bg-[#1C1F24] border-red-500 text-red-300' 
                 : 'bg-black border-slate-800 text-slate-400 hover:text-slate-200'
             }`}
           >
-            <div className="font-bold text-red-400">T+05:00</div>
-            <div className="truncate">Mati Total 21.9V</div>
+            <div className="font-bold text-red-400">T+04:20</div>
+            <div className="truncate">Mati Total 21.0V</div>
           </button>
         </div>
 
@@ -505,9 +515,9 @@ export const TelemetryStudio: React.FC = () => {
                 </linearGradient>
               </defs>
 
-              {/* Eclipse Shading Area (from T+03:15 / x=390 to T+05:20 / x=640) */}
-              <rect x="390" y="0" width="250" height="240" fill="url(#eclipseShade)" />
-              <text x="395" y="20" fill="#c084fc" fontSize="10" fontFamily="monospace">
+              {/* Eclipse Shading Area: x1 = (menit eclipse pertama)/360*720, lebar = (menit eclipse terakhir + 10 - menit eclipse pertama)/360*720 */}
+              <rect x={eclipseX1} y="0" width={eclipseWidth} height="240" fill="url(#eclipseShade)" />
+              <text x={eclipseX1 + 5} y="20" fill="#c084fc" fontSize="10" fontFamily="monospace">
                 ZONA BAYANGAN : 0W
               </text>
 

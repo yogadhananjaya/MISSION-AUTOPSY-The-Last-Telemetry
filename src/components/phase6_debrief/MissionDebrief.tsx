@@ -6,10 +6,12 @@ import {
   Wrench, 
   Download, 
   Layers, 
-  Sparkles 
+  Sparkles,
+  FileText
 } from 'lucide-react';
 import { useMissionStore } from '../../store/useMissionStore';
 import { SPACECRAFT_COMPONENTS } from '../../data/components';
+import { runMissionSimulation } from '../../utils/simulationEngine';
 import { sounds } from '../../utils/soundEngine';
 
 export const MissionDebrief: React.FC = () => {
@@ -17,6 +19,7 @@ export const MissionDebrief: React.FC = () => {
     activeCase, 
     redesignConfig, 
     simulationResult, 
+    pinnedEvidences,
     setPhase, 
     resetMission,
     selectedRole 
@@ -47,6 +50,69 @@ export const MissionDebrief: React.FC = () => {
     return SPACECRAFT_COMPONENTS.find((c) => c.id === id)?.name || id;
   };
 
+  // Run legacy configuration for authentic dynamic comparison table
+  const legacyConfig = activeCase.legacyConfiguration;
+  const legacyRun = runMissionSimulation({
+    config: legacyConfig,
+    budgetCapMillion: activeCase.budgetCapMillion,
+    isHypothesisCorrect: false,
+    pinnedEvidenceIds: [],
+    requiredEvidenceIds: [],
+    redHerringEvidenceIds: [],
+    timeTakenSeconds: 180,
+  });
+
+  const lastPt = simulationResult?.telemetryTrace?.[simulationResult.telemetryTrace.length - 1];
+  const lastSOC = lastPt ? lastPt.batterySOC : 0;
+  const minTemp = simulationResult?.telemetryTrace 
+    ? Math.min(...simulationResult.telemetryTrace.map((t) => t.batteryTemp)) 
+    : 0;
+  const powerMargin = simulationResult?.powerMarginPercent ?? 0;
+
+  // Ghost Replay: Telemetry comparison curve
+  const eclipsePoints = activeCase.telemetryLogs.filter((p) => p.isEclipse);
+  const eclipseStartMin = eclipsePoints.length > 0 ? eclipsePoints[0].timeMinutes : 180;
+  const eclipseEndMin = eclipsePoints.length > 0 ? eclipsePoints[eclipsePoints.length - 1].timeMinutes + 10 : 255;
+  const ghostEclipseX = (eclipseStartMin / 360) * 720;
+  const ghostEclipseW = Math.max(10, ((eclipseEndMin - eclipseStartMin) / 360) * 720);
+
+  const legacyTrace = legacyRun.telemetryTrace || [];
+  const redesignTrace = simulationResult?.telemetryTrace || [];
+
+  const voltToY = (v: number) => {
+    const clamped = Math.max(18, Math.min(30, v));
+    return 125 - ((clamped - 18) / 12) * 105;
+  };
+
+  const legacyPolyline = legacyTrace
+    .map((p) => `${((p.timeMinutes / 360) * 720).toFixed(1)},${voltToY(p.busVoltage).toFixed(1)}`)
+    .join(' ');
+
+  const redesignPolyline = redesignTrace
+    .map((p) => `${((p.timeMinutes / 360) * 720).toFixed(1)},${voltToY(p.busVoltage).toFixed(1)}`)
+    .join(' ');
+
+  const legacyFailurePt = legacyTrace.find((p) => p.severity === 'fatal') || legacyTrace[legacyTrace.length - 1];
+  const legacyFailX = legacyFailurePt ? (legacyFailurePt.timeMinutes / 360) * 720 : 520;
+  const legacyFailY = legacyFailurePt ? voltToY(legacyFailurePt.busVoltage) : 125;
+
+  const getFailureAdvice = (reason?: string) => {
+    if (!reason) return '';
+    if (reason.includes('UVLO') || reason.includes('ENERGY_DEPLETED')) {
+      return 'Tambahkan kapasitas baterai atau isolasi termal.';
+    }
+    if (reason.includes('POWER_DEFICIT')) {
+      return 'Kurangi beban atau naikkan pembangkit.';
+    }
+    if (reason.includes('LAUNCH_ABORT')) {
+      return 'Kurangi massa atau pilih peluncur lebih besar.';
+    }
+    if (reason.includes('BUDGET_EXCEEDED')) {
+      return 'Kurangi biaya komponen.';
+    }
+    return 'Tinjau kembali konfigurasi sistem wahana.';
+  };
+
   const handleExportReport = () => {
     sounds.playClick(800);
     const reportText = `
@@ -75,7 +141,7 @@ CETAK BIRU DESAIN ULANG:
 - Total Massa: ${simulationResult?.finalMassKg} kg
 - Total Biaya: $${simulationResult?.finalCostMillion}M
 
-STATUS MISI: ${isSuccess ? 'SUKSES : SELURUH TARGET TERCAPAI' : 'GAGAL'}
+STATUS MISI: ${isSuccess ? 'SUKSES : SELURUH TARGET TERCAPAI' : `GAGAL: ${simulationResult?.failureReason}`}
 =====================================================
 `;
     const blob = new Blob([reportText], { type: 'text/plain' });
@@ -112,13 +178,13 @@ STATUS MISI: ${isSuccess ? 'SUKSES : SELURUH TARGET TERCAPAI' : 'GAGAL'}
             </div>
             
             <h1 className="text-2xl md:text-3xl font-bold font-display text-white tracking-wide">
-              {isSuccess ? 'SERTIFIKASI KEBERHASILAN MISI DITERBITKAN' : 'LAPORAN EVALUASI KEGAGALAN MISI'}
+              {isSuccess ? 'SERTIFIKASI KEBERHASILAN MISI' : 'LAPORAN KEGAGALAN MISI'}
             </h1>
             
             <p className="text-xs text-slate-300 max-w-2xl leading-relaxed font-sans">
               {isSuccess 
-                ? 'Pilihan rekayasa berhasil mengatasi defisit daya dan pembekuan baterai. Wahana ASTER-9 Mark II melewati bayangan dengan cadangan energi aman.'
-                : 'Misi terputus sebelum target sains tercapai. Evaluasi kembali massa wahana, cadangan baterai, dan pemanas termal, lalu lakukan uji ulang.'}
+                ? `Pilihan rekayasa berhasil menyelesaikan orbit. Cadangan energi akhir ${lastSOC}%, suhu minimum baterai ${minTemp}°C, dan margin daya ${powerMargin}%. Wahana ASTER-9 Mark II beroperasi aman.`
+                : `${simulationResult?.failureReason ?? 'Kegagalan kritis pada wahana.'} ${getFailureAdvice(simulationResult?.failureReason)}`}
             </p>
           </div>
 
@@ -233,6 +299,121 @@ STATUS MISI: ${isSuccess ? 'SUKSES : SELURUH TARGET TERCAPAI' : 'GAGAL'}
         </div>
       </div>
 
+      {/* Pinned Evidence Review with Weak Evidence Tags */}
+      {pinnedEvidences.length > 0 && (
+        <div className="border border-black bg-[#141619] text-white p-5 space-y-3 clip-chamfer-md shadow-2xl font-mono-tech text-xs">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-[#EAB308]" />
+              <span className="font-bold text-[#EAB308]">EVALUASI BUKTI INVESTIGASI ({pinnedEvidences.length} BUKTI DISEMATKAN) :</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {pinnedEvidences.map((e) => (
+              <div key={e.id} className="p-3 bg-black border border-slate-800 flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="text-[10px] text-slate-400">{e.timeStr} • {e.metric}</div>
+                  <div className="text-white font-sans text-xs leading-relaxed">{e.observedText}</div>
+                </div>
+                {e.isRedHerring ? (
+                  <span className="px-2 py-0.5 bg-rose-950 border border-rose-600 text-rose-300 text-[10px] font-bold shrink-0">
+                    BUKTI LEMAH
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 bg-emerald-950 border border-emerald-600 text-emerald-300 text-[10px] font-bold shrink-0">
+                    BUKTI VALID
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Ghost Replay: Telemetry Curve Comparison */}
+      <div className="border border-black bg-[#141619] text-white p-5 space-y-3 clip-chamfer-md shadow-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <h3 className="font-mono-tech text-xs font-bold text-white flex items-center gap-2">
+            <span className="w-2 h-2 bg-[#EAB308] rounded-full animate-pulse" />
+            <span>GHOST REPLAY : PERBANDINGAN TELEMETRI TEGANGAN BUS</span>
+          </h3>
+          <div className="flex items-center gap-4 text-[11px] font-mono-tech">
+            <span className="flex items-center gap-1.5 text-rose-400">
+              <span className="w-4 h-0.5 border-t-2 border-dashed border-rose-500 inline-block" />
+              <span>Desain ASTER-9 Lama</span>
+            </span>
+            <span className="flex items-center gap-1.5 text-emerald-400">
+              <span className="w-4 h-0.5 bg-emerald-400 inline-block" />
+              <span>Refit Mark II Baru</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="w-full h-44 bg-black/80 border border-slate-800 relative overflow-hidden clip-chamfer-sm">
+          <svg viewBox="0 0 720 140" className="w-full h-full" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="ghostEclipse" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#7e22ce" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#7e22ce" stopOpacity="0.05" />
+              </linearGradient>
+            </defs>
+
+            {/* Eclipse zone */}
+            <rect x={ghostEclipseX} y="0" width={ghostEclipseW} height="140" fill="url(#ghostEclipse)" />
+            <text x={ghostEclipseX + 6} y="16" fill="#c084fc" fontSize="9" fontFamily="monospace">
+              ZONA GERHANA 0W
+            </text>
+
+            {/* UVLO Cutoff threshold */}
+            <line x1="0" y1={voltToY(22)} x2="720" y2={voltToY(22)} stroke="#ef4444" strokeDasharray="3 3" strokeWidth="1" opacity="0.7" />
+            <text x="8" y={voltToY(22) - 4} fill="#ef4444" fontSize="9" fontFamily="monospace">
+              AMBANG UVLO 22.0V
+            </text>
+
+            {/* Nominal Line 28V */}
+            <line x1="0" y1={voltToY(28)} x2="720" y2={voltToY(28)} stroke="#64748b" strokeDasharray="2 4" strokeWidth="1" opacity="0.4" />
+            <text x="8" y={voltToY(28) - 4} fill="#94a3b8" fontSize="8" fontFamily="monospace">
+              NOMINAL 28.0V
+            </text>
+
+            {/* Legacy Trace: Red dashed */}
+            {legacyPolyline && (
+              <polyline
+                fill="none"
+                stroke="#ef4444"
+                strokeWidth="2"
+                strokeDasharray="4 4"
+                points={legacyPolyline}
+              />
+            )}
+
+            {/* Redesign Trace: Green solid */}
+            {redesignPolyline && (
+              <polyline
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="2.5"
+                points={redesignPolyline}
+              />
+            )}
+
+            {/* Legacy failure point marker */}
+            {legacyFailurePt && (
+              <g transform={`translate(${legacyFailX}, ${legacyFailY})`}>
+                <circle r="4" fill="#ef4444" />
+                <text x="8" y="4" fill="#ef4444" fontSize="9" fontFamily="monospace" fontWeight="bold">
+                  {legacyFailurePt.timeStr} UVLO
+                </text>
+              </g>
+            )}
+          </svg>
+        </div>
+
+        <p className="font-mono-tech text-[11px] text-slate-400">
+          Garis merah putus-putus menunjukkan keruntuhan tegangan wahana lama. Garis hijau membuktikan stabilitas desain baru.
+        </p>
+      </div>
+
       {/* Side-by-Side Comparison: Legacy ASTER-9 vs Redesign */}
       <div className="border border-black bg-[#141619] text-white p-5 space-y-4 clip-chamfer-md shadow-2xl">
         <h3 className="font-mono-tech text-xs font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
@@ -253,39 +434,39 @@ STATUS MISI: ${isSuccess ? 'SUKSES : SELURUH TARGET TERCAPAI' : 'GAGAL'}
             <tbody className="divide-y divide-slate-800/80 text-slate-300">
               <tr>
                 <td className="py-2.5 px-3 font-bold text-white">Pembangkit Daya</td>
-                <td className="py-2.5 px-3">Silikon Tetap 160W</td>
+                <td className="py-2.5 px-3">{getCompName(legacyConfig.solar)}</td>
                 <td className="py-2.5 px-3 text-white">{getCompName(redesignConfig.solar)}</td>
                 <td className="py-2.5 px-3 text-emerald-400">Menjaga laju pengisian daya tinggi</td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-bold text-white">Penyimpan Energi</td>
-                <td className="py-2.5 px-3">Litium Standar 400 Wh</td>
+                <td className="py-2.5 px-3">{getCompName(legacyConfig.battery)}</td>
                 <td className="py-2.5 px-3 text-white">{getCompName(redesignConfig.battery)}</td>
                 <td className="py-2.5 px-3 text-emerald-400">Menjamin pasokan daya selama gerhana</td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-bold text-white">Proteksi Termal</td>
-                <td className="py-2.5 px-3 text-rose-400">Pasif Tanpa Pemanas</td>
+                <td className="py-2.5 px-3 text-rose-400">{getCompName(legacyConfig.thermal)}</td>
                 <td className="py-2.5 px-3 text-white">{getCompName(redesignConfig.thermal)}</td>
                 <td className="py-2.5 px-3 text-emerald-400">Menjaga suhu sel di atas batas beku</td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-bold text-white">Massa Wahana</td>
-                <td className="py-2.5 px-3">112 kg</td>
-                <td className="py-2.5 px-3 text-white">{simulationResult?.finalMassKg} kg</td>
+                <td className="py-2.5 px-3">{legacyRun.finalMassKg} kg</td>
+                <td className="py-2.5 px-3 text-white">{simulationResult?.finalMassKg ?? 0} kg</td>
                 <td className="py-2.5 px-3 text-slate-400">Dalam kapasitas muatan roket</td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-bold text-white">Total Biaya</td>
-                <td className="py-2.5 px-3">$38.2M</td>
-                <td className="py-2.5 px-3 text-white">${simulationResult?.finalCostMillion}M</td>
+                <td className="py-2.5 px-3">${legacyRun.finalCostMillion}M</td>
+                <td className="py-2.5 px-3 text-white">${simulationResult?.finalCostMillion ?? 0}M</td>
                 <td className="py-2.5 px-3 text-slate-400">Sesuai pagu program</td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-bold text-white">Hasil Misi</td>
-                <td className="py-2.5 px-3 text-rose-400 font-bold">SINYAL HILANG DI MENIT 330</td>
-                <td className="py-2.5 px-3 font-bold text-emerald-400">
-                  {isSuccess ? 'ORBIT PENUH BERHASIL' : 'BELUM SEMPURNA'}
+                <td className="py-2.5 px-3 text-rose-400 font-bold">{legacyRun.failureReason ?? 'GAGAL'}</td>
+                <td className={`py-2.5 px-3 font-bold ${isSuccess ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {isSuccess ? 'SUKSES ORBIT PENUH' : (simulationResult?.failureReason ?? 'GAGAL')}
                 </td>
                 <td className="py-2.5 px-3 text-emerald-400">
                   {isSuccess ? 'Seluruh telemetri sains terkirim' : 'Desain butuh penyesuaian'}

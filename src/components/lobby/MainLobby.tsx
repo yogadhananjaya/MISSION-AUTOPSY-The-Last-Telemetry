@@ -15,7 +15,8 @@ import {
   ChevronRight,
   Sparkles,
   Rocket,
-  Activity
+  Activity,
+  Lock
 } from 'lucide-react';
 import { CREW_MEMBERS } from '../../data/crewData';
 import { MissionSelector } from './MissionSelector';
@@ -30,7 +31,16 @@ interface MainLobbyProps {
 }
 
 export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGame }) => {
-  const { astronautName, audioEnabled, toggleAudio, setPhase, setCurrentView } = useMissionStore();
+  const { 
+    astronautName, 
+    audioEnabled, 
+    toggleAudio, 
+    setPhase, 
+    setCurrentView,
+    hypothesisSubmitted,
+    pinnedEvidences,
+    simulationResult
+  } = useMissionStore();
 
   const [activeCrewIndex, setActiveCrewIndex] = useState<number>(0);  // Default: NOVA
   const [showMissionModal, setShowMissionModal] = useState<boolean>(false);
@@ -38,8 +48,35 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
   const [showCoopModal, setShowCoopModal] = useState<boolean>(false);
   const [showAchievementModal, setShowAchievementModal] = useState<boolean>(false);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+  const [lobbyNotice, setLobbyNotice] = useState<string | null>(null);
 
   const currentCrew = CREW_MEMBERS[activeCrewIndex];
+
+  const handleSmartResume = () => {
+    sounds.playClick(850);
+    if (simulationResult) {
+      setPhase('debrief');
+    } else if (hypothesisSubmitted) {
+      setPhase('redesign');
+    } else if (pinnedEvidences.length > 0) {
+      setPhase('root_cause');
+    } else {
+      setPhase('briefing');
+    }
+    setCurrentView('mission');
+  };
+
+  const handleOpenGudang = () => {
+    if (!hypothesisSubmitted) {
+      sounds.playAlarm();
+      setLobbyNotice('Gudang terkunci. Selesaikan diagnosis akar masalah terlebih dahulu.');
+      setTimeout(() => setLobbyNotice(null), 3500);
+      return;
+    }
+    sounds.playClick(700);
+    setPhase('redesign');
+    setCurrentView('mission');
+  };
 
   // Cycling character with quick switch button
   const cycleCharacter = () => {
@@ -227,6 +264,15 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
 
       </header>
 
+      {/* Lobby Locked Notice Toast */}
+      {lobbyNotice && (
+        <div className="relative z-30 bg-amber-500/10 border-b border-amber-500/40 text-amber-300 py-2 px-4 text-center font-mono text-xs flex items-center justify-center gap-2">
+          <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+          <span className="font-bold">AKSES DIBATASI:</span>
+          <span>{lobbyNotice}</span>
+        </div>
+      )}
+
 
       {/* =========================================================================
           3. MAIN ARENA: CENTER CHARACTER & ASYMMETRIC HUD (IMAGE 2 REPLICA)
@@ -354,7 +400,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
 
             {/* Prominent Action Bar (Orange Tactical with Black Outline) */}
             <button
-              onClick={onResumeGame}
+              onClick={handleSmartResume}
               className="w-full py-3.5 px-5 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 hover:from-orange-400 hover:to-orange-500 text-black font-display font-black text-sm tracking-wider flex items-center justify-between cursor-pointer shadow-xl transition-all hover:scale-[1.01] border border-black clip-chamfer-sm"
             >
               <div className="text-left leading-tight">
@@ -390,23 +436,33 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
               </div>
             </div>
 
-            {/* Tile 2: GUDANG (Spacecraft Redesign) */}
+            {/* Tile 2: GUDANG (Spacecraft Redesign - Locked if not diagnosed) */}
             <div 
-              onClick={() => {
-                setPhase('redesign');
-                setCurrentView('mission');
-              }}
-              className="group p-3 bg-[#14171E] border border-black hover:border-orange-500 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
+              onClick={handleOpenGudang}
+              className={`group p-3 bg-[#14171E] border rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3 relative ${
+                hypothesisSubmitted 
+                  ? 'border-black hover:border-orange-500' 
+                  : 'border-slate-800 opacity-60'
+              }`}
             >
-              <div className="p-2 bg-[#0B0D12] group-hover:bg-orange-500 group-hover:text-black text-orange-400 rounded transition-colors">
-                <Wrench className="w-5 h-5" />
+              <div className={`p-2 bg-[#0B0D12] rounded transition-colors ${
+                hypothesisSubmitted 
+                  ? 'group-hover:bg-orange-500 group-hover:text-black text-orange-400' 
+                  : 'text-slate-500'
+              }`}>
+                {hypothesisSubmitted ? <Wrench className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
               </div>
               <div>
-                <div className="font-display font-bold text-xs text-white uppercase tracking-wide group-hover:text-orange-400 transition-colors">
-                  GUDANG
+                <div className="font-display font-bold text-xs text-white uppercase tracking-wide group-hover:text-orange-400 transition-colors flex items-center gap-1.5">
+                  <span>GUDANG</span>
+                  {!hypothesisSubmitted && (
+                    <span className="text-[8px] font-mono px-1 bg-amber-500/20 text-amber-400 border border-amber-500/40">
+                      KUNCI
+                    </span>
+                  )}
                 </div>
                 <div className="text-[9px] font-mono text-slate-400">
-                  REKAYASA MODUL
+                  {hypothesisSubmitted ? 'REKAYASA MODUL' : 'BUTUH DIAGNOSIS'}
                 </div>
               </div>
             </div>

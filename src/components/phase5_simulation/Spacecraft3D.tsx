@@ -47,10 +47,10 @@ export const Spacecraft3D: React.FC<Spacecraft3DProps> = ({ config, isEclipse })
     scene.add(stars);
 
     // 3. Lighting
-    const ambientLight = new THREE.AmbientLight(0x1e293b, 0.8);
+    const ambientLight = new THREE.AmbientLight(0x1e293b, isEclipse ? 0.3 : 0.8);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfffaed, 2.5);
+    const sunLight = new THREE.DirectionalLight(0xfffaed, isEclipse ? 0.3 : 2.5);
     sunLight.position.set(40, 20, 20);
     sunLight.castShadow = true;
     scene.add(sunLight);
@@ -249,30 +249,11 @@ export const Spacecraft3D: React.FC<Spacecraft3DProps> = ({ config, isEclipse })
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [config]);
+  }, [config, isEclipse]);
 
   return (
-    <div className="relative w-full h-80 rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+    <div className="relative w-full h-80 overflow-hidden bg-slate-950">
       <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
-      
-      {/* 3D Viewport HUD Overlay */}
-      <div className="absolute top-3 left-3 flex items-center gap-2 font-mono text-[11px] bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800 backdrop-blur">
-        <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-        <span className="text-cyan-300 font-bold">MESIN SIMULASI TIGA DIMENSI</span>
-        <span className="text-slate-500">: DRAG ROTASI</span>
-      </div>
-
-      <div className="absolute bottom-3 left-3 font-mono text-[10px] bg-slate-950/80 px-2.5 py-1 rounded border border-slate-800 text-slate-400">
-        TARGET: BENNU CLASS : ORBIT: {config.orbit.replace('orbit_', '').toUpperCase()}
-      </div>
-
-      <div className={`absolute top-3 right-3 font-mono text-xs px-2.5 py-1 rounded border font-bold flex items-center gap-1.5 ${
-        isEclipse 
-          ? 'bg-purple-950/80 border-purple-600 text-purple-300 animate-pulse' 
-          : 'bg-yellow-950/80 border-yellow-600 text-yellow-300'
-      }`}>
-        <span>{isEclipse ? '🌑 FASE BAYANGAN' : '☀️ FASE MATAHARI'}</span>
-      </div>
     </div>
   );
 };

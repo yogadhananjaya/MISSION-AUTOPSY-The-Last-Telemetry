@@ -26,7 +26,7 @@ export const MISSIONS_LIST: MissionDossier[] = [
     category: 'FORENSIK ANTARIKSA DALAM',
     status: 'active',
     progressPercentage: 62,
-    anomalySummary: 'Sinyal telemetri hilang total pada T+03:15 setelah wahana masuk ke bayangan asteroid.',
+    anomalySummary: 'Sinyal telemetri hilang pada T+04:20 setelah wahana masuk bayangan asteroid.',
     objective: 'Periksa telemetri, tentukan akar masalah, dan bangun kembali arsitektur wahana antariksa.',
     budgetLimit: '$65,000,000',
     difficulty: 'STANDARD',
