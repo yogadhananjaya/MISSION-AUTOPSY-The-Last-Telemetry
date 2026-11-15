@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/common/Header';
 import { MissionBriefing } from './components/phase1_briefing/MissionBriefing';
 import { TelemetryStudio } from './components/phase2_investigation/TelemetryStudio';
@@ -18,27 +18,64 @@ import { SpaceMap } from './components/story/SpaceMap';
 import { EpisodeStage } from './components/story/EpisodeStage';
 import { LeaderboardScreen } from './components/leaderboard/LeaderboardScreen';
 import { AcademyScreen } from './components/academy/AcademyScreen';
+import { AuthScreen } from './components/auth/AuthScreen';
 import { useMissionStore } from './store/useMissionStore';
 import { useCoopStore } from './store/useCoopStore';
+import { useAuthStore } from './store/useAuthStore';
 import { FEATURES } from './config/features';
 import type { EpisodeDef } from './engine/crisis/episodes';
 import type { AgentDef } from './data/agents';
 
 export const App: React.FC = () => {
-  const { currentPhase, gameStarted, onboardingStep, currentView, setCurrentView, setPhase } = useMissionStore();
+  const { currentPhase, gameStarted, onboardingStep, currentView, setCurrentView, setPhase, astronautName, setAstronautName } = useMissionStore();
   const { lobby, leave: leaveCoop } = useCoopStore();
+  const { isAuthenticated, checkAuth, isLoading: isAuthLoading, user } = useAuthStore();
   const [activeEpisode, setActiveEpisode] = useState<{ episode: EpisodeDef; companion: AgentDef } | null>(null);
   const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  useEffect(() => {
+    if (user?.callsign && !astronautName) {
+      setAstronautName(user.callsign);
+    }
+  }, [user, astronautName, setAstronautName]);
 
   // Route for Minigame Lab testing
   if (typeof window !== 'undefined' && window.location.search.includes('lab=1')) {
     return <MinigameLab />;
   }
 
-  const showOnboarding = !gameStarted || onboardingStep !== 'ready';
+  // If checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-[#070A0F] text-white flex flex-col items-center justify-center blueprint-grid p-6 select-none font-mono">
+        <div className="flex flex-col items-center gap-3">
+          <span className="w-4 h-4 rounded-full bg-amber-400 animate-ping" />
+          <div className="text-xs font-bold text-amber-400 uppercase tracking-widest">
+            ORBITA NOVA // VERIFYING TIER-1 SECURITY CREDENTIALS
+          </div>
+          <div className="text-[10px] text-slate-500">
+            TEAM CERTIFIED SPACE CAP • NASA MISSION ARCHIVE
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Requirement 4: High-security authentication gate (Login, Register, Google SSO)
+  if (!isAuthenticated) {
+    return <AuthScreen onSuccess={() => {}} />;
+  }
+
+  // Requirement 5: After login, show Nova to collect explorer callsign
+  const needsCallsign = !user?.callsign && !astronautName;
+  const showOnboarding = needsCallsign || !gameStarted || onboardingStep !== 'ready';
 
   return (
-    <div className="min-h-screen bg-[#EAECEF] text-[#141619] flex flex-col font-sans selection:bg-[#EAB308]/30 selection:text-black">
+    <div className="min-h-screen bg-[#0B0E14] text-[#F8FAFC] flex flex-col font-sans selection:bg-[#EAB308]/30 selection:text-white">
       
       {/* Interactive Welcoming Screen & Mascot Tutorial Modal */}
       {showOnboarding && <WelcomeModal />}
@@ -135,11 +172,11 @@ export const App: React.FC = () => {
 
       {/* Active Mission Investigation Mode (Header + 6 Phase Viewport) */}
       {!showOnboarding && currentView === 'mission' && (
-        <div className="min-h-screen flex flex-col bg-[#EAECEF] blueprint-grid relative">
+        <div className="min-h-screen flex flex-col bg-[#0B0E14] blueprint-grid relative">
           
           {/* Subtle Technical Giant Typography in Background */}
-          <div className="absolute top-1/4 right-0 pointer-events-none select-none overflow-hidden opacity-[0.03] leading-none z-0">
-            <span className="font-display font-black text-[22vw] text-black tracking-tighter block text-right">
+          <div className="absolute top-1/4 right-0 pointer-events-none select-none overflow-hidden opacity-[0.02] leading-none z-0">
+            <span className="font-display font-black text-[22vw] text-white tracking-tighter block text-right">
               AUTOPSY
             </span>
           </div>
@@ -174,7 +211,7 @@ export const App: React.FC = () => {
                 KEMBALI KE HUB
               </button>
               <span className="text-slate-600">:</span>
-              <span>NASA SPACE APPS 2026</span>
+              <span>CERTIFIED SPACE CAP • NASA SPACE APPS 2026</span>
             </div>
           </footer>
         </div>

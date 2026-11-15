@@ -1,0 +1,414 @@
+@import "tailwindcss";
+
+/* antislop: Authentic tactical sci-fi tokens & CSS variables for high-fidelity technical HUD */
+:root {
+  --nv-bg: #0a1224;      /* Dark Navy */
+  --nv-cyan: #22d3ee;    /* Informasi & Interaksi */
+  --nv-blue: #3b82f6;    /* Sistem & Navigasi */
+  --nv-text: #f8fafc;    /* Teks Utama */
+  --nv-warn: #eab308;    /* Warning */
+  --nv-crit: #ef4444;    /* Kritis */
+  --nv-ok: #22c55e;      /* Aman / Repair Sukses */
+}
+
+/* Agent Poses & Micro-interactions (Q11) */
+@keyframes agentBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.015); }
+}
+
+@keyframes agentLockinPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.8); }
+  50% { transform: scale(1.04); box-shadow: 0 0 20px 4px rgba(234, 179, 8, 0.6); }
+  100% { transform: scale(1.04); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+}
+
+@keyframes agentSpeakingPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  50% { box-shadow: 0 0 14px 3px rgba(34, 197, 94, 0.9); }
+}
+
+.agent-idle {
+  animation: agentBreath 3.2s ease-in-out infinite;
+}
+
+.agent-selected {
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 2px var(--nv-cyan), 0 8px 20px -4px rgba(34, 211, 238, 0.3);
+}
+
+.agent-lockin {
+  animation: agentLockinPulse 400ms ease-out forwards;
+}
+
+.agent-speaking {
+  animation: agentSpeakingPulse 600ms ease-in-out infinite;
+}
+
+/* Holographic Panel Technical Scanlines (Q13) */
+.holo-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(34, 211, 238, 0.04) 2px,
+    rgba(34, 211, 238, 0.04) 4px
+  );
+}
+
+html {
+  zoom: 1.05;
+  min-height: 100%;
+}
+
+@layer base {
+  body {
+    background-color: #0B0E14;
+    color: #F8FAFC;
+    font-family: 'Space Grotesk', 'Rajdhani', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  /* Accessible cursor pointer requirement */
+  button, 
+  a, 
+  input[type="button"], 
+  input[type="submit"], 
+  [role="button"] {
+    cursor: pointer;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TYPOGRAPHY SPECIFICATION (TACTICAL INDUSTRIAL)
+   ───────────────────────────────────────────────────────────── */
+.font-display {
+  font-family: 'Rajdhani', 'Chakra Petch', 'Space Grotesk', sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.font-mono-tech {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: "zero" 1;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TACTICAL BACKGROUNDS & ARCHITECTURAL BLUEPRINTS
+   ───────────────────────────────────────────────────────────── */
+/* Subtle architectural blueprint grid on dark space cadet */
+.blueprint-grid {
+  background-color: #0B0E14;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* High-contrast dark tactical blueprint grid */
+.blueprint-grid-dark {
+  background-color: #121417;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Tactical hazard warning stripes */
+.hazard-stripes {
+  background: repeating-linear-gradient(
+    -45deg,
+    #F59E0B,
+    #F59E0B 8px,
+    #141619 8px,
+    #141619 16px
+  );
+}
+
+.hazard-stripes-subtle {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(245, 158, 11, 0.2),
+    rgba(245, 158, 11, 0.2) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CHAMFERED CORNERS & ANGLED GEOMETRY (ANTI-ROUNDED SAAS)
+   ───────────────────────────────────────────────────────────── */
+/* Chamfered 45-degree corner clip-paths */
+.clip-chamfer-sm {
+  clip-path: polygon(
+    0 6px, 
+    6px 0, 
+    100% 0, 
+    100% calc(100% - 6px), 
+    calc(100% - 6px) 100%, 
+    0 100%
+  );
+}
+
+.clip-chamfer-md {
+  clip-path: polygon(
+    0 10px, 
+    10px 0, 
+    100% 0, 
+    100% calc(100% - 10px), 
+    calc(100% - 10px) 100%, 
+    0 100%
+  );
+}
+
+.clip-chamfer-tr {
+  clip-path: polygon(
+    0 0, 
+    calc(100% - 12px) 0, 
+    100% 12px, 
+    100% 100%, 
+    0 100%
+  );
+}
+
+.clip-chamfer-bl {
+  clip-path: polygon(
+    0 0, 
+    100% 0, 
+    100% 100%, 
+    12px 100%, 
+    0 calc(100% - 12px)
+  );
+}
+
+/* Parallelogram slanted cut */
+.clip-slanted {
+  clip-path: polygon(
+    10px 0%, 
+    100% 0%, 
+    calc(100% - 10px) 100%, 
+    0% 100%
+  );
+}
+
+/* Gacha Character Card Ribbon Banner (Top-Left) */
+.clip-ribbon {
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    50% calc(100% - 7px),
+    0 100%
+  );
+}
+
+/* Card Level Badge Cut (Bottom-Left) */
+.clip-level-badge {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TACTICAL INDUSTRIAL UI PANELS
+   ───────────────────────────────────────────────────────────── */
+/* Heavy Contrast Dark Tactical HUD Panel */
+.tactical-panel-dark {
+  background-color: #141619;
+  color: #F8FAFC;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+
+/* Light Concrete Tactical Panel */
+.tactical-panel-light {
+  background-color: #FFFFFF;
+  color: #141619;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+/* Tactical Amber Highlighted Border */
+.tactical-border-amber {
+  border-left: 3px solid #F59E0B;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   TACTICAL INDUSTRIAL BUTTONS
+   ───────────────────────────────────────────────────────────── */
+/* Primary High-Contrast Tactical Action (Amber / Black) */
+.btn-tactical-primary {
+  background-color: #F59E0B;
+  color: #0F1114;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid #D97706;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-tactical-primary:hover {
+  background-color: #FBBF24;
+  color: #000000;
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-tactical-primary:active {
+  transform: translateY(1px);
+}
+
+/* Secondary Dark Tactical Button */
+.btn-tactical-dark {
+  background-color: #1C1F24;
+  color: #F8FAFC;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-tactical-dark:hover {
+  background-color: #262A31;
+  border-color: #F59E0B;
+  color: #F59E0B;
+}
+
+/* Outline Technical Button */
+.btn-tactical-outline {
+  background-color: transparent;
+  color: #141619;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-tactical-outline:hover {
+  background-color: #141619;
+  color: #F8FAFC;
+  border-color: #141619;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MICRO-UI TECHNICAL DETAILS
+   ───────────────────────────────────────────────────────────── */
+/* Corner plus mark indicator */
+.crosshair-corner::before {
+  content: "+";
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(245, 158, 11, 0.85);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.crosshair-corner-tr::after {
+  content: "+";
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(245, 158, 11, 0.85);
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Industrial Technical Badge */
+.badge-tactical-amber {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #F59E0B;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge-tactical-dark {
+  background-color: #1C1F24;
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Custom Tactical Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #E2E5E9;
+}
+::-webkit-scrollbar-thumb {
+  background: #94A3B8;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F59E0B;
+}
+
+/* Animations */
+@keyframes floatBob {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+.animate-nova-float {
+  animation: floatBob 3s ease-in-out infinite;
+}
+
+@keyframes pedestal-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-pedestal-spin {
+  animation: pedestal-spin 30s linear infinite;
+}
+
+/* Backward compatibility aliases */
+.scifi-panel {
+  background-color: #141619;
+  color: #F8FAFC;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.scifi-panel-purple {
+  background-color: #1C1726;
+  color: #F8FAFC;
+  border: 1px solid rgba(192, 132, 252, 0.3);
+}
+
+.btn-scifi-primary {
+  background-color: #F59E0B;
+  color: #0F1114;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid #D97706;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  transition: all 0.15s ease-in-out;
+}

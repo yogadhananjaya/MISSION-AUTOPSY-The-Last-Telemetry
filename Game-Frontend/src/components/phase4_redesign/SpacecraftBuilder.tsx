@@ -1,0 +1,408 @@
+import React, { useState } from 'react';
+import { 
+  BatteryCharging, 
+  Zap, 
+  Thermometer, 
+  Radio, 
+  Compass, 
+  Rocket, 
+  Orbit, 
+  DollarSign, 
+  Scale, 
+  AlertTriangle, 
+  Sparkles, 
+  ArrowRight, 
+  Check, 
+  Activity, 
+  Layers, 
+  Info 
+} from 'lucide-react';
+import { useMissionStore } from '../../store/useMissionStore';
+import { SPACECRAFT_COMPONENTS, getLocalizedComponent } from '../../data/components';
+import type { ComponentCategory } from '../../types/mission';
+import { sounds } from '../../utils/soundEngine';
+import { SpacecraftXRayInspector } from './SpacecraftXRayInspector';
+import { getLauncherCapKg, previewConfig } from '../../utils/simulationEngine';
+import { useTranslation } from '../../i18n';
+
+export const SpacecraftBuilder: React.FC = () => {
+  const { 
+    redesignConfig, 
+    updateRedesignComponent, 
+    activeCase, 
+    setPhase, 
+    startSimulation, 
+    simulationRunning, 
+    guidedMode,
+    hypothesisSubmitted
+  } = useMissionStore();
+  const { t, language } = useTranslation();
+
+  const [activeCategory, setActiveCategory] = useState<ComponentCategory>('power_generation');
+
+  // Categories config
+  const categories: { id: ComponentCategory; label: string; icon: React.ElementType }[] = [
+    { id: 'power_generation', label: language === 'en' ? '01 : Power Generation' : '01 : Pembangkit Daya', icon: Zap },
+    { id: 'energy_storage', label: language === 'en' ? '02 : Energy Storage' : '02 : Baterai Energi', icon: BatteryCharging },
+    { id: 'thermal_control', label: language === 'en' ? '03 : Thermal Protection' : '03 : Proteksi Termal', icon: Thermometer },
+    { id: 'payload', label: language === 'en' ? '04 : Science Payloads' : '04 : Instrumen Sains', icon: Activity },
+    { id: 'communications', label: language === 'en' ? '05 : Telemetry Comms' : '05 : Telekomunikasi', icon: Radio },
+    { id: 'adcs', label: language === 'en' ? '06 : ADCS Attitude' : '06 : Navigasi ADCS', icon: Compass },
+    { id: 'launch_vehicle', label: language === 'en' ? '07 : Launch Vehicle' : '07 : Roket Peluncur', icon: Rocket },
+    { id: 'orbit_profile', label: language === 'en' ? '08 : Orbit Profile' : '08 : Profil Orbit', icon: Orbit },
+  ];
+
+  // Single Source of Truth via simulationEngine previewConfig
+  const preview = previewConfig(redesignConfig, activeCase.budgetCapMillion);
+  const cap = getLauncherCapKg(redesignConfig.launcher);
+  const isOverMass = preview.massKg > cap;
+  const isOverBudget = preview.costMillion > activeCase.budgetCapMillion;
+
+  // Laser comms check
+  const isLaserIncompatible = 
+    redesignConfig.comms === 'comms_optical_laser' && 
+    redesignConfig.adcs !== 'adcs_star_tracker_cmas';
+
+  // Toggle payload items (multi-select)
+  const handlePayloadToggle = (id: string) => {
+    sounds.playClick(750);
+    const current = redesignConfig.payloads;
+    if (current.includes(id)) {
+      if (current.length > 1) {
+        updateRedesignComponent('payloads', current.filter((p) => p !== id));
+      }
+    } else {
+      updateRedesignComponent('payloads', [...current, id]);
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-6">
+      
+      {/* Header Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#141619] border border-black text-white p-5 clip-chamfer-md shadow-2xl relative">
+        <div className="absolute top-2 right-4 font-mono-tech text-[10px] text-slate-500">
+          {language === 'en' ? 'SYS.CAD : ASTER-9 MK2 REDESIGN' : 'SYS.CAD : REKAYASA ASTER-9 MK2'}
+        </div>
+
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="clip-slanted font-mono-tech text-[10px] uppercase px-2 py-0.5 bg-[#EAB308] text-black font-bold">
+              {language === 'en' ? 'PHASE 04 : SYSTEMS ENGINEERING' : 'FASE 04 : REKAYASA SISTEM'}
+            </span>
+            <span className="text-[11px] text-slate-400 font-mono-tech">
+              {language === 'en' ? 'SPACECRAFT REDESIGN LAB' : 'LAB PERANCANGAN ULANG'}
+            </span>
+          </div>
+          <h2 className="text-xl md:text-2xl font-bold font-display tracking-wide text-white mt-1">
+            {t.redesign.builderTitle}
+          </h2>
+          <p className="text-xs text-slate-300 mt-1 font-sans">
+            {t.redesign.builderSubtitle}
+          </p>
+        </div>
+
+        {/* Real-time Status Badges */}
+        <div className="flex items-center gap-3">
+          <div className={`p-2.5 border font-mono-tech text-xs flex items-center gap-2 ${
+            isOverMass ? 'bg-red-950/80 border-red-600 text-red-300 animate-pulse' : 'bg-black border-slate-800 text-slate-300'
+          }`}>
+            <Scale className="w-4 h-4 text-[#EAB308]" />
+            <span>
+              {language === 'en' ? 'MASS: ' : 'MASSA: '}
+              <strong className="text-white">{preview.massKg.toFixed(1)} / {cap} kg</strong>
+            </span>
+          </div>
+
+          <div className={`p-2.5 border font-mono-tech text-xs flex items-center gap-2 ${
+            isOverBudget ? 'bg-red-950/80 border-red-600 text-red-300 animate-pulse' : 'bg-black border-slate-800 text-slate-300'
+          }`}>
+            <DollarSign className="w-4 h-4 text-emerald-400" />
+            <span>
+              {language === 'en' ? 'BUDGET: ' : 'ANGGARAN: '}
+              <strong className="text-white">${preview.costMillion.toFixed(1)}M / ${activeCase.budgetCapMillion}.0M</strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Guided Cadet Advice */}
+      {guidedMode && (
+        <div className="p-3.5 bg-[#1C1F24] border border-slate-800 text-xs text-slate-200 flex items-start gap-3">
+          <Sparkles className="w-5 h-5 text-[#EAB308] shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="font-bold text-[#EAB308] font-mono-tech uppercase">ARAHAN REKAYASA SISTEM:</p>
+            <p className="text-slate-300 text-[11px] font-sans leading-relaxed">
+              ASTER-9 kehabisan daya dan membeku di bayangan 75 menit. Solusi perbaikan: ganti panel surya ke GaAs, perbesar baterai, pasang pemanas termal, atau pilih orbit terminator.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          FEATURE: X-RAY SUBSYSTEM INSPECTOR & BEFORE-AFTER VISUAL COMPARISON
+          ========================================================================= */}
+      <SpacecraftXRayInspector config={redesignConfig} />
+
+      {/* Main Workspace: 2-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Left Column: Subsystem Categories Navigation & Component Selector (7 cols) */}
+        <div className="lg:col-span-7 space-y-4">
+          
+          {/* Category Tabs */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 bg-[#141619] border border-black font-mono-tech text-xs">
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              const isActive = activeCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    sounds.playClick(700);
+                    setActiveCategory(cat.id);
+                  }}
+                  className={`flex items-center gap-1.5 p-2 text-left transition-all cursor-pointer ${
+                    isActive 
+                      ? 'bg-[#1C1F24] text-[#EAB308] font-bold border-l-2 border-[#EAB308]' 
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-[#1C1F24]/50'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate text-[11px]">{cat.label.split(' : ')[1] || cat.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Component Options List for Active Category */}
+          <div className="space-y-3">
+            {SPACECRAFT_COMPONENTS.map(c => getLocalizedComponent(c, language)).filter((c) => c.category === activeCategory).map((comp) => {
+              const isPayloadCat = activeCategory === 'payload';
+              const isSelected = isPayloadCat 
+                ? redesignConfig.payloads.includes(comp.id)
+                : redesignConfig[activeCategory as keyof typeof redesignConfig] === comp.id;
+
+              return (
+                <div
+                  key={comp.id}
+                  onClick={() => {
+                    if (isPayloadCat) {
+                      handlePayloadToggle(comp.id);
+                    } else {
+                      updateRedesignComponent(activeCategory as keyof typeof redesignConfig, comp.id);
+                    }
+                  }}
+                  className={`cursor-pointer p-4 transition-all relative border clip-chamfer-sm ${
+                    isSelected
+                      ? 'bg-[#1C1F24] border-[#EAB308] text-white shadow-xl shadow-amber-500/10'
+                      : 'bg-[#141619] border-black text-slate-300 hover:border-slate-700 hover:bg-[#181A1F]'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-display font-bold text-sm text-white">
+                          {comp.name}
+                        </span>
+                        {isSelected && (
+                          <span className="flex items-center gap-1 text-[9px] font-mono-tech font-bold px-1.5 py-0.5 bg-[#EAB308] text-black">
+                            <Check className="w-3 h-3" /> INSTALLED
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                        {comp.description}
+                      </p>
+                      <div className="text-[11px] font-mono-tech text-[#EAB308] pt-1">
+                        SPEC: {comp.specSummary}
+                      </div>
+                    </div>
+
+                    {/* Stats pill */}
+                    <div className="shrink-0 flex flex-col items-end font-mono-tech text-xs space-y-1 bg-black p-2 border border-slate-800">
+                      <span className="text-emerald-400 font-bold">${comp.costMillion}M</span>
+                      <span className="text-amber-400">{comp.massKg > 0 ? `${comp.massKg} kg` : 'N/A'}</span>
+                      {comp.powerGenerationW ? (
+                        <span className="text-[#EAB308] font-semibold">+{comp.powerGenerationW}W</span>
+                      ) : null}
+                      {comp.powerConsumptionW ? (
+                        <span className="text-rose-400 font-semibold">-{comp.powerConsumptionW}W</span>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+        </div>
+
+        {/* Right Column: Live Engineering Trade-Off Barometer & Warnings (5 cols) */}
+        <div className="lg:col-span-5 space-y-4">
+          
+          <div className="bg-[#141619] border border-black text-white p-5 space-y-5 clip-chamfer-md shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2 font-display font-bold text-sm text-white">
+                <Layers className="w-4 h-4 text-[#EAB308]" />
+                <span>ENGINEERING CONSEQUENCE BAROMETER</span>
+              </div>
+              <span className="text-[10px] font-mono-tech px-2 py-0.5 bg-black border border-slate-800 text-[#EAB308]">
+                LIVE CAD SIM
+              </span>
+            </div>
+
+            {/* Metric 1: Mass Capacity Bar */}
+            <div className="space-y-1 font-mono-tech text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400 flex items-center gap-1.5">
+                  <Scale className="w-3.5 h-3.5 text-amber-400" /> TOTAL SYSTEM MASS
+                </span>
+                <span className={isOverMass ? 'text-rose-400 font-bold' : 'text-slate-200 font-bold'}>
+                  {preview.massKg.toFixed(1)} / {cap} kg
+                </span>
+              </div>
+              <div className="w-full bg-black h-2 overflow-hidden border border-slate-800">
+                <div 
+                  className={`h-full transition-all duration-300 ${
+                    isOverMass ? 'bg-rose-500' : 'bg-[#EAB308]'
+                  }`}
+                  style={{ width: `${Math.min(100, (preview.massKg / cap) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Metric 2: Budget Bar */}
+            <div className="space-y-1 font-mono-tech text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400 flex items-center gap-1.5">
+                  <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> BUDGET CEILING
+                </span>
+                <span className={isOverBudget ? 'text-rose-400 font-bold' : 'text-slate-200 font-bold'}>
+                  ${preview.costMillion.toFixed(1)}M / ${activeCase.budgetCapMillion}.0M
+                </span>
+              </div>
+              <div className="w-full bg-black h-2 overflow-hidden border border-slate-800">
+                <div 
+                  className={`h-full transition-all duration-300 ${
+                    isOverBudget ? 'bg-rose-500' : 'bg-emerald-400'
+                  }`}
+                  style={{ width: `${Math.min(100, (preview.costMillion / activeCase.budgetCapMillion) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Metric 3: Power Budget (Sunlit vs Load) */}
+            <div className="p-3 bg-black border border-slate-800 space-y-2 font-mono-tech text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">{language === 'en' ? 'Total Power Load:' : 'Total Beban Daya:'}</span>
+                <span className="text-rose-400 font-bold">{preview.maxLoadW} W</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-400">{language === 'en' ? 'Sunlit Generation:' : 'Pembangkit Daya Siang:'}</span>
+                <span className="text-[#EAB308] font-bold">+{preview.solarW} W</span>
+              </div>
+              <div className="flex items-center justify-between pt-1 border-t border-slate-800">
+                <span className="text-slate-400">{language === 'en' ? 'Sunlit Margin:' : 'Surplus Daya Siang:'}</span>
+                <span className={preview.solarW >= preview.maxLoadW ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                  {preview.solarW >= preview.maxLoadW 
+                    ? (language === 'en' ? `+${preview.solarW - preview.maxLoadW} W SURPLUS` : `+${preview.solarW - preview.maxLoadW} W PENGISIAN`)
+                    : (language === 'en' ? `${preview.solarW - preview.maxLoadW} W DEFICIT` : `${preview.solarW - preview.maxLoadW} W DEFISIT`)}
+                </span>
+              </div>
+            </div>
+
+            {/* Live Prediction Bar */}
+            <div className="font-mono-tech text-xs">
+              {preview.willFail ? (
+                <div className="p-2.5 bg-red-950/70 border border-red-700 text-red-400 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                  <span>
+                    {language === 'en' ? 'PREDICTION: FAILURE — ' : 'PREDIKSI: GAGAL — '}
+                    {preview.failureReason}
+                  </span>
+                </div>
+              ) : (
+                <div className="p-2.5 bg-emerald-950/60 border border-emerald-600 text-emerald-400 flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    {language === 'en'
+                      ? `PREDICTION: PASS (End SOC ${preview.endSOC}%, min temp ${preview.minTempC}°C)`
+                      : `PREDIKSI: LOLOS (SOC akhir ${preview.endSOC}%, suhu min ${preview.minTempC}°C)`}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Critical Engineering Warnings */}
+            <div className="space-y-2 font-mono-tech text-xs">
+              {isLaserIncompatible && (
+                <div className="p-2.5 bg-purple-950/70 border border-purple-700 text-purple-300 flex items-start gap-2">
+                  <Info className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>{language === 'en' ? 'ADCS INCOMPATIBILITY:' : 'KETIDAKCOCOKAN ADCS:'}</strong>{' '}
+                    {language === 'en'
+                      ? 'Optical laser comms requires precision dual star trackers for micro-radian beam pointing.'
+                      : 'Pemancar laser membutuhkan pelacak bintang presisi tinggi agar tautan data stabil.'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Launch Simulation Action Button */}
+            <div className="pt-2 space-y-2">
+              {!hypothesisSubmitted && (
+                <div className="p-2.5 bg-amber-950/80 border border-amber-700 text-amber-300 font-mono-tech text-xs flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>
+                    {language === 'en'
+                      ? 'Complete root cause diagnosis before launching orbit simulation.'
+                      : 'Selesaikan diagnosis akar masalah sebelum meluncurkan simulasi.'}
+                  </span>
+                </div>
+              )}
+
+              {(isOverMass || isOverBudget) && (
+                <div className="p-2.5 bg-red-950/80 border border-red-700 text-red-300 font-mono-tech text-xs flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>
+                    {language === 'en' 
+                      ? `NO-GO CRITERIA: ${isOverMass ? `Mass ${preview.massKg.toFixed(1)} kg exceeds ${cap} kg limit.` : `Cost $${preview.costMillion.toFixed(1)}M exceeds $${activeCase.budgetCapMillion}M budget.`}`
+                      : `TIDAK DAPAT MELUNCUR: ${isOverMass ? `Massa ${preview.massKg.toFixed(1)} kg melebihi kapasitas ${cap} kg.` : `Biaya $${preview.costMillion.toFixed(1)}M melebihi batas $${activeCase.budgetCapMillion}M.`}`}
+                  </span>
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  startSimulation();
+                  setPhase('simulation');
+                }}
+                disabled={!hypothesisSubmitted || isOverMass || isOverBudget || simulationRunning}
+                className={`w-full flex items-center justify-center gap-2 py-3.5 font-display font-black text-sm tracking-wider transition-all cursor-pointer ${
+                  hypothesisSubmitted && !isOverMass && !isOverBudget && !simulationRunning
+                    ? 'btn-tactical-primary text-black shadow-xl shadow-amber-500/20 hover:scale-[1.01]'
+                    : 'bg-[#1C1F24] text-slate-600 border border-slate-800 cursor-not-allowed'
+                }`}
+              >
+                <Rocket className="w-4 h-4" />
+                <span>
+                  {!hypothesisSubmitted 
+                    ? (language === 'en' ? 'DIAGNOSIS REQUIRED' : 'BUTUH DIAGNOSIS')
+                    : simulationRunning 
+                    ? (language === 'en' ? 'LAUNCHING SIMULATION...' : 'MEMULAI SIMULASI...') 
+                    : t.redesign.launchSimulation}
+                </span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+};

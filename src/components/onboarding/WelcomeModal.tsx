@@ -22,6 +22,7 @@ import { useMissionStore } from '../../store/useMissionStore';
 import { AstroMascot } from './AstroMascot';
 import { sounds } from '../../utils/soundEngine';
 import { useTranslation } from '../../i18n';
+import { useAuthStore } from '../../store/useAuthStore';
 
 export const WelcomeModal: React.FC = () => {
   const { 
@@ -50,13 +51,15 @@ export const WelcomeModal: React.FC = () => {
 
   const handleNameSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!inputName.trim()) {
+    const cleanName = inputName.trim().toUpperCase();
+    if (!cleanName) {
       sounds.playAlarm();
-      setNameError(language === 'en' ? 'Please enter your callsign / astronaut name!' : 'Silakan masukkan nama / callsign penjelajah!');
+      setNameError(language === 'en' ? 'Please enter your callsign / astronaut nickname!' : 'Silakan masukkan nama panggilan / callsign penjelajah!');
       return;
     }
     setNameError('');
-    setAstronautName(inputName.trim());
+    setAstronautName(cleanName);
+    useAuthStore.getState().setCallsign(cleanName);
     sounds.playClick(750);
     setOnboardingStep('check_experience');
   };

@@ -186,7 +186,7 @@ STATUS MISI: ${isSuccess ? 'SUKSES : SELURUH TARGET TERCAPAI' : `GAGAL: ${simula
     // Header Title
     ctx.fillStyle = '#eab308';
     ctx.font = 'bold 32px monospace';
-    ctx.fillText('NASA SPACE APPS 2026 // ORBITA NOVA', 60, 95);
+    ctx.fillText('CERTIFIED SPACE CAP // NASA SPACE APPS 2026', 60, 95);
 
     ctx.fillStyle = '#ffffff';
     ctx.font = '900 60px sans-serif';

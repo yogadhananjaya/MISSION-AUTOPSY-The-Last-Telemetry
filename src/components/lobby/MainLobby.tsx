@@ -185,7 +185,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
                 {astronautName || 'Mister'}
               </span>
               <span className="text-[9px] font-mono px-1.5 py-0.2 bg-orange-500/15 text-orange-400 border border-orange-500/40 font-bold clip-chamfer-sm">
-                NASA INVESTIGATOR
+                CERTIFIED SPACE CAP
               </span>
             </div>
             

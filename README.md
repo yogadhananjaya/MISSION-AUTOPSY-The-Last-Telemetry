@@ -1,37 +1,96 @@
-<<<<<<< HEAD
-# React + TypeScript + Vite
+# ORBITA NOVA — The Last Telemetry
+### NASA Space Apps Challenge 2026
+**Team: Certified Space Cap**
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+---
 
-Currently, two official plugins are available:
+## 🚀 About the Project
+**ORBITA NOVA: The Last Telemetry** is an educational space systems engineering and forensic autopsy simulation game developed for the NASA Space Apps Challenge 2026 by **Team Certified Space Cap**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Pemain bertindak sebagai investigator forensik penerbangan antariksa yang menganalisis telemetri satelit (ASTER-9, dsb.), mendiagnosis akar anomali kelistrikan/termal saat melintasi gerhana asteroid, merekayasa ulang komponen satelit di Hangar modular, dan menguji kemampuan bertahan hidup wahana melalui simulasi orbit 3D.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📂 Architecture & Directory Structure
+Proyek ini memisahkan frontend dan backend secara bersih:
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```
+NASA 2026/
+├── Game-Frontend/              # Client Interactive Simulator (React 19 + Vite + Tailwind + Three.js)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── academy/        # Space Learning Center (6 Aerospace Modules + Quizzes)
+│   │   │   ├── auth/           # High-Security Tier-1 Auth Portal & Google SSO
+│   │   │   ├── common/         # Tactical Header, HoloPanel, NvButton, GameLogo
+│   │   │   ├── coop/           # Realtime Co-op Last Stand (PeerJS + BroadcastChannel)
+│   │   │   ├── leaderboard/    # Global & Weekly Forensic Leaderboard
+│   │   │   ├── lobby/          # Command Hub & 10-Character Crew Album
+│   │   │   ├── minigames/      # Crisis Minigames (Cables, Power, Antenna Alignment)
+│   │   │   ├── onboarding/     # NOVA Mascot Welcome & Explorer Callsign Collector
+│   │   │   ├── phase1_briefing/# Mission Briefing & Incident Dossier
+│   │   │   ├── phase2_investigation/# 4-Channel Telemetry Studio & Black Box Audio
+│   │   │   ├── phase3_root_cause/# 3-Tier Hypothesis Matrix
+│   │   │   ├── phase3b_rewind/ # Interactive Crisis Rewind Sandbox
+│   │   │   ├── phase4_redesign/# Modular Spacecraft Refit & Budget/Mass Constraints
+│   │   │   ├── phase5_simulation/# 3D Orbital Trajectory & Flight Telemetry
+│   │   │   └── phase6_debrief/ # Debriefing, NASA 5 Pillars, Ghost Replay, Share Card
+│   │   ├── data/               # Case Files, Crew Roster (10 Characters), Component Catalog
+│   │   ├── services/           # Backend API Client with Resilient Offline Fallback
+│   │   └── store/              # Zustand Stores (Mission, Auth, Coop, Progress, Score)
+│   └── package.json
+│
+├── Game-Backend/               # Mission Control Backend API & Database (Node.js + Express)
+│   ├── src/
+│   │   ├── auth.ts             # Memory-Hard Scrypt Hashing & Brute-Force Rate Limiter
+│   │   ├── db.ts               # Native SQLite Database (node:sqlite WAL mode)
+│   │   ├── routes/
+│   │   │   ├── authRoutes.ts   # Register, Login, Google OAuth, Session Guard
+│   │   │   └── userRoutes.ts   # Callsign Update, Player Progress, Leaderboard, Telemetry
+│   │   └── server.ts           # Express Application Server & Health Check
+│   ├── data/
+│   │   └── orbita.db           # Persistent SQLite Database
+│   └── package.json
+│
+└── package.json                # Root Workspace
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
-=======
-# MISSION-AUTOPSY-The-Last-Telemetry
-MISSION AUTOPSY: The Last Telemetry is a sci-fi space systems engineering and forensic investigation simulation game developed for the NASA Space Apps Challenge 2026.
->>>>>>> 4d20aa434cdf3afe2cc3552990a4fb48ededbd55
+---
+
+## 🛡️ High-Security Authentication & Database
+- **Backend Database**: Didukung SQLite native (`node:sqlite`) dengan journaling WAL.
+- **Kriptografi Scrypt**: Hashing kata sandi memory-hard dengan garam acak 32-byte kriptografis ($N=16384, r=8, p=1$).
+- **Perlindungan Serangan Waktu (Constant-Time)**: Menggunakan `crypto.timingSafeEqual`.
+- **Sliding-Window Rate Limiting**: Mengunci IP/akun selama 15 menit jika gagal 5 kali berturut-turut untuk mencegah brute-force.
+- **Google OAuth SSO**: Masuk dengan akun Google secara aman.
+- **Onboarding NOVA**: Setelah login berhasil, NOVA langsung menyapa penjelajah untuk menginput nama panggilan (*Callsign*) dan memilih protokol kesulitan (*Cadet Mode* vs *Engineer Mode*).
+
+---
+
+## 🎨 Konsistensi Visual (Anti-Slop Design)
+- **Palet Warna Senada & Padu**:
+  - Warna Latar: *Deep Space Cadet Charcoal* (`#0B0E14` / `#070A0F` / `#111520`).
+  - Aksen Telemetri: *NASA Gold / Amber* (`#F59E0B` / `#EAB308`).
+  - Status Nominal: *Emerald Green* (`#10B981`).
+  - Status Bahaya: *Rose Crimson* (`#EF4444`).
+  - Status Komunikasi Fotonik: *Electric Cyan* (`#06B6D4` / `#38BDF8`).
+- **Geometri Chamfered**: Tepi sudut 45 derajat poligonal tajam berstandar antarmuka militer/aerospace, meniadakan kartu *bubbly SaaS* yang generik.
+
+---
+
+## 🛠️ Cara Menjalankan
+
+### Menjalankan Backend
+```bash
+cd Game-Backend
+npm install
+npm run dev
+# Server aktif di http://localhost:3001
+```
+
+### Menjalankan Frontend
+```bash
+cd Game-Frontend
+npm install
+npm run dev
+# Client aktif di http://localhost:5173
+```

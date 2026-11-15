@@ -152,7 +152,7 @@ export const Header: React.FC = () => {
             </span>
             <div className="mt-1">
               <span className="clip-slanted bg-[#1F2329] border border-slate-700/80 px-2 py-0.5 text-[9px] font-mono-tech tracking-wider text-slate-300 uppercase truncate block">
-                NASA INVESTIGATOR
+                CERTIFIED SPACE CAP
               </span>
             </div>
           </div>
