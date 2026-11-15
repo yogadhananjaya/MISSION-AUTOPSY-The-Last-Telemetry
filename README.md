@@ -225,28 +225,6 @@ cd Game-Backend
 npm run build
 ```
 
----
-
-## 🌐 Panduan Deployment (Online Hosting)
-
-### Opsi A: Deploy Frontend ke Vercel (100% Gratis & Instan)
-1. Push repositori ini ke GitHub Anda.
-2. Buka [Vercel.com](https://vercel.com) dan klik **Add New Project**.
-3. Import repositori Anda:
-   - **Root Directory**: `Game-Frontend`
-   - **Framework Preset**: `Vite`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-4. Klik **Deploy**. Web game akan langsung aktif dan bisa dimainkan di URL `.vercel.app`.
-
-### Opsi B: Deploy Backend ke Railway / Render
-1. Buat project baru di [Railway.app](https://railway.app) atau [Render.com](https://render.com).
-2. Pilih direktori `Game-Backend`.
-3. Start command: `node dist/server.js` (atau `npm start`).
-4. Dapatkan domain API publik untuk disematkan pada konfigurasi frontend.
-
----
-
 ## 👥 Tim Pengembang (Credits)
 
 **Team Certified Space Cap**  
