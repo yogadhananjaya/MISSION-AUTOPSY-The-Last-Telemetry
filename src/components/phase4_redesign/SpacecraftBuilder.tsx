@@ -18,11 +18,12 @@ import {
   Info 
 } from 'lucide-react';
 import { useMissionStore } from '../../store/useMissionStore';
-import { SPACECRAFT_COMPONENTS } from '../../data/components';
+import { SPACECRAFT_COMPONENTS, getLocalizedComponent } from '../../data/components';
 import type { ComponentCategory } from '../../types/mission';
 import { sounds } from '../../utils/soundEngine';
 import { SpacecraftXRayInspector } from './SpacecraftXRayInspector';
 import { getLauncherCapKg, previewConfig } from '../../utils/simulationEngine';
+import { useTranslation } from '../../i18n';
 
 export const SpacecraftBuilder: React.FC = () => {
   const { 
@@ -35,19 +36,20 @@ export const SpacecraftBuilder: React.FC = () => {
     guidedMode,
     hypothesisSubmitted
   } = useMissionStore();
+  const { t, language } = useTranslation();
 
   const [activeCategory, setActiveCategory] = useState<ComponentCategory>('power_generation');
 
   // Categories config
   const categories: { id: ComponentCategory; label: string; icon: React.ElementType }[] = [
-    { id: 'power_generation', label: '01 : Pembangkit Daya', icon: Zap },
-    { id: 'energy_storage', label: '02 : Baterai Energi', icon: BatteryCharging },
-    { id: 'thermal_control', label: '03 : Proteksi Termal', icon: Thermometer },
-    { id: 'payload', label: '04 : Instrumen Sains', icon: Activity },
-    { id: 'communications', label: '05 : Telekomunikasi', icon: Radio },
-    { id: 'adcs', label: '06 : Navigasi ADCS', icon: Compass },
-    { id: 'launch_vehicle', label: '07 : Roket Peluncur', icon: Rocket },
-    { id: 'orbit_profile', label: '08 : Profil Orbit', icon: Orbit },
+    { id: 'power_generation', label: language === 'en' ? '01 : Power Generation' : '01 : Pembangkit Daya', icon: Zap },
+    { id: 'energy_storage', label: language === 'en' ? '02 : Energy Storage' : '02 : Baterai Energi', icon: BatteryCharging },
+    { id: 'thermal_control', label: language === 'en' ? '03 : Thermal Protection' : '03 : Proteksi Termal', icon: Thermometer },
+    { id: 'payload', label: language === 'en' ? '04 : Science Payloads' : '04 : Instrumen Sains', icon: Activity },
+    { id: 'communications', label: language === 'en' ? '05 : Telemetry Comms' : '05 : Telekomunikasi', icon: Radio },
+    { id: 'adcs', label: language === 'en' ? '06 : ADCS Attitude' : '06 : Navigasi ADCS', icon: Compass },
+    { id: 'launch_vehicle', label: language === 'en' ? '07 : Launch Vehicle' : '07 : Roket Peluncur', icon: Rocket },
+    { id: 'orbit_profile', label: language === 'en' ? '08 : Orbit Profile' : '08 : Profil Orbit', icon: Orbit },
   ];
 
   // Single Source of Truth via simulationEngine previewConfig
@@ -80,23 +82,23 @@ export const SpacecraftBuilder: React.FC = () => {
       {/* Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#141619] border border-black text-white p-5 clip-chamfer-md shadow-2xl relative">
         <div className="absolute top-2 right-4 font-mono-tech text-[10px] text-slate-500">
-          SYS.CAD : REKAYASA ASTER-9 MK2
+          {language === 'en' ? 'SYS.CAD : ASTER-9 MK2 REDESIGN' : 'SYS.CAD : REKAYASA ASTER-9 MK2'}
         </div>
 
         <div>
           <div className="flex items-center gap-2">
             <span className="clip-slanted font-mono-tech text-[10px] uppercase px-2 py-0.5 bg-[#EAB308] text-black font-bold">
-              FASE 04 : REKAYASA SISTEM
+              {language === 'en' ? 'PHASE 04 : SYSTEMS ENGINEERING' : 'FASE 04 : REKAYASA SISTEM'}
             </span>
             <span className="text-[11px] text-slate-400 font-mono-tech">
-              LAB PERANCANGAN ULANG
+              {language === 'en' ? 'SPACECRAFT REDESIGN LAB' : 'LAB PERANCANGAN ULANG'}
             </span>
           </div>
           <h2 className="text-xl md:text-2xl font-bold font-display tracking-wide text-white mt-1">
-            ARSITEKTUR PERANCANGAN ULANG ASTER-9 MARK II
+            {t.redesign.builderTitle}
           </h2>
           <p className="text-xs text-slate-300 mt-1 font-sans">
-            Seimbangkan massa, daya surya, kapasitas anggaran, transmisi data, dan margin termal wahana.
+            {t.redesign.builderSubtitle}
           </p>
         </div>
 
@@ -106,14 +108,20 @@ export const SpacecraftBuilder: React.FC = () => {
             isOverMass ? 'bg-red-950/80 border-red-600 text-red-300 animate-pulse' : 'bg-black border-slate-800 text-slate-300'
           }`}>
             <Scale className="w-4 h-4 text-[#EAB308]" />
-            <span>MASSA: <strong className="text-white">{preview.massKg.toFixed(1)} / {cap} kg</strong></span>
+            <span>
+              {language === 'en' ? 'MASS: ' : 'MASSA: '}
+              <strong className="text-white">{preview.massKg.toFixed(1)} / {cap} kg</strong>
+            </span>
           </div>
 
           <div className={`p-2.5 border font-mono-tech text-xs flex items-center gap-2 ${
             isOverBudget ? 'bg-red-950/80 border-red-600 text-red-300 animate-pulse' : 'bg-black border-slate-800 text-slate-300'
           }`}>
             <DollarSign className="w-4 h-4 text-emerald-400" />
-            <span>ANGGARAN: <strong className="text-white">${preview.costMillion.toFixed(1)}M / ${activeCase.budgetCapMillion}.0M</strong></span>
+            <span>
+              {language === 'en' ? 'BUDGET: ' : 'ANGGARAN: '}
+              <strong className="text-white">${preview.costMillion.toFixed(1)}M / ${activeCase.budgetCapMillion}.0M</strong>
+            </span>
           </div>
         </div>
       </div>
@@ -169,7 +177,7 @@ export const SpacecraftBuilder: React.FC = () => {
 
           {/* Component Options List for Active Category */}
           <div className="space-y-3">
-            {SPACECRAFT_COMPONENTS.filter((c) => c.category === activeCategory).map((comp) => {
+            {SPACECRAFT_COMPONENTS.map(c => getLocalizedComponent(c, language)).filter((c) => c.category === activeCategory).map((comp) => {
               const isPayloadCat = activeCategory === 'payload';
               const isSelected = isPayloadCat 
                 ? redesignConfig.payloads.includes(comp.id)
@@ -287,17 +295,19 @@ export const SpacecraftBuilder: React.FC = () => {
             {/* Metric 3: Power Budget (Sunlit vs Load) */}
             <div className="p-3 bg-black border border-slate-800 space-y-2 font-mono-tech text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-slate-400">Total Load:</span>
+                <span className="text-slate-400">{language === 'en' ? 'Total Power Load:' : 'Total Beban Daya:'}</span>
                 <span className="text-rose-400 font-bold">{preview.maxLoadW} W</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-400">Sunlit Generation:</span>
+                <span className="text-slate-400">{language === 'en' ? 'Sunlit Generation:' : 'Pembangkit Daya Siang:'}</span>
                 <span className="text-[#EAB308] font-bold">+{preview.solarW} W</span>
               </div>
               <div className="flex items-center justify-between pt-1 border-t border-slate-800">
-                <span className="text-slate-400">Surplus Daya Siang:</span>
+                <span className="text-slate-400">{language === 'en' ? 'Sunlit Margin:' : 'Surplus Daya Siang:'}</span>
                 <span className={preview.solarW >= preview.maxLoadW ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
-                  {preview.solarW >= preview.maxLoadW ? `+${preview.solarW - preview.maxLoadW} W PENGISIAN` : `${preview.solarW - preview.maxLoadW} W DEFISIT`}
+                  {preview.solarW >= preview.maxLoadW 
+                    ? (language === 'en' ? `+${preview.solarW - preview.maxLoadW} W SURPLUS` : `+${preview.solarW - preview.maxLoadW} W PENGISIAN`)
+                    : (language === 'en' ? `${preview.solarW - preview.maxLoadW} W DEFICIT` : `${preview.solarW - preview.maxLoadW} W DEFISIT`)}
                 </span>
               </div>
             </div>
@@ -307,12 +317,19 @@ export const SpacecraftBuilder: React.FC = () => {
               {preview.willFail ? (
                 <div className="p-2.5 bg-red-950/70 border border-red-700 text-red-400 flex items-start gap-2">
                   <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <span>PREDIKSI: GAGAL — {preview.failureReason}</span>
+                  <span>
+                    {language === 'en' ? 'PREDICTION: FAILURE — ' : 'PREDIKSI: GAGAL — '}
+                    {preview.failureReason}
+                  </span>
                 </div>
               ) : (
                 <div className="p-2.5 bg-emerald-950/60 border border-emerald-600 text-emerald-400 flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>PREDIKSI: LOLOS (SOC akhir {preview.endSOC}%, suhu min {preview.minTempC}°C)</span>
+                  <span>
+                    {language === 'en'
+                      ? `PREDICTION: PASS (End SOC ${preview.endSOC}%, min temp ${preview.minTempC}°C)`
+                      : `PREDIKSI: LOLOS (SOC akhir ${preview.endSOC}%, suhu min ${preview.minTempC}°C)`}
+                  </span>
                 </div>
               )}
             </div>
@@ -322,7 +339,12 @@ export const SpacecraftBuilder: React.FC = () => {
               {isLaserIncompatible && (
                 <div className="p-2.5 bg-purple-950/70 border border-purple-700 text-purple-300 flex items-start gap-2">
                   <Info className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
-                  <span><strong>KETIDAKCOCOKAN ADCS:</strong> Pemancar laser membutuhkan pelacak bintang presisi tinggi agar tautan data stabil.</span>
+                  <span>
+                    <strong>{language === 'en' ? 'ADCS INCOMPATIBILITY:' : 'KETIDAKCOCOKAN ADCS:'}</strong>{' '}
+                    {language === 'en'
+                      ? 'Optical laser comms requires precision dual star trackers for micro-radian beam pointing.'
+                      : 'Pemancar laser membutuhkan pelacak bintang presisi tinggi agar tautan data stabil.'}
+                  </span>
                 </div>
               )}
             </div>
@@ -332,7 +354,11 @@ export const SpacecraftBuilder: React.FC = () => {
               {!hypothesisSubmitted && (
                 <div className="p-2.5 bg-amber-950/80 border border-amber-700 text-amber-300 font-mono-tech text-xs flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span>Selesaikan diagnosis akar masalah sebelum meluncurkan simulasi.</span>
+                  <span>
+                    {language === 'en'
+                      ? 'Complete root cause diagnosis before launching orbit simulation.'
+                      : 'Selesaikan diagnosis akar masalah sebelum meluncurkan simulasi.'}
+                  </span>
                 </div>
               )}
 
@@ -340,7 +366,9 @@ export const SpacecraftBuilder: React.FC = () => {
                 <div className="p-2.5 bg-red-950/80 border border-red-700 text-red-300 font-mono-tech text-xs flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
                   <span>
-                    TIDAK DAPAT MELUNCUR: {isOverMass ? `Massa ${preview.massKg.toFixed(1)} kg melebihi kapasitas ${cap} kg.` : `Biaya $${preview.costMillion.toFixed(1)}M melebihi batas $${activeCase.budgetCapMillion}M.`}
+                    {language === 'en' 
+                      ? `NO-GO CRITERIA: ${isOverMass ? `Mass ${preview.massKg.toFixed(1)} kg exceeds ${cap} kg limit.` : `Cost $${preview.costMillion.toFixed(1)}M exceeds $${activeCase.budgetCapMillion}M budget.`}`
+                      : `TIDAK DAPAT MELUNCUR: ${isOverMass ? `Massa ${preview.massKg.toFixed(1)} kg melebihi kapasitas ${cap} kg.` : `Biaya $${preview.costMillion.toFixed(1)}M melebihi batas $${activeCase.budgetCapMillion}M.`}`}
                   </span>
                 </div>
               )}
@@ -360,10 +388,10 @@ export const SpacecraftBuilder: React.FC = () => {
                 <Rocket className="w-4 h-4" />
                 <span>
                   {!hypothesisSubmitted 
-                    ? 'BUTUH DIAGNOSIS' 
+                    ? (language === 'en' ? 'DIAGNOSIS REQUIRED' : 'BUTUH DIAGNOSIS')
                     : simulationRunning 
-                    ? 'MEMULAI SIMULASI...' 
-                    : 'UJI SIMULASI ORBIT'}
+                    ? (language === 'en' ? 'LAUNCHING SIMULATION...' : 'MEMULAI SIMULASI...') 
+                    : t.redesign.launchSimulation}
                 </span>
                 <ArrowRight className="w-4 h-4" />
               </button>

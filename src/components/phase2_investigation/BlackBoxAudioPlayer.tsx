@@ -9,6 +9,7 @@ import {
   Check
 } from 'lucide-react';
 import { sounds } from '../../utils/soundEngine';
+import { useTranslation } from '../../i18n';
 
 interface BlackBoxAudioPlayerProps {
   onPinEvidence?: () => void;
@@ -19,6 +20,7 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
   onPinEvidence,
   isPinned = false
 }) => {
+  const { language } = useTranslation();
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentLineIndex, setCurrentLineIndex] = useState<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -26,38 +28,50 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
   const TRANSCRIPT_LINES = [
     {
       time: 'T+04:18:40',
-      source: 'SENSOR SURYA',
-      text: 'Fluks surya nol watt. Wahana memasuki bayangan tebal asteroid.',
+      source: language === 'en' ? 'SOLAR ARRAYS' : 'SENSOR SURYA',
+      text: language === 'en' 
+        ? 'Solar flux zero watts. Spacecraft entering deep asteroid umbra shadow.' 
+        : 'Fluks surya nol watt. Wahana memasuki bayangan tebal asteroid.',
       severity: 'normal'
     },
     {
       time: 'T+04:19:10',
-      source: 'SENSOR TERMAL',
-      text: 'Suhu baterai melewati minus 20 derajat. Terjadi pembekuan elektrolit ekstrem.',
+      source: language === 'en' ? 'THERMAL SENSORS' : 'SENSOR TERMAL',
+      text: language === 'en'
+        ? 'Battery core temperature dropping below -20 degrees Celsius. Cryogenic electrolyte freeze detected.'
+        : 'Suhu baterai melewati minus 20 derajat. Terjadi pembekuan elektrolit ekstrem.',
       severity: 'warning'
     },
     {
       time: 'T+04:19:35',
-      source: 'BUS DAYA EPS',
-      text: 'Elektrolit membeku. Hambatan dalam melonjak tinggi. Tegangan bus turun mendekati 22V.',
+      source: language === 'en' ? 'EPS MAIN BUS' : 'BUS DAYA EPS',
+      text: language === 'en'
+        ? 'Internal cell resistance spiking. Bus terminal voltage collapsing toward 22V limit.'
+        : 'Elektrolit membeku. Hambatan dalam melonjak tinggi. Tegangan bus turun mendekati 22V.',
       severity: 'warning'
     },
     {
       time: 'T+04:20:00',
-      source: 'KOMPUTER UTAMA',
-      text: 'PERINGATAN KRITIS: Tegangan anjlok ke 21.0V. Pemutusan darurat otomatis aktif.',
+      source: language === 'en' ? 'FLIGHT COMPUTER' : 'KOMPUTER UTAMA',
+      text: language === 'en'
+        ? 'CRITICAL ALERT: Terminal voltage down to 21.0V. Autonomous UVLO cutoff tripping.'
+        : 'PERINGATAN KRITIS: Tegangan anjlok ke 21.0V. Pemutusan darurat otomatis aktif.',
       severity: 'critical'
     },
     {
       time: 'T+04:20:14',
-      source: 'PEMANCAR DSN',
-      text: 'Penguat sinyal kehilangan daya. Kuncian DSN terlepas. Kontak terputus total.',
+      source: language === 'en' ? 'DSN TRANSMITTER' : 'PEMANCAR DSN',
+      text: language === 'en'
+        ? 'Transmitter amplifier lost power. DSN carrier lock dropped. Telemetry lost.'
+        : 'Penguat sinyal kehilangan daya. Kuncian DSN terlepas. Kontak terputus total.',
       severity: 'critical'
     },
     {
       time: 'T+04:20:20',
-      source: 'ARSIP TELEMETRI',
-      text: 'SINYAL DERAU STATIS : PEREKAM PENERBANGAN PADAM',
+      source: language === 'en' ? 'TELEMETRY ARCHIVE' : 'ARSIP TELEMETRI',
+      text: language === 'en'
+        ? 'STATIC NOISE CARRIER : FLIGHT DATA RECORDER BLACKOUT'
+        : 'SINYAL DERAU STATIS : PEREKAM PENERBANGAN PADAM',
       severity: 'fatal'
     }
   ];
@@ -108,13 +122,17 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
         <div className="flex items-center gap-2">
           <Radio className="w-4 h-4 text-rose-500 animate-pulse" />
           <h3 className="font-display font-bold text-xs tracking-wider uppercase text-white">
-            REKAMAN AUDIO KOTAK HITAM : SUARA DARURAT T+04:20
+            {language === 'en' 
+              ? 'BLACK BOX AUDIO LOGS : EMERGENCY AUDIO T+04:20' 
+              : 'REKAMAN AUDIO KOTAK HITAM : SUARA DARURAT T+04:20'}
           </h3>
         </div>
 
         <div className="flex items-center gap-2 font-mono-tech text-[10px]">
           <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-          <span className="text-slate-400">ARSIP STASIUN DSN</span>
+          <span className="text-slate-400">
+            {language === 'en' ? 'DSN ARCHIVE FEED' : 'ARSIP STASIUN DSN'}
+          </span>
         </div>
       </div>
 
@@ -134,12 +152,12 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
             {isPlaying ? (
               <>
                 <Square className="w-3.5 h-3.5 fill-current" />
-                <span>HENTIKAN</span>
+                <span>{language === 'en' ? 'HALT' : 'HENTIKAN'}</span>
               </>
             ) : (
               <>
                 <Play className="w-3.5 h-3.5 fill-current" />
-                <span>PUTAR AUDIO</span>
+                <span>{language === 'en' ? 'PLAY AUDIO' : 'PUTAR AUDIO'}</span>
               </>
             )}
           </button>
@@ -148,10 +166,14 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
             {isPlaying ? (
               <span className="text-rose-400 font-bold flex items-center gap-1">
                 <Volume2 className="w-3.5 h-3.5 animate-bounce" />
-                MEMUTAR TRANSKRIPSI AUDIO
+                {language === 'en' ? 'PLAYING AUDIO TRANSCRIPT' : 'MEMUTAR TRANSKRIPSI AUDIO'}
               </span>
             ) : (
-              <span>Dengarkan rekaman detik terakhir ASTER-9.</span>
+              <span>
+                {language === 'en' 
+                  ? 'Listen to the final seconds recorded before ASTER-9 carrier loss.' 
+                  : 'Dengarkan rekaman detik terakhir ASTER-9.'}
+              </span>
             )}
           </div>
         </div>
@@ -178,9 +200,11 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
       <div className="bg-[#0B0D10] border border-slate-800 p-3 space-y-1.5 font-mono-tech text-xs min-h-[96px] flex flex-col justify-center">
         <div className="flex items-center justify-between text-[10px] border-b border-slate-800/80 pb-1">
           <span className="text-[#EAB308] font-bold">
-            [{TRANSCRIPT_LINES[currentLineIndex].time}] : SUMBER : {TRANSCRIPT_LINES[currentLineIndex].source}
+            [{TRANSCRIPT_LINES[currentLineIndex].time}] : {language === 'en' ? 'SOURCE' : 'SUMBER'} : {TRANSCRIPT_LINES[currentLineIndex].source}
           </span>
-          <span className="text-slate-500">BARIS {currentLineIndex + 1} / {TRANSCRIPT_LINES.length}</span>
+          <span className="text-slate-500">
+            {language === 'en' ? 'LINE' : 'BARIS'} {currentLineIndex + 1} / {TRANSCRIPT_LINES.length}
+          </span>
         </div>
 
         <p className={`text-xs sm:text-sm font-mono-tech leading-relaxed pt-1 transition-colors ${
@@ -199,7 +223,11 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
         <div className="flex items-center justify-between pt-1 text-xs font-mono-tech">
           <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
             <AlertCircle className="w-3.5 h-3.5 text-[#EAB308]" />
-            <span>Rekaman audio membuktikan pemutusan kontak radio pada 21.0V.</span>
+            <span>
+              {language === 'en' 
+                ? 'Audio logs confirm telemetry carrier drop at 21.0V UVLO threshold.' 
+                : 'Rekaman audio membuktikan pemutusan kontak radio pada 21.0V.'}
+            </span>
           </div>
 
           <button
@@ -213,12 +241,12 @@ export const BlackBoxAudioPlayer: React.FC<BlackBoxAudioPlayerProps> = ({
             {isPinned ? (
               <>
                 <Check className="w-3.5 h-3.5" />
-                <span>TERSEMAT</span>
+                <span>{language === 'en' ? 'PINNED' : 'TERSEMAT'}</span>
               </>
             ) : (
               <>
                 <Pin className="w-3.5 h-3.5 text-[#EAB308]" />
-                <span>SEMATKAN</span>
+                <span>{language === 'en' ? 'PIN EVIDENCE' : 'SEMATKAN'}</span>
               </>
             )}
           </button>

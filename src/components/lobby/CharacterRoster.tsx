@@ -11,10 +11,12 @@ import {
   ChevronRight,
   Mail,
   Settings,
-  Grid
+  Grid,
+  Globe
 } from 'lucide-react';
-import { CREW_MEMBERS, type CrewMember } from '../../data/crewData';
+import { CREW_MEMBERS, getLocalizedCrew, type CrewMember } from '../../data/crewData';
 import { sounds } from '../../utils/soundEngine';
+import { useTranslation } from '../../i18n';
 
 interface CharacterRosterProps {
   onBack: () => void;
@@ -23,6 +25,8 @@ interface CharacterRosterProps {
 }
 
 export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSelectRole, onOpenCoopRoom }) => {
+  const { language, setLanguage } = useTranslation();
+
   // View mode: 'album' (Grid view matching Image 1) or 'detail' (Full specification view)
   const [viewMode, setViewMode] = useState<'album' | 'detail'>('album');
   const [selectedCrewId, setSelectedCrewId] = useState<string>('sarah');
@@ -30,26 +34,27 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
   const [sortOrder, setSortOrder] = useState<'default' | 'level' | 'rarity'>('default');
   const [activeTab, setActiveTab] = useState<'status' | 'skills' | 'equipment' | 'breakthrough'>('status');
 
-  const selectedIndex = CREW_MEMBERS.findIndex(c => c.id === selectedCrewId);
-  const selectedCrew = CREW_MEMBERS[selectedIndex] || CREW_MEMBERS[0];
+  const rawSelectedIndex = CREW_MEMBERS.findIndex(c => c.id === selectedCrewId);
+  const rawSelectedCrew = CREW_MEMBERS[rawSelectedIndex] || CREW_MEMBERS[0];
+  const selectedCrew = getLocalizedCrew(rawSelectedCrew, language);
 
   // 4 Core Role Divisions (Essential NASA Disciplines)
   const DIVISIONS = [
-    { id: 'ALL', label: 'SEMUA AWAK', icon: Grid },
-    { id: 'KOMANDO', label: 'KOMANDO', icon: Award },
-    { id: 'TELEMETRI', label: 'TELEMETRI', icon: Activity },
-    { id: 'DAYA EPS', label: 'DAYA EPS', icon: Zap },
-    { id: 'REKAYASA', label: 'REKAYASA', icon: Shield },
+    { id: 'ALL', label: language === 'en' ? 'ALL CREW' : 'SEMUA AWAK', icon: Grid },
+    { id: 'KOMANDO', label: language === 'en' ? 'COMMAND' : 'KOMANDO', icon: Award },
+    { id: 'TELEMETRI', label: language === 'en' ? 'TELEMETRY' : 'TELEMETRI', icon: Activity },
+    { id: 'DAYA EPS', label: language === 'en' ? 'DAYA EPS' : 'DAYA EPS', icon: Zap },
+    { id: 'REKAYASA', label: language === 'en' ? 'ENGINEERING' : 'REKAYASA', icon: Shield },
   ];
 
   // Filtered and sorted crew members
-  const filteredCrew = CREW_MEMBERS.filter(c => {
+  const filteredCrew = CREW_MEMBERS.map(c => getLocalizedCrew(c, language)).filter(c => {
     if (selectedDivision === 'ALL') return true;
     return c.divisionCode === selectedDivision;
   }).sort((a, b) => {
     if (sortOrder === 'level') return b.level - a.level;
     if (sortOrder === 'rarity') return (b.rarity === 'SSR' ? 2 : 1) - (a.rarity === 'SSR' ? 2 : 1);
-    return 0; // Default: maintains exact array order (Sarah, Marcus, Ryan, Kaito)
+    return 0; // Default: maintains exact array order
   });
 
   const handleCardClick = (crew: CrewMember) => {
@@ -60,13 +65,13 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
 
   const handlePrevCrew = () => {
     sounds.playClick(600);
-    const newIdx = (selectedIndex - 1 + CREW_MEMBERS.length) % CREW_MEMBERS.length;
+    const newIdx = (rawSelectedIndex - 1 + CREW_MEMBERS.length) % CREW_MEMBERS.length;
     setSelectedCrewId(CREW_MEMBERS[newIdx].id);
   };
 
   const handleNextCrew = () => {
     sounds.playClick(600);
-    const newIdx = (selectedIndex + 1) % CREW_MEMBERS.length;
+    const newIdx = (rawSelectedIndex + 1) % CREW_MEMBERS.length;
     setSelectedCrewId(CREW_MEMBERS[newIdx].id);
   };
 
@@ -97,7 +102,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
               className="flex items-center gap-2 px-3 py-1.5 bg-[#1C2027] border border-slate-700 text-xs font-mono text-amber-400 hover:text-white hover:border-amber-400 transition-colors cursor-pointer clip-chamfer-sm"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>KEMBALI KE ALBUM</span>
+              <span>{language === 'en' ? 'BACK TO ALBUM' : 'KEMBALI KE ALBUM'}</span>
             </button>
           ) : (
             <button 
@@ -105,7 +110,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
               className="flex items-center gap-2 px-3.5 py-1.5 bg-[#1C2027] border border-slate-700 text-xs font-mono text-amber-400 hover:text-white hover:border-amber-400 transition-colors cursor-pointer clip-chamfer-sm"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              <span>KEMBALI</span>
+              <span>{language === 'en' ? 'BACK' : 'KEMBALI'}</span>
             </button>
           )}
 
@@ -113,10 +118,12 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
 
           <div className="hidden sm:flex items-center gap-2">
             <span className="font-display font-black text-sm tracking-wider uppercase text-slate-100">
-              {viewMode === 'album' ? 'ALBUM ARSIP AWAK' : `DETAIL AWAK : ${selectedCrew.name}`}
+              {viewMode === 'album' 
+                ? (language === 'en' ? 'CREW ARCHIVE ALBUM' : 'ALBUM ARSIP AWAK') 
+                : `${language === 'en' ? 'SPECIALIST' : 'DETAIL AWAK'} : ${selectedCrew.name}`}
             </span>
             <span className="text-[10px] font-mono px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/30">
-              TOTAL : {CREW_MEMBERS.length} SPESIALIS
+              TOTAL : {CREW_MEMBERS.length} {language === 'en' ? 'SPECIALISTS' : 'SPESIALIS'}
             </span>
           </div>
         </div>
@@ -144,6 +151,18 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
             <span className="font-bold text-slate-100 font-mono-tech">30</span>
             <span className="text-slate-400 hover:text-white cursor-pointer ml-1 font-bold">+</span>
           </div>
+
+          {/* Language Switcher */}
+          <button
+            onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+            title={language === 'en' ? 'Switch to Bahasa Indonesia' : 'Switch to English'}
+            className="flex items-center gap-1 px-2.5 py-1 bg-[#1C2027] border border-black hover:border-amber-400 rounded text-xs font-mono font-bold text-slate-300 hover:text-white transition-colors cursor-pointer ml-1"
+          >
+            <Globe className="w-3.5 h-3.5 text-amber-400" />
+            <span className={language === 'en' ? 'text-amber-400' : 'text-slate-500'}>EN</span>
+            <span className="text-slate-600">/</span>
+            <span className={language === 'id' ? 'text-amber-400' : 'text-slate-500'}>ID</span>
+          </button>
 
           {/* Mail icon with unread indicator */}
           <div className="relative p-1.5 bg-[#1C2027] border border-black rounded text-slate-300 hover:text-white cursor-pointer ml-1">
@@ -198,7 +217,11 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
                 <div className="flex items-center gap-1.5">
                   <SlidersHorizontal className="w-3.5 h-3.5 text-orange-400" />
                   <span className="text-[11px] font-bold">
-                    {sortOrder === 'default' ? 'URUTAN DAFTAR' : sortOrder === 'level' ? 'URUTAN LEVEL' : 'URUTAN RARITAS'}
+                    {sortOrder === 'default' 
+                      ? (language === 'en' ? 'DEFAULT ORDER' : 'URUTAN DAFTAR') 
+                      : sortOrder === 'level' 
+                      ? (language === 'en' ? 'BY LEVEL' : 'URUTAN LEVEL') 
+                      : (language === 'en' ? 'BY RARITY' : 'URUTAN RARITAS')}
                   </span>
                 </div>
                 <span className="text-[10px] text-orange-400">▲</span>
@@ -208,7 +231,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
 
           {/* ── MAIN AREA: 2-Row Character Card Grid (matching Image 1 Main Grid) ── */}
           <main className="flex-1 overflow-y-auto pr-1">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3.5">
               {filteredCrew.map(crew => {
                 return (
                   <div
@@ -383,7 +406,9 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-3xl font-black font-display text-white">LV.{selectedCrew.level}</span>
-                  <span className="text-xs font-mono text-amber-400 ml-2 font-bold">{selectedCrew.rarity} SPESIALIS</span>
+                  <span className="text-xs font-mono text-amber-400 ml-2 font-bold">
+                    {selectedCrew.rarity} {language === 'en' ? 'SPECIALIST' : 'SPESIALIS'}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1 text-amber-400">
                   {Array.from({ length: selectedCrew.stars }).map((_, i) => (
@@ -409,9 +434,9 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
             <div className="grid grid-cols-4 gap-1 p-1 bg-[#0E1116] border border-slate-800">
               {[
                 { id: 'status', label: 'STATUS', icon: Activity },
-                { id: 'skills', label: 'KEAHLIAN', icon: Zap },
-                { id: 'equipment', label: 'MODUL', icon: Shield },
-                { id: 'breakthrough', label: 'PRESTASI', icon: Award },
+                { id: 'skills', label: language === 'en' ? 'SKILLS' : 'KEAHLIAN', icon: Zap },
+                { id: 'equipment', label: language === 'en' ? 'MODULE' : 'MODUL', icon: Shield },
+                { id: 'breakthrough', label: language === 'en' ? 'HONORS' : 'PRESTASI', icon: Award },
               ].map(tab => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -436,12 +461,14 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
             {activeTab === 'status' && (
               <div className="space-y-3 font-mono text-xs flex-1">
                 <div className="flex items-center justify-between pb-1 border-b border-slate-800 text-[10px] text-slate-400">
-                  <span>STATISTIK KEMAMPUAN AWAK</span>
-                  <span className="px-1.5 py-0.5 bg-slate-800 text-amber-400 font-bold">KOSMETIK</span>
+                  <span>{language === 'en' ? 'CREW PERFORMANCE STATS' : 'STATISTIK KEMAMPUAN AWAK'}</span>
+                  <span className="px-1.5 py-0.5 bg-slate-800 text-amber-400 font-bold">
+                    {language === 'en' ? 'SPEC' : 'KOSMETIK'}
+                  </span>
                 </div>
                 <div>
                   <div className="flex justify-between text-slate-300 mb-1">
-                    <span>ANALISIS FORENSIK</span>
+                    <span>{language === 'en' ? 'FORENSIC ANALYSIS' : 'ANALISIS FORENSIK'}</span>
                     <span className="font-bold text-amber-400">{selectedCrew.stats.analysis}</span>
                   </div>
                   <div className="w-full bg-black h-2 border border-slate-800">
@@ -451,7 +478,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
 
                 <div>
                   <div className="flex justify-between text-slate-300 mb-1">
-                    <span>ARSITEKTUR SISTEM</span>
+                    <span>{language === 'en' ? 'SYSTEMS ENGINEERING' : 'ARSITEKTUR SISTEM'}</span>
                     <span className="font-bold text-amber-400">{selectedCrew.stats.engineering}</span>
                   </div>
                   <div className="w-full bg-black h-2 border border-slate-800">
@@ -461,7 +488,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
 
                 <div>
                   <div className="flex justify-between text-slate-300 mb-1">
-                    <span>DAYA TEGANGAN EPS</span>
+                    <span>{language === 'en' ? 'EPS VOLTAGE SYSTEMS' : 'DAYA TEGANGAN EPS'}</span>
                     <span className="font-bold text-amber-400">{selectedCrew.stats.powerSystems}</span>
                   </div>
                   <div className="w-full bg-black h-2 border border-slate-800">
@@ -471,7 +498,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
 
                 <div>
                   <div className="flex justify-between text-slate-300 mb-1">
-                    <span>KETAHANAN BAYANGAN</span>
+                    <span>{language === 'en' ? 'ECLIPSE RESILIENCE' : 'KETAHANAN BAYANGAN'}</span>
                     <span className="font-bold text-amber-400">{selectedCrew.stats.resilience}</span>
                   </div>
                   <div className="w-full bg-black h-2 border border-slate-800">
@@ -485,15 +512,17 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
             {activeTab === 'skills' && (
               <div className="space-y-2 flex-1 overflow-y-auto max-h-56 pr-1">
                 <div className="flex items-center justify-between pb-1 border-b border-slate-800 text-[10px] text-slate-400 mb-2">
-                  <span>POHON KEAHLIAN SPESIALIS</span>
-                  <span className="px-1.5 py-0.5 bg-slate-800 text-amber-400 font-bold">KOSMETIK</span>
+                  <span>{language === 'en' ? 'SPECIALIST SKILLS TREE' : 'POHON KEAHLIAN SPESIALIS'}</span>
+                  <span className="px-1.5 py-0.5 bg-slate-800 text-amber-400 font-bold">
+                    {language === 'en' ? 'SPEC' : 'KOSMETIK'}
+                  </span>
                 </div>
                 {selectedCrew.skills.map((s, idx) => (
                   <div key={idx} className="p-2.5 bg-[#181B22] border border-slate-800 space-y-1">
                     <div className="flex items-center justify-between text-xs font-display font-bold text-white uppercase">
                       <span>{s.name}</span>
                       <span className="text-[9px] font-mono px-1.5 py-0.2 bg-black text-amber-400 border border-slate-700">
-                        TINGKAT {s.level}
+                        {language === 'en' ? `TIER ${s.level}` : `TINGKAT ${s.level}`}
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-300 font-sans leading-relaxed">
@@ -509,17 +538,29 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
               <div className="space-y-2 flex-1 text-xs font-mono">
                 <div className="p-2.5 bg-[#181B22] border border-slate-800 flex items-center justify-between">
                   <div>
-                    <div className="font-bold text-white">SETELAN TERMAL DSN-MK4</div>
-                    <div className="text-[10px] text-slate-400">Insulasi sub-zero ruang hampa</div>
+                    <div className="font-bold text-white">
+                      {language === 'en' ? 'DSN-MK4 THERMAL SUIT' : 'SETELAN TERMAL DSN-MK4'}
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      {language === 'en' ? 'Sub-zero vacuum insulation layer' : 'Insulasi sub-zero ruang hampa'}
+                    </div>
                   </div>
-                  <span className="text-[10px] text-emerald-400 font-bold">TERPASANG</span>
+                  <span className="text-[10px] text-emerald-400 font-bold">
+                    {language === 'en' ? 'EQUIPPED' : 'TERPASANG'}
+                  </span>
                 </div>
                 <div className="p-2.5 bg-[#181B22] border border-slate-800 flex items-center justify-between">
                   <div>
-                    <div className="font-bold text-white">MODUL TELEMETRI DUAL-BUS</div>
-                    <div className="text-[10px] text-slate-400">Kompensasi sinyal derau tinggi</div>
+                    <div className="font-bold text-white">
+                      {language === 'en' ? 'DUAL-BUS TELEMETRY MODULE' : 'MODUL TELEMETRI DUAL-BUS'}
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      {language === 'en' ? 'High-noise SNR link filtering' : 'Kompensasi sinyal derau tinggi'}
+                    </div>
                   </div>
-                  <span className="text-[10px] text-emerald-400 font-bold">TERPASANG</span>
+                  <span className="text-[10px] text-emerald-400 font-bold">
+                    {language === 'en' ? 'EQUIPPED' : 'TERPASANG'}
+                  </span>
                 </div>
               </div>
             )}
@@ -530,8 +571,12 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
                 <div className="p-2.5 bg-[#181B22] border border-amber-500/40 flex items-center gap-2.5">
                   <Award className="w-5 h-5 text-amber-400 shrink-0" />
                   <div>
-                    <div className="font-bold text-amber-300">SERTIFIKASI INVESTIGATOR KELAS 1</div>
-                    <div className="text-[10px] text-slate-300 font-sans">Otorisasi forensik kegagalan antariksa penuh.</div>
+                    <div className="font-bold text-amber-300">
+                      {language === 'en' ? 'CLASS 1 INVESTIGATOR CERTIFICATION' : 'SERTIFIKASI INVESTIGATOR KELAS 1'}
+                    </div>
+                    <div className="text-[10px] text-slate-300 font-sans">
+                      {language === 'en' ? 'Full deep space failure forensics authorization.' : 'Otorisasi forensik kegagalan antariksa penuh.'}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -544,7 +589,7 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
                 className="btn-tactical-primary w-full py-3 text-xs tracking-wider text-black flex items-center justify-center gap-2 cursor-pointer shadow-lg font-bold font-display"
               >
                 <UserCheck className="w-4 h-4" />
-                <span>PILIH {selectedCrew.callsign}</span>
+                <span>{language === 'en' ? `DEPLOY ${selectedCrew.callsign}` : `PILIH ${selectedCrew.callsign}`}</span>
               </button>
 
               {onOpenCoopRoom && (
@@ -553,9 +598,9 @@ export const CharacterRoster: React.FC<CharacterRosterProps> = ({ onBack, onSele
                     sounds.playClick(850);
                     onOpenCoopRoom();
                   }}
-                  className="w-full py-2.5 bg-[#161920] border border-black hover:border-orange-500 text-orange-400 hover:text-white font-mono text-[11px] font-bold flex items-center justify-center gap-2 cursor-pointer transition-colors clip-chamfer-sm"
+                  className="w-full py-2 bg-[#1C2027] border border-slate-700 hover:border-amber-400 text-slate-300 hover:text-white text-xs font-mono font-bold tracking-wider transition-colors cursor-pointer"
                 >
-                  <span>MASUK RUANG BERSAMA</span>
+                  {language === 'en' ? 'CO-OP LINK PROTOCOL' : 'BUKA RUANG BERSAMA'}
                 </button>
               )}
             </div>

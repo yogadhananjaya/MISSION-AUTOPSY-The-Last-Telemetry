@@ -1,17 +1,22 @@
 import { create } from 'zustand';
-import type { AnomalyEvidence, CaseFile, GamePhase, RedesignConfiguration, SimulationResult, UserRole } from '../types/mission';
-import { CASE_FILES } from '../data/caseFiles';
+import type { AnomalyEvidence, CaseFile, GamePhase, RedesignConfiguration, SimulationResult, UserRole, RewindResult, DiagnosisGrade } from '../types/mission';
+import { CASE_FILES, getLocalizedCaseFile } from '../data/caseFiles';
 import { runMissionSimulation } from '../utils/simulationEngine';
 import { sounds } from '../utils/soundEngine';
+import type { Language } from '../i18n/translations';
 
 interface MissionState {
+  // Localization State
+  language: Language;
+  setLanguage: (lang: Language) => void;
+
   // Onboarding & Welcoming State
   gameStarted: boolean;
   onboardingStep: 'welcome' | 'enter_name' | 'check_experience' | 'tutorial' | 'ready';
   astronautName: string;
   isFirstTimePlayer: boolean | null;
   tutorialStep: number;
-  currentView: 'lobby' | 'mission';
+  currentView: 'lobby' | 'mission' | 'coop' | 'map' | 'comic' | 'academy';
 
   currentPhase: GamePhase;
   activeCase: CaseFile;
@@ -25,6 +30,8 @@ interface MissionState {
   selectedHypothesisId: string | null;
   hypothesisSubmitted: boolean;
   isHypothesisCorrect: boolean;
+  diagnosisGrade: DiagnosisGrade | null;
+  failedSubmitsCount: number;
   lastSubmitMissingCount: number;
   missionStartedAt: number | null;
 
@@ -33,19 +40,22 @@ interface MissionState {
   simulationResult: SimulationResult | null;
   simulationRunning: boolean;
   simulationProgress: number; // 0 to 100%
+  rewindResult: RewindResult | null;
 
   // Actions
+  setRewindResult: (res: RewindResult) => void;
   // Onboarding Actions
   setAstronautName: (name: string) => void;
   setOnboardingStep: (step: 'welcome' | 'enter_name' | 'check_experience' | 'tutorial' | 'ready') => void;
   setIsFirstTimePlayer: (isFirst: boolean) => void;
   setTutorialStep: (step: number) => void;
   startGame: () => void;
-  setCurrentView: (view: 'lobby' | 'mission') => void;
+  setCurrentView: (view: 'lobby' | 'mission' | 'coop' | 'map' | 'comic' | 'academy') => void;
 
   setPhase: (phase: GamePhase) => void;
   setRole: (role: UserRole) => void;
   toggleGuidedMode: () => void;
+  setGuidedMode: (guided: boolean) => void;
   toggleAudio: () => void;
   setCurrentTimeMinute: (min: number) => void;
   pinEvidence: (evidence: AnomalyEvidence) => void;
@@ -63,7 +73,8 @@ export const checkPhaseAccess = (
     pinnedEvidences: AnomalyEvidence[];
     hypothesisSubmitted: boolean;
     simulationResult: SimulationResult | null;
-  }
+  },
+  lang: Language = 'en'
 ): { allowed: boolean; reason: string } => {
   if (targetPhase === 'briefing' || targetPhase === 'investigation') {
     return { allowed: true, reason: '' };
@@ -72,7 +83,20 @@ export const checkPhaseAccess = (
     if (state.pinnedEvidences.length === 0) {
       return { 
         allowed: false, 
-        reason: 'Sematkan minimal 1 bukti telemetri terlebih dahulu.' 
+        reason: lang === 'id'
+          ? 'Sematkan minimal 1 bukti telemetri terlebih dahulu.'
+          : 'Pin at least 1 telemetry evidence first.'
+      };
+    }
+    return { allowed: true, reason: '' };
+  }
+  if (targetPhase === 'rewind') {
+    if (!state.hypothesisSubmitted) {
+      return { 
+        allowed: false, 
+        reason: lang === 'id'
+          ? 'Selesaikan diagnosis akar masalah terlebih dahulu.'
+          : 'Complete root cause diagnosis first.'
       };
     }
     return { allowed: true, reason: '' };
@@ -81,7 +105,9 @@ export const checkPhaseAccess = (
     if (!state.hypothesisSubmitted) {
       return { 
         allowed: false, 
-        reason: 'Selesaikan diagnosis akar masalah terlebih dahulu.' 
+        reason: lang === 'id'
+          ? 'Selesaikan diagnosis akar masalah terlebih dahulu.'
+          : 'Complete root cause diagnosis first.'
       };
     }
     return { allowed: true, reason: '' };
@@ -90,7 +116,9 @@ export const checkPhaseAccess = (
     if (!state.hypothesisSubmitted) {
       return { 
         allowed: false, 
-        reason: 'Selesaikan diagnosis akar masalah sebelum simulasi.' 
+        reason: lang === 'id'
+          ? 'Selesaikan diagnosis akar masalah sebelum simulasi.'
+          : 'Complete root cause diagnosis before simulation.'
       };
     }
     return { allowed: true, reason: '' };
@@ -99,7 +127,9 @@ export const checkPhaseAccess = (
     if (!state.simulationResult) {
       return { 
         allowed: false, 
-        reason: 'Luncurkan uji simulasi penerbangan terlebih dahulu.' 
+        reason: lang === 'id'
+          ? 'Luncurkan uji simulasi penerbangan terlebih dahulu.'
+          : 'Launch flight simulation test first.'
       };
     }
     return { allowed: true, reason: '' };
@@ -108,6 +138,18 @@ export const checkPhaseAccess = (
 };
 
 export const useMissionStore = create<MissionState>((set, get) => ({
+  // Localization Initial State (Default: English)
+  language: (typeof window !== 'undefined' && (localStorage.getItem('orbita_nova_lang') as Language)) || 'en',
+  setLanguage: (lang: Language) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('orbita_nova_lang', lang);
+    }
+    set({ 
+      language: lang,
+      activeCase: getLocalizedCaseFile(CASE_FILES[0], lang),
+    });
+  },
+
   // Onboarding Initial State
   gameStarted: false,
   onboardingStep: 'welcome',
@@ -117,7 +159,10 @@ export const useMissionStore = create<MissionState>((set, get) => ({
   currentView: 'lobby',
 
   currentPhase: 'briefing',
-  activeCase: CASE_FILES[0],
+  activeCase: getLocalizedCaseFile(
+    CASE_FILES[0], 
+    (typeof window !== 'undefined' && (localStorage.getItem('orbita_nova_lang') as Language)) || 'en'
+  ),
   selectedRole: 'flight_director',
   guidedMode: true,
   audioEnabled: true,
@@ -127,6 +172,8 @@ export const useMissionStore = create<MissionState>((set, get) => ({
   selectedHypothesisId: null,
   hypothesisSubmitted: false,
   isHypothesisCorrect: false,
+  diagnosisGrade: null,
+  failedSubmitsCount: 0,
   lastSubmitMissingCount: 0,
   missionStartedAt: null,
 
@@ -143,6 +190,9 @@ export const useMissionStore = create<MissionState>((set, get) => ({
   simulationResult: null,
   simulationRunning: false,
   simulationProgress: 0,
+  rewindResult: null,
+
+  setRewindResult: (res) => set({ rewindResult: res }),
 
   setAstronautName: (name) => {
     set({ astronautName: name });
@@ -207,6 +257,11 @@ export const useMissionStore = create<MissionState>((set, get) => ({
     set((state) => ({ guidedMode: !state.guidedMode }));
   },
 
+  setGuidedMode: (guided) => {
+    sounds.playClick(750);
+    set({ guidedMode: guided });
+  },
+
   toggleAudio: () => {
     sounds.enabled = !sounds.enabled;
     set((state) => ({ audioEnabled: !state.audioEnabled }));
@@ -241,20 +296,43 @@ export const useMissionStore = create<MissionState>((set, get) => ({
     const hyp = activeCase.hypotheses.find((h) => h.id === selectedHypothesisId);
     if (!hyp) return false;
 
+    const pinnedRequired = hyp.requiredEvidenceIds.filter(id => pinnedEvidences.some(e => e.id === id));
     const missing = hyp.requiredEvidenceIds.filter(id => !pinnedEvidences.some(e => e.id === id));
-    const isCorrect = hyp.isCorrect;
-    if (isCorrect) {
+
+    let grade: DiagnosisGrade = 'incorrect';
+    if (hyp.isCorrect && missing.length === 0) {
+      grade = 'correct';
+    } else if (hyp.isCorrect || pinnedRequired.length >= 2) {
+      grade = 'partial';
+    } else {
+      grade = 'incorrect';
+    }
+
+    if (grade === 'incorrect') {
+      const prevFails = get().failedSubmitsCount || 0;
+      if (prevFails >= 1 && get().missionStartedAt) {
+        // -30 seconds time penalty on 2nd+ fail
+        set((s) => ({
+          missionStartedAt: (s.missionStartedAt || Date.now()) - 30000,
+          failedSubmitsCount: prevFails + 1,
+        }));
+      } else {
+        set((s) => ({ failedSubmitsCount: (s.failedSubmitsCount || 0) + 1 }));
+      }
+      sounds.playAlarm();
+    } else if (grade === 'correct') {
       sounds.playSuccess();
     } else {
-      sounds.playAlarm();
+      sounds.playEvidenceFound();
     }
 
     set({
-      hypothesisSubmitted: true,
-      isHypothesisCorrect: isCorrect,
+      hypothesisSubmitted: grade !== 'incorrect',
+      isHypothesisCorrect: grade === 'correct',
+      diagnosisGrade: grade,
       lastSubmitMissingCount: missing.length,
     });
-    return isCorrect;
+    return grade !== 'incorrect';
   },
 
   updateRedesignComponent: (category, value) => {

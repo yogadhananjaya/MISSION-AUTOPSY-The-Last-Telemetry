@@ -1,5 +1,61 @@
 @import "tailwindcss";
 
+/* antislop: Authentic tactical sci-fi tokens & CSS variables for high-fidelity technical HUD */
+:root {
+  --nv-bg: #0a1224;      /* Dark Navy */
+  --nv-cyan: #22d3ee;    /* Informasi & Interaksi */
+  --nv-blue: #3b82f6;    /* Sistem & Navigasi */
+  --nv-text: #f8fafc;    /* Teks Utama */
+  --nv-warn: #eab308;    /* Warning */
+  --nv-crit: #ef4444;    /* Kritis */
+  --nv-ok: #22c55e;      /* Aman / Repair Sukses */
+}
+
+/* Agent Poses & Micro-interactions (Q11) */
+@keyframes agentBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.015); }
+}
+
+@keyframes agentLockinPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.8); }
+  50% { transform: scale(1.04); box-shadow: 0 0 20px 4px rgba(234, 179, 8, 0.6); }
+  100% { transform: scale(1.04); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+}
+
+@keyframes agentSpeakingPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+  50% { box-shadow: 0 0 14px 3px rgba(34, 197, 94, 0.9); }
+}
+
+.agent-idle {
+  animation: agentBreath 3.2s ease-in-out infinite;
+}
+
+.agent-selected {
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 2px var(--nv-cyan), 0 8px 20px -4px rgba(34, 211, 238, 0.3);
+}
+
+.agent-lockin {
+  animation: agentLockinPulse 400ms ease-out forwards;
+}
+
+.agent-speaking {
+  animation: agentSpeakingPulse 600ms ease-in-out infinite;
+}
+
+/* Holographic Panel Technical Scanlines (Q13) */
+.holo-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(34, 211, 238, 0.04) 2px,
+    rgba(34, 211, 238, 0.04) 4px
+  );
+}
+
 html {
   zoom: 1.05;
   min-height: 100%;

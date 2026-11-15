@@ -14,6 +14,7 @@ import {
   Volume2
 } from 'lucide-react';
 import { sounds } from '../../utils/soundEngine';
+import { useTranslation } from '../../i18n';
 
 interface CoopRoomLobbyProps {
   onBack: () => void;
@@ -46,6 +47,7 @@ export const CoopRoomLobby: React.FC<CoopRoomLobbyProps> = ({
   onLaunchCoopMission, 
   astronautName 
 }) => {
+  const { language } = useTranslation();
   const [selectedRoleId, setSelectedRoleId] = useState<string>('flight_director');
   const [copiedCode, setCopiedCode] = useState<boolean>(false);
   const [chatMessages, setChatMessages] = useState<Array<{ sender: string; role: string; text: string; time: string }>>([
@@ -63,24 +65,33 @@ export const CoopRoomLobby: React.FC<CoopRoomLobbyProps> = ({
       id: 'flight_director',
       code: '01',
       title: 'FLIGHT DIRECTOR',
-      sublabel: 'COMMAND & RESOURCE CONTROLLER',
+      sublabel: language === 'en' ? 'COMMAND & RESOURCE CONTROLLER' : 'KOMANDO DAN MANAJEMEN SUMBER DAYA',
       icon: Compass,
       color: 'text-[#EAB308]',
       badgeBg: 'bg-[#EAB308] text-black',
       accentBorder: 'border-[#EAB308]',
-      duties: [
+      duties: language === 'en' ? [
+        'Authorize Go/No-Go mission decisions at each flight phase.',
+        'Manage total program budget ceiling up to $65M.',
+        'Select trajectory profile and orbital insertion altitude.',
+        'Coordinate team communications and incident prioritization.'
+      ] : [
         'Otorisasi keputusan Go No-Go di setiap fase misi.',
         'Kendalikan alokasi anggaran total hingga batas 65 juta dollar.',
         'Tentukan profil lintasan orbit wahana penyelidik.',
         'Pimpin koordinasi komunikasi dan tetapkan prioritas tindakan kru.'
       ],
-      exclusiveActions: [
+      exclusiveActions: language === 'en' ? [
+        'Phase Authorization',
+        'Budget Approval',
+        'Trajectory Control'
+      ] : [
         'Otorisasi Fase',
         'Persetujuan Anggaran',
         'Koreksi Lintasan'
       ],
       assignedPlayer: {
-        name: `${(astronautName || 'Mister').toUpperCase()} ANDA`,
+        name: `${(astronautName || 'Cadet').toUpperCase()} ${language === 'en' ? '(YOU)' : '(ANDA)'}`,
         isHost: true,
         ping: '18ms',
         isReady: playerReadyState,
@@ -91,18 +102,27 @@ export const CoopRoomLobby: React.FC<CoopRoomLobbyProps> = ({
       id: 'data_detective',
       code: '02',
       title: 'DATA DETECTIVE',
-      sublabel: 'FORENSIK TELEMETRI KOTAK HITAM',
+      sublabel: language === 'en' ? 'BLACK BOX TELEMETRY FORENSICS' : 'FORENSIK TELEMETRI KOTAK HITAM',
       icon: Activity,
       color: 'text-cyan-400',
       badgeBg: 'bg-cyan-500 text-black',
       accentBorder: 'border-cyan-400',
-      duties: [
+      duties: language === 'en' ? [
+        'Scrub black box timeline across power, thermal, and signal channels.',
+        'Pin critical anomalous telemetry points to evidence files.',
+        'Filter out decoy sensor noise and orbital drift red herrings.',
+        'Formulate scientific hypotheses on the cascading root cause.'
+      ] : [
         'Kendalikan pemutar linimasa telemetri kotak hitam.',
         'Deteksi anomali pada tegangan, suhu, fluks surya, dan sinyal.',
         'Sematkan bukti penting ke berkas resmi penyelidikan.',
         'Rumuskan hipotesis ilmiah akar masalah kegagalan misi.'
       ],
-      exclusiveActions: [
+      exclusiveActions: language === 'en' ? [
+        'Timeline Scrubbing',
+        'Evidence Pinning',
+        'Hypothesis Framing'
+      ] : [
         'Kendali Linimasa',
         'Sematkan Bukti',
         'Tentukan Hipotesis'
@@ -119,18 +139,27 @@ export const CoopRoomLobby: React.FC<CoopRoomLobbyProps> = ({
       id: 'systems_engineer',
       code: '03',
       title: 'SYSTEMS ENGINEER',
-      sublabel: 'SPESIALIS PERANGKAT KERAS WAHANA',
+      sublabel: language === 'en' ? 'SPACECRAFT HARDWARE & CAD SPECIALIST' : 'SPESIALIS PERANGKAT KERAS WAHANA',
       icon: Wrench,
       color: 'text-emerald-400',
       badgeBg: 'bg-emerald-500 text-black',
       accentBorder: 'border-emerald-400',
-      duties: [
+      duties: language === 'en' ? [
+        'Re-engineer spacecraft hardware subsystems in the CAD workbench.',
+        'Select solar generation wings, battery packs, and MLI heaters.',
+        'Balance electrical power load during deep eclipse shadows.',
+        'Verify spacecraft dry mass stays within launch rocket payload capacity.'
+      ] : [
         'Rancang ulang arsitektur wahana pada laboratorium CAD.',
         'Pilih sel surya, kapasitas baterai, dan pemanas termal.',
         'Hitung keseimbangan daya saat fase bayangan gelap.',
         'Pastikan bobot wahana tidak melampaui batas roket peluncur.'
       ],
-      exclusiveActions: [
+      exclusiveActions: language === 'en' ? [
+        'Component Swapping',
+        'Thermal Balancing',
+        'Mass Budgeting'
+      ] : [
         'Ganti Komponen',
         'Keseimbangan Termal',
         'Alokasi Massa'

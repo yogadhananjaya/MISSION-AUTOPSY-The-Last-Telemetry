@@ -4,9 +4,11 @@ import { Play } from 'lucide-react';
 import { useMissionStore } from '../../store/useMissionStore';
 import { sounds } from '../../utils/soundEngine';
 import { getLauncherCapKg } from '../../utils/simulationEngine';
+import { useTranslation } from '../../i18n';
 
 export const MissionBriefing: React.FC = () => {
   const { setPhase, activeCase } = useMissionStore();
+  const { t, language } = useTranslation();
   const mountRef = useRef<HTMLDivElement>(null);
 
   // Holographic 3D Satellite Pedestal Rendering (matching Image 4 Center)
@@ -163,7 +165,7 @@ export const MissionBriefing: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-[#EAB308] rotate-45" />
             <h2 className="text-sm font-bold font-mono-tech tracking-wider text-[#EAB308] uppercase">
-              BRIEFING MISI : KASUS-01
+              {language === 'en' ? 'MISSION BRIEFING : CASE-01' : 'BRIEFING MISI : KASUS-01'}
             </h2>
           </div>
 
@@ -203,31 +205,33 @@ export const MissionBriefing: React.FC = () => {
               <ellipse cx="205" cy="65" rx="12" ry="8" fill="#334155" stroke="#1e293b" />
             </svg>
             <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 border border-slate-700 font-mono-tech text-[10px] text-[#EAB308]">
-              TARGET : ASTEROID BENNU
+              TARGET : {activeCase.targetObject}
             </div>
             <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-rose-950/80 border border-rose-600 font-mono-tech text-[9px] text-rose-300">
-              SINYAL PUTUS : T+04:20:00
+              {language === 'en' ? 'CARRIER LOST : T+04:20:00' : 'SINYAL PUTUS : T+04:20:00'}
             </div>
           </div>
 
           {/* Description text */}
           <div className="border-l-2 border-[#EAB308] pl-3 py-1">
             <div className="text-[10px] font-mono-tech text-slate-400 uppercase tracking-widest">
-              RINGKASAN INSIDEN
+              {t.briefing.incidentDossier}
             </div>
             <p className="text-sm text-slate-200 leading-relaxed font-sans mt-0.5">
-              Wahana pengamat kehilangan sinyal setelah 5 jam beroperasi. Deep Space Network mendeteksi nol sinyal carrier.
+              {activeCase.incidentSummary}
             </p>
           </div>
 
           {/* Objective block */}
           <div className="bg-[#1C1F24] border border-slate-800 p-3.5 space-y-1">
             <div className="text-xs font-bold text-[#EAB308] font-mono-tech uppercase tracking-wide flex items-center justify-between">
-              <span>ARAHAN UTAMA:</span>
-              <span className="text-[10px] text-emerald-400">INVESTIGASI KELAS A</span>
+              <span>{t.briefing.primaryObjective}:</span>
+              <span className="text-[10px] text-emerald-400">
+                {language === 'en' ? 'CLASS-A INVESTIGATION' : 'INVESTIGASI KELAS A'}
+              </span>
             </div>
             <p className="text-xs text-slate-300 font-sans leading-relaxed">
-              Periksa telemetri kotak hitam, buktikan hipotesis kegagalan, dan bangun ulang wahana.
+              {activeCase.objectiveSummary}
             </p>
           </div>
         </div>
@@ -274,13 +278,13 @@ export const MissionBriefing: React.FC = () => {
         <div className="lg:col-span-4 bg-[#141619] border border-black text-white p-6 sm:p-7 space-y-6 clip-chamfer-md shadow-2xl relative">
           
           <div className="absolute top-2 right-3 font-mono-tech text-[10px] text-slate-500">
-            STATUS SISTEM : BATAS TELEMETRI
+            {language === 'en' ? 'SYSTEM ENVELOPE : TELEMETRY' : 'STATUS SISTEM : BATAS TELEMETRI'}
           </div>
 
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-[#EAB308] rotate-45" />
             <h2 className="text-sm font-bold font-mono-tech tracking-wider text-[#EAB308] uppercase">
-              BATAS TELEMETRI MISI
+              {language === 'en' ? 'MISSION ENVELOPE LIMITS' : 'BATAS TELEMETRI MISI'}
             </h2>
           </div>
 
@@ -288,7 +292,9 @@ export const MissionBriefing: React.FC = () => {
             {/* 1. Budget: $65M */}
             <div className="space-y-1.5 bg-[#1C1F24] p-3 border border-slate-800">
               <div className="flex items-center justify-between text-white font-medium">
-                <span className="text-slate-300">01 : BATAS ANGGARAN</span>
+                <span className="text-slate-300">
+                  {language === 'en' ? '01 : BUDGET CAP' : '01 : BATAS ANGGARAN'}
+                </span>
                 <span className="font-bold text-[#EAB308]">${activeCase.budgetCapMillion}M MAX</span>
               </div>
               <div className="w-full bg-black h-2 overflow-hidden border border-slate-700">
@@ -299,7 +305,9 @@ export const MissionBriefing: React.FC = () => {
             {/* 2. Mass: 140 kg */}
             <div className="space-y-1.5 bg-[#1C1F24] p-3 border border-slate-800">
               <div className="flex items-center justify-between text-white font-medium">
-                <span className="text-slate-300">02 : MASSA PELUNCURAN</span>
+                <span className="text-slate-300">
+                  {language === 'en' ? '02 : LAUNCH MASS CAP' : '02 : MASSA PELUNCURAN'}
+                </span>
                 <span className="font-bold text-cyan-400">{getLauncherCapKg('launch_smallsat_rideshare')} KG</span>
               </div>
               <div className="w-full bg-black h-2 overflow-hidden border border-slate-700">
@@ -310,7 +318,9 @@ export const MissionBriefing: React.FC = () => {
             {/* 3. Power: 78% */}
             <div className="space-y-1.5 bg-[#1C1F24] p-3 border border-slate-800">
               <div className="flex items-center justify-between text-white font-medium">
-                <span className="text-slate-300">03 : DAYA SURYA</span>
+                <span className="text-slate-300">
+                  {language === 'en' ? '03 : SOLAR BUDGET' : '03 : DAYA SURYA'}
+                </span>
                 <span className="font-bold text-amber-400">78%</span>
               </div>
               <div className="w-full bg-black h-2 overflow-hidden border border-slate-700">
@@ -321,7 +331,9 @@ export const MissionBriefing: React.FC = () => {
             {/* 4. Fuel: 85% */}
             <div className="space-y-1.5 bg-[#1C1F24] p-3 border border-slate-800">
               <div className="flex items-center justify-between text-white font-medium">
-                <span className="text-slate-300">04 : PROPULSI DELTA-V</span>
+                <span className="text-slate-300">
+                  {language === 'en' ? '04 : DELTA-V PROPULSION' : '04 : PROPULSI DELTA-V'}
+                </span>
                 <span className="font-bold text-emerald-400">85%</span>
               </div>
               <div className="w-full bg-black h-2 overflow-hidden border border-slate-700">
@@ -342,7 +354,7 @@ export const MissionBriefing: React.FC = () => {
           className="btn-tactical-primary px-8 sm:px-10 py-3.5 text-black font-display font-black text-sm sm:text-base tracking-wider flex items-center gap-3 cursor-pointer shadow-xl hover:scale-[1.02] transition-all"
         >
           <Play className="w-4 h-4 fill-current text-black" />
-          <span>MULAI INVESTIGASI</span>
+          <span>{t.briefing.startInvestigation}</span>
         </button>
       </div>
 

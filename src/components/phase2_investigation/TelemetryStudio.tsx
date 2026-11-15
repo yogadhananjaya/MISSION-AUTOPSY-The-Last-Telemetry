@@ -21,6 +21,9 @@ import { sounds } from '../../utils/soundEngine';
 import { SatelliteVisualizer } from './SatelliteVisualizer';
 import { BlackBoxAudioPlayer } from './BlackBoxAudioPlayer';
 import { AstroMascot } from '../onboarding/AstroMascot';
+import { ShipHotspotView } from './ShipHotspotView';
+import { FEATURES } from '../../config/features';
+import { useTranslation } from '../../i18n';
 
 export const TelemetryStudio: React.FC = () => {
   const { 
@@ -32,8 +35,10 @@ export const TelemetryStudio: React.FC = () => {
     unpinEvidence, 
     setPhase
   } = useMissionStore();
+  const { t, language } = useTranslation();
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<'telemetry' | 'hotspot'>('telemetry');
 
   // Auto-play scrubber effect
   useEffect(() => {
@@ -176,6 +181,45 @@ export const TelemetryStudio: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Tab Mode: Kurva vs Penampang Cetak Biru (Q9) */}
+      {FEATURES.shipHotspots && (
+        <div className="flex items-center gap-2 bg-[#141619] border border-black p-1.5 rounded-lg font-mono-tech text-xs">
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick(500);
+              setViewMode('telemetry');
+            }}
+            className={`flex-1 py-2 px-3 rounded font-bold transition-all cursor-pointer text-center ${
+              viewMode === 'telemetry'
+                ? 'bg-amber-400 text-black shadow-md'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            {language === 'en' ? 'TELEMETRY PLOT CURVES' : 'ANALISIS KURVA TELEMETRI'}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              sounds.playClick(500);
+              setViewMode('hotspot');
+            }}
+            className={`flex-1 py-2 px-3 rounded font-bold transition-all cursor-pointer text-center ${
+              viewMode === 'hotspot'
+                ? 'bg-amber-400 text-black shadow-md'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            {language === 'en' ? 'SPACECRAFT SCHEMATIC / HOTSPOTS' : 'PENAMPANG KAPAL / HOTSPOT'}
+          </button>
+        </div>
+      )}
+
+      {/* Render Hotspot Blueprint View when active */}
+      {FEATURES.shipHotspots && viewMode === 'hotspot' && (
+        <ShipHotspotView />
+      )}
 
       {/* =========================================================================
           FEATURE 1: QUICK ANOMALY SNAP POINTS (4 Glitch Jump Buttons)
@@ -323,14 +367,14 @@ export const TelemetryStudio: React.FC = () => {
             : 'bg-[#141619] border-black text-slate-300'
         }`}>
           <div className="flex items-center justify-between text-[10px] text-slate-400">
-            <span>CH-01 : VOLTASE</span>
+            <span>CH-01 : {t.investigation.busVoltage}</span>
             <Zap className="w-3.5 h-3.5 text-[#EAB308]" />
           </div>
           <div className="text-xl font-bold mt-1 text-white">
             {currentPoint.busVoltage} <span className="text-xs text-slate-400">V</span>
           </div>
           <div className="text-[10px] mt-1 text-slate-400">
-            {currentPoint.busVoltage < 22.0 ? 'DARURAT UVLO' : 'Batas Aman : 22.0V'}
+            {currentPoint.busVoltage < 22.0 ? (language === 'en' ? 'UVLO CRITICAL' : 'DARURAT UVLO') : (language === 'en' ? 'Safe Limit : 22.0V' : 'Batas Aman : 22.0V')}
           </div>
         </div>
 
@@ -341,14 +385,14 @@ export const TelemetryStudio: React.FC = () => {
             : 'bg-[#141619] border-black text-slate-300'
         }`}>
           <div className="flex items-center justify-between text-[10px] text-slate-400">
-            <span>CH-02 : DAYA SURYA</span>
+            <span>CH-02 : {t.investigation.solarGeneration}</span>
             <Zap className="w-3.5 h-3.5 text-[#EAB308]" />
           </div>
           <div className="text-xl font-bold mt-1 text-white">
             {currentPoint.solarOutput} <span className="text-xs text-slate-400">W</span>
           </div>
           <div className="text-[10px] mt-1 text-slate-400">
-            {currentPoint.isEclipse ? 'BAYANGAN 0W' : 'TERANG MATAHARI'}
+            {currentPoint.isEclipse ? (language === 'en' ? 'UMBRA 0W' : 'BAYANGAN 0W') : (language === 'en' ? 'SUNLIT' : 'TERANG MATAHARI')}
           </div>
         </div>
 
@@ -361,14 +405,14 @@ export const TelemetryStudio: React.FC = () => {
             : 'bg-[#141619] border-black text-slate-300'
         }`}>
           <div className="flex items-center justify-between text-[10px] text-slate-400">
-            <span>CH-03 : DAYA BATERAI</span>
+            <span>CH-03 : {t.investigation.batterySOC}</span>
             <Battery className="w-3.5 h-3.5 text-[#EAB308]" />
           </div>
           <div className="text-xl font-bold mt-1 text-white">
             {currentPoint.batterySOC} <span className="text-xs text-slate-400">%</span>
           </div>
           <div className="text-[10px] mt-1 text-slate-400">
-            KAPASITAS : 400 WH
+            {language === 'en' ? 'CAPACITY : 400 WH' : 'KAPASITAS : 400 WH'}
           </div>
         </div>
 
@@ -381,28 +425,28 @@ export const TelemetryStudio: React.FC = () => {
             : 'bg-[#141619] border-black text-slate-300'
         }`}>
           <div className="flex items-center justify-between text-[10px] text-slate-400">
-            <span>CH-04 : SUHU BATERAI</span>
+            <span>CH-04 : {t.investigation.batteryTemp}</span>
             <Thermometer className="w-3.5 h-3.5 text-cyan-400" />
           </div>
           <div className="text-xl font-bold mt-1 text-white">
             {currentPoint.batteryTemp} <span className="text-xs text-slate-400">°C</span>
           </div>
           <div className="text-[10px] mt-1 text-slate-400">
-            {currentPoint.batteryTemp < -10 ? 'BEKU TOTAL' : 'Rentang Normal'}
+            {currentPoint.batteryTemp < -10 ? (language === 'en' ? 'CRYOGENIC FREEZE' : 'BEKU TOTAL') : (language === 'en' ? 'Nominal Range' : 'Rentang Normal')}
           </div>
         </div>
 
         {/* CH-05 Power Consumption */}
         <div className="p-3 border border-black bg-[#141619] font-mono-tech text-slate-300">
           <div className="flex items-center justify-between text-[10px] text-slate-400">
-            <span>CH-05 : KONSUMSI DAYA</span>
+            <span>CH-05 : {t.investigation.powerLoad}</span>
             <Zap className="w-3.5 h-3.5 text-[#EAB308]" />
           </div>
           <div className="text-xl font-bold mt-1 text-white">
             {currentPoint.powerConsumption} <span className="text-xs text-slate-400">W</span>
           </div>
           <div className="text-[10px] mt-1 text-slate-400">
-            {currentPoint.powerConsumption > 160 ? 'DEFISIT ENERGI' : 'BEBAN SEIMBANG'}
+            {currentPoint.powerConsumption > 160 ? (language === 'en' ? 'ENERGY DEFICIT' : 'DEFISIT ENERGI') : (language === 'en' ? 'LOAD BALANCED' : 'BEBAN SEIMBANG')}
           </div>
         </div>
 
@@ -415,14 +459,14 @@ export const TelemetryStudio: React.FC = () => {
             : 'bg-[#141619] border-black text-slate-300'
         }`}>
           <div className="flex items-center justify-between text-[10px] text-slate-400">
-            <span>CH-06 : KEKUATAN SINYAL</span>
+            <span>CH-06 : {t.investigation.linkSNR}</span>
             <Radio className="w-3.5 h-3.5 text-[#10B981]" />
           </div>
           <div className="text-xl font-bold mt-1 text-white">
             {currentPoint.signalSNR} <span className="text-xs text-slate-400">dB</span>
           </div>
           <div className="text-[10px] mt-1 text-slate-400">
-            {currentPoint.signalSNR <= 0 ? 'SINYAL HILANG' : 'SINYAL NORMAL'}
+            {currentPoint.signalSNR <= 0 ? (language === 'en' ? 'CARRIER LOST' : 'SINYAL HILANG') : (language === 'en' ? 'NOMINAL CARRIER' : 'SINYAL NORMAL')}
           </div>
         </div>
 
@@ -678,16 +722,21 @@ export const TelemetryStudio: React.FC = () => {
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <div className="flex items-center gap-2 font-mono-tech text-xs font-bold text-white">
               <Layers className="w-4 h-4 text-[#EAB308]" />
-              <span>BERKAS BUKTI INVESTIGASI : {pinnedEvidences.length} BUKTI</span>
+              <span>
+                {language === 'en' ? 'INVESTIGATION EVIDENCE TRAY : ' : 'BERKAS BUKTI INVESTIGASI : '}
+                {pinnedEvidences.length} {language === 'en' ? 'EVIDENCE' : 'BUKTI'}
+              </span>
             </div>
             <span className="text-[11px] text-slate-400 font-mono-tech">
-              MINIMAL 2 BUKTI DIPERLUKAN
+              {language === 'en' ? 'MINIMUM 2 EVIDENCE REQUIRED' : 'MINIMAL 2 BUKTI DIPERLUKAN'}
             </span>
           </div>
 
           {pinnedEvidences.length === 0 ? (
             <p className="text-xs text-slate-400 font-mono-tech py-4 text-center">
-              Belum ada bukti tersemat. Geser linimasa ke titik anomali lalu klik Sematkan.
+              {language === 'en' 
+                ? 'No evidence pinned yet. Scrub the timeline to anomaly points and pin findings.' 
+                : 'Belum ada bukti tersemat. Geser linimasa ke titik anomali lalu klik Sematkan.'}
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -698,7 +747,9 @@ export const TelemetryStudio: React.FC = () => {
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[#EAB308] font-bold">BUKTI {String(idx + 1).padStart(2, '0')} : {ev.timeStr}</span>
+                      <span className="text-[#EAB308] font-bold">
+                        {language === 'en' ? 'EVIDENCE' : 'BUKTI'} {String(idx + 1).padStart(2, '0')} : {ev.timeStr}
+                      </span>
                       <span className="text-[10px] text-slate-400 uppercase">{ev.metric}</span>
                     </div>
                     <div className="text-white font-semibold mt-1">{ev.value}</div>
@@ -708,7 +759,7 @@ export const TelemetryStudio: React.FC = () => {
                     onClick={() => unpinEvidence(ev.id)}
                     className="text-[10px] text-rose-400 hover:text-rose-300 self-end mt-2 cursor-pointer font-bold"
                   >
-                    HAPUS
+                    {language === 'en' ? 'REMOVE' : 'HAPUS'}
                   </button>
                 </div>
               ))}
@@ -720,13 +771,15 @@ export const TelemetryStudio: React.FC = () => {
         <div className="bg-[#141619] border border-black text-white p-5 flex flex-col justify-between clip-chamfer-md shadow-2xl">
           <div>
             <div className="text-[10px] font-mono-tech text-slate-500 uppercase">
-              FASE BERIKUTNYA
+              {language === 'en' ? 'NEXT PHASE' : 'FASE BERIKUTNYA'}
             </div>
             <h3 className="font-display font-bold text-base text-white mt-1">
-              MENUJU MATRIKS AKAR MASALAH
+              {t.investigation.proceedToRootCause}
             </h3>
             <p className="text-xs text-slate-300 mt-1.5 font-sans leading-relaxed">
-              Hubungkan anomali listrik, termal, dan bayangan untuk membuktikan urutan kegagalan wahana.
+              {language === 'en'
+                ? 'Correlate electrical, thermal, and shadow anomalies to prove the cascading failure chain.'
+                : 'Hubungkan anomali listrik, termal, dan bayangan untuk membuktikan urutan kegagalan wahana.'}
             </p>
           </div>
 
@@ -742,7 +795,7 @@ export const TelemetryStudio: React.FC = () => {
                 : 'bg-[#1C1F24] text-slate-600 border border-slate-800 cursor-not-allowed'
             }`}
           >
-            <span>LANJUTKAN HIPOTESIS</span>
+            <span>{language === 'en' ? 'PROCEED TO HYPOTHESIS' : 'LANJUTKAN HIPOTESIS'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

@@ -8,29 +8,31 @@ import {
   Maximize2,
   Wrench,
   Radio,
-  FolderGit2,
   Repeat,
   Mail,
   Settings,
   ChevronRight,
   Sparkles,
   Rocket,
-  Activity,
-  Lock
+  Globe,
+  GraduationCap
 } from 'lucide-react';
-import { CREW_MEMBERS } from '../../data/crewData';
+import { CREW_MEMBERS, getLocalizedCrew } from '../../data/crewData';
 import { MissionSelector } from './MissionSelector';
 import { CharacterRoster } from './CharacterRoster';
 import { CoopRoomLobby } from './CoopRoomLobby';
 import { useMissionStore } from '../../store/useMissionStore';
 import { sounds } from '../../utils/soundEngine';
+import { useTranslation } from '../../i18n';
+import { FEATURES } from '../../config/features';
 
 interface MainLobbyProps {
   onStartNewGame: () => void;
   onResumeGame: () => void;
+  onOpenLeaderboard?: () => void;
 }
 
-export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGame }) => {
+export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGame, onOpenLeaderboard }) => {
   const { 
     astronautName, 
     audioEnabled, 
@@ -41,6 +43,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
     pinnedEvidences,
     simulationResult
   } = useMissionStore();
+  const { language, setLanguage } = useTranslation();
 
   const [activeCrewIndex, setActiveCrewIndex] = useState<number>(0);  // Default: NOVA
   const [showMissionModal, setShowMissionModal] = useState<boolean>(false);
@@ -48,9 +51,8 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
   const [showCoopModal, setShowCoopModal] = useState<boolean>(false);
   const [showAchievementModal, setShowAchievementModal] = useState<boolean>(false);
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
-  const [lobbyNotice, setLobbyNotice] = useState<string | null>(null);
 
-  const currentCrew = CREW_MEMBERS[activeCrewIndex];
+  const currentCrew = getLocalizedCrew(CREW_MEMBERS[activeCrewIndex] || CREW_MEMBERS[0], language);
 
   const handleSmartResume = () => {
     sounds.playClick(850);
@@ -67,12 +69,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
   };
 
   const handleOpenGudang = () => {
-    if (!hypothesisSubmitted) {
-      sounds.playAlarm();
-      setLobbyNotice('Gudang terkunci. Selesaikan diagnosis akar masalah terlebih dahulu.');
-      setTimeout(() => setLobbyNotice(null), 3500);
-      return;
-    }
+    // antislop: Per final direction, Hangar is modular satellite refit accessible anytime from Hub
     sounds.playClick(700);
     setPhase('redesign');
     setCurrentView('mission');
@@ -245,8 +242,20 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
             <Settings className="w-4 h-4" />
           </div>
 
-          {/* Audio & Fullscreen buttons */}
-          <div className="hidden sm:flex items-center gap-1 pl-1 border-l border-black">
+          {/* Audio, Language & Fullscreen buttons */}
+          <div className="hidden sm:flex items-center gap-1.5 pl-1 border-l border-black">
+            {/* Language Switcher */}
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+              title={language === 'en' ? 'Switch to Bahasa Indonesia' : 'Switch to English'}
+              className="flex items-center gap-1.5 px-2 py-1.5 bg-[#14171E] border border-black hover:border-orange-500 rounded text-xs font-mono font-bold text-slate-300 hover:text-white transition-colors cursor-pointer"
+            >
+              <Globe className="w-3.5 h-3.5 text-orange-400" />
+              <span className={language === 'en' ? 'text-orange-400' : 'text-slate-500'}>EN</span>
+              <span className="text-slate-600">/</span>
+              <span className={language === 'id' ? 'text-orange-400' : 'text-slate-500'}>ID</span>
+            </button>
+
             <button 
               onClick={toggleAudio}
               className="p-2 bg-[#14171E] border border-black rounded text-slate-300 hover:text-orange-400 transition-colors cursor-pointer"
@@ -264,16 +273,6 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
 
       </header>
 
-      {/* Lobby Locked Notice Toast */}
-      {lobbyNotice && (
-        <div className="relative z-30 bg-amber-500/10 border-b border-amber-500/40 text-amber-300 py-2 px-4 text-center font-mono text-xs flex items-center justify-center gap-2">
-          <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-          <span className="font-bold">AKSES DIBATASI:</span>
-          <span>{lobbyNotice}</span>
-        </div>
-      )}
-
-
       {/* =========================================================================
           3. MAIN ARENA: CENTER CHARACTER & ASYMMETRIC HUD (IMAGE 2 REPLICA)
           ========================================================================= */}
@@ -285,10 +284,22 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
           {/* Vertical Menu Items */}
           <div className="space-y-3.5 pt-2">
             {[
-              { id: 'new_game', title: 'GAME BARU', subtitle: 'KASUS PERDANA', icon: Sparkles, onClick: () => onStartNewGame() },
-              { id: 'missions', title: 'TUGAS', subtitle: 'MISI INVESTIGASI', icon: Compass, onClick: () => setShowMissionModal(true) },
-              { id: 'events', title: 'EVENT', subtitle: 'PROTOKOL DSN 2026', icon: Trophy, onClick: () => setShowAchievementModal(true) },
-              { id: 'logistics', title: 'LOGISTIK', subtitle: 'KLAIM HARIAN', icon: FolderGit2, onClick: () => setShowSettingsModal(true) },
+              { id: 'new_game', title: language === 'en' ? 'NEW MISSION' : 'GAME BARU', subtitle: language === 'en' ? 'CASE DOSSIER' : 'KASUS PERDANA', icon: Sparkles, onClick: () => onStartNewGame() },
+              { id: 'missions', title: language === 'en' ? 'SPACE MAP' : 'PETA MISI', subtitle: language === 'en' ? 'EPISODES 01-06' : 'EPISODE 01-06', icon: Compass, onClick: () => {
+                if (FEATURES.spaceMap) {
+                  setCurrentView('map');
+                } else {
+                  setShowMissionModal(true);
+                }
+              }},
+              { id: 'academy', title: language === 'en' ? 'ACADEMY' : 'AKADEMI', subtitle: language === 'en' ? '6 STUDY MODULES' : '6 MODUL PEMBELAJARAN', icon: GraduationCap, onClick: () => setCurrentView('academy') },
+              { id: 'events', title: language === 'en' ? 'LEADERBOARD' : 'PERINGKAT', subtitle: language === 'en' ? 'WEEKLY RANKING' : 'TANTANGAN MINGGUAN', icon: Trophy, onClick: () => {
+                if (FEATURES.leaderboardLocal && onOpenLeaderboard) {
+                  onOpenLeaderboard();
+                } else {
+                  setShowAchievementModal(true);
+                }
+              }},
             ].map(item => {
               const Icon = item.icon;
               return (
@@ -370,7 +381,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
           <div className="flex items-center justify-end">
             <div className="px-3 py-1 bg-[#14171E] border border-black text-orange-400 text-xs font-mono font-bold flex items-center gap-2 clip-chamfer-sm shadow-md">
               <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping" />
-              <span>ORBITA NOVA : KADET AKTIF</span>
+              <span>{language === 'en' ? 'ORBITA NOVA : ACTIVE CADET' : 'ORBITA NOVA : KADET AKTIF'}</span>
             </div>
           </div>
 
@@ -379,8 +390,8 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
             
             {/* Progres Tag */}
             <div className="flex items-center justify-between text-xs font-mono border-b border-black/80 pb-2">
-              <span className="text-slate-400">PROGRES AKTIF : KASUS 01</span>
-              <span className="text-orange-400 font-bold">FASE FORENSIK</span>
+              <span className="text-slate-400">{language === 'en' ? 'ACTIVE PROGRESS : CASE 01' : 'PROGRES AKTIF : KASUS 01'}</span>
+              <span className="text-orange-400 font-bold">{language === 'en' ? 'FORENSIC PHASE' : 'FASE FORENSIK'}</span>
             </div>
 
             {/* Target Title & Insignia */}
@@ -390,10 +401,12 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
               </div>
               <div>
                 <h3 className="font-display font-black text-base text-white uppercase tracking-wide">
-                  ASTER-9 : UMBRA ANTARIKSA
+                  ASTER-9 : UMBRA FORENSICS
                 </h3>
                 <p className="text-[11px] text-slate-300 font-sans leading-tight mt-0.5">
-                  Wahana hilang kontak saat memasuki bayangan gerhana asteroid.
+                  {language === 'en' 
+                    ? 'Spacecraft telemetry lost entering asteroid eclipse shadow.' 
+                    : 'Wahana hilang kontak saat memasuki bayangan gerhana asteroid.'}
                 </p>
               </div>
             </div>
@@ -405,10 +418,10 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
             >
               <div className="text-left leading-tight">
                 <div className="text-base font-black uppercase text-black">
-                  LUNCURKAN
+                  {language === 'en' ? 'LAUNCH' : 'LUNCURKAN'}
                 </div>
                 <div className="text-[9px] font-mono text-black/90 font-bold tracking-widest uppercase">
-                  MULAI INVESTIGASI
+                  {language === 'en' ? 'COMMENCE INVESTIGATION' : 'MULAI INVESTIGASI'}
                 </div>
               </div>
               <ChevronRight className="w-6 h-6 text-black" />
@@ -428,69 +441,53 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
               </div>
               <div>
                 <div className="font-display font-bold text-xs text-white uppercase tracking-wide group-hover:text-orange-400 transition-colors">
-                  AWAK
+                  {language === 'en' ? 'CREW' : 'AWAK'}
                 </div>
                 <div className="text-[9px] font-mono text-slate-400">
-                  ALBUM SPESIALIS
+                  {language === 'en' ? 'SPECIALIST ALBUM' : 'ALBUM SPESIALIS'}
                 </div>
               </div>
             </div>
 
-            {/* Tile 2: GUDANG (Spacecraft Redesign - Locked if not diagnosed) */}
+            {/* Tile 2: GUDANG / HANGAR (Accessible anytime per final direction) */}
             <div 
               onClick={handleOpenGudang}
-              className={`group p-3 bg-[#14171E] border rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3 relative ${
-                hypothesisSubmitted 
-                  ? 'border-black hover:border-orange-500' 
-                  : 'border-slate-800 opacity-60'
-              }`}
+              className="group p-3 bg-[#14171E] border border-black hover:border-orange-500 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3 relative"
             >
-              <div className={`p-2 bg-[#0B0D12] rounded transition-colors ${
-                hypothesisSubmitted 
-                  ? 'group-hover:bg-orange-500 group-hover:text-black text-orange-400' 
-                  : 'text-slate-500'
-              }`}>
-                {hypothesisSubmitted ? <Wrench className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+              <div className="p-2 bg-[#0B0D12] group-hover:bg-orange-500 group-hover:text-black text-orange-400 rounded transition-colors">
+                <Wrench className="w-5 h-5" />
               </div>
               <div>
                 <div className="font-display font-bold text-xs text-white uppercase tracking-wide group-hover:text-orange-400 transition-colors flex items-center gap-1.5">
-                  <span>GUDANG</span>
-                  {!hypothesisSubmitted && (
-                    <span className="text-[8px] font-mono px-1 bg-amber-500/20 text-amber-400 border border-amber-500/40">
-                      KUNCI
-                    </span>
-                  )}
+                  <span>{language === 'en' ? 'HANGAR' : 'GUDANG'}</span>
                 </div>
                 <div className="text-[9px] font-mono text-slate-400">
-                  {hypothesisSubmitted ? 'REKAYASA MODUL' : 'BUTUH DIAGNOSIS'}
+                  {language === 'en' ? 'SATELLITE REFIT' : 'REKAYASA MODUL'}
                 </div>
               </div>
             </div>
 
-            {/* Tile 3: LAB TELEMETRI */}
+            {/* Tile 3: ACADEMY (Space Learning Center) */}
             <div 
-              onClick={() => {
-                setPhase('investigation');
-                setCurrentView('mission');
-              }}
+              onClick={() => setCurrentView('academy')}
               className="group p-3 bg-[#14171E] border border-black hover:border-orange-500 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
             >
               <div className="p-2 bg-[#0B0D12] group-hover:bg-orange-500 group-hover:text-black text-orange-400 rounded transition-colors">
-                <Activity className="w-5 h-5" />
+                <GraduationCap className="w-5 h-5" />
               </div>
               <div>
                 <div className="font-display font-bold text-xs text-white uppercase tracking-wide group-hover:text-orange-400 transition-colors">
-                  LAB TELEMETRI
+                  {language === 'en' ? 'ACADEMY' : 'AKADEMI'}
                 </div>
                 <div className="text-[9px] font-mono text-slate-400">
-                  ANALISIS KURVA
+                  {language === 'en' ? 'LEARNING CENTER' : 'PUSAT BELAJAR'}
                 </div>
               </div>
             </div>
 
-            {/* Tile 4: RUANG BERSAMA (Co-op) */}
+            {/* Tile 4: RUANG BERSAMA (Co-op Last Stand) */}
             <div 
-              onClick={() => setShowCoopModal(true)}
+              onClick={() => setCurrentView('coop')}
               className="group p-3 bg-[#14171E] border border-black hover:border-orange-500 rounded cursor-pointer transition-all hover:scale-[1.02] shadow-md flex items-center gap-3"
             >
               <div className="p-2 bg-[#0B0D12] group-hover:bg-orange-500 group-hover:text-black text-orange-400 rounded transition-colors">
@@ -501,7 +498,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
                   CO-OP
                 </div>
                 <div className="text-[9px] font-mono text-slate-400">
-                  RUANG BERSAMA
+                  {language === 'en' ? 'LAST STAND' : 'RUANG BERSAMA'}
                 </div>
               </div>
             </div>
@@ -573,7 +570,7 @@ export const MainLobby: React.FC<MainLobbyProps> = ({ onStartNewGame, onResumeGa
           }}
           onOpenCoopRoom={() => {
             setShowCharacterModal(false);
-            setShowCoopModal(true);
+            setCurrentView('coop');
           }}
         />
       )}

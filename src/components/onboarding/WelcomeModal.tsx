@@ -15,11 +15,13 @@ import {
   Sparkles,
   Volume2,
   VolumeX,
-  Play
+  Play,
+  Globe
 } from 'lucide-react';
 import { useMissionStore } from '../../store/useMissionStore';
 import { AstroMascot } from './AstroMascot';
 import { sounds } from '../../utils/soundEngine';
+import { useTranslation } from '../../i18n';
 
 export const WelcomeModal: React.FC = () => {
   const { 
@@ -32,8 +34,11 @@ export const WelcomeModal: React.FC = () => {
     setTutorialStep, 
     startGame,
     audioEnabled,
-    toggleAudio
+    toggleAudio,
+    setGuidedMode
   } = useMissionStore();
+
+  const { language, setLanguage } = useTranslation();
 
   const [inputName, setInputName] = useState(astronautName || '');
   const [nameError, setNameError] = useState('');
@@ -47,7 +52,7 @@ export const WelcomeModal: React.FC = () => {
     if (e) e.preventDefault();
     if (!inputName.trim()) {
       sounds.playAlarm();
-      setNameError('Please enter your explorer / astronaut name!');
+      setNameError(language === 'en' ? 'Please enter your callsign / astronaut name!' : 'Silakan masukkan nama / callsign penjelajah!');
       return;
     }
     setNameError('');
@@ -56,9 +61,10 @@ export const WelcomeModal: React.FC = () => {
     setOnboardingStep('check_experience');
   };
 
-  const handleExperienceSelect = (isFirstTime: boolean) => {
-    setIsFirstTimePlayer(isFirstTime);
-    if (isFirstTime) {
+  const handleExperienceSelect = (isCadet: boolean) => {
+    setIsFirstTimePlayer(isCadet);
+    setGuidedMode(isCadet);
+    if (isCadet) {
       setOnboardingStep('tutorial');
       setTutorialStep(0);
     } else {
@@ -67,7 +73,68 @@ export const WelcomeModal: React.FC = () => {
   };
 
   // Tutorial Steps guided by Nova
-  const TUTORIAL_PAGES = [
+  const TUTORIAL_PAGES = language === 'en' ? [
+    {
+      title: '1 : ASTER-9 INCIDENT BRIEFING',
+      subtitle: 'SPACECRAFT TELEMETRY LOSS',
+      icon: ShieldAlert,
+      mascotMood: 'sad' as const,
+      color: 'text-red-400',
+      description: 
+        'Spacecraft lost telemetry contact during asteroid operations. Inspect degraded sensor packets, diagnose cascading failures, and re-engineer the spacecraft to survive.',
+      tip: 'Telemetry traces preserve the forensic fingerprint of the anomaly.',
+    },
+    {
+      title: '2 : BLACK BOX TELEMETRY STUDIO',
+      subtitle: 'DATA ANALYSIS & EVIDENCE PINNING',
+      icon: Activity,
+      mascotMood: 'analyzing' as const,
+      color: 'text-cyan-400',
+      description: 
+        'Scrub the timeline slider to inspect 4 subsystem channels. Identify thermal and power anomalies. Pin suspicious data points as forensic evidence.',
+      tip: 'Watch closely when the spacecraft enters asteroid eclipse at T+03:20.',
+    },
+    {
+      title: '3 : ROOT CAUSE HYPOTHESIS MATRIX',
+      subtitle: 'SCIENTIFIC CAUSALITY PROOF',
+      icon: Compass,
+      mascotMood: 'explaining' as const,
+      color: 'text-purple-400',
+      description: 
+        'Correlate pinned evidence with competing failure hypotheses. Prove the root cause to the Flight Review Board to unlock the re-engineering laboratory.',
+      tip: 'Accurate diagnosis authorizes emergency spacecraft refit budget.',
+    },
+    {
+      title: '4 : SPACECRAFT RE-ENGINEERING',
+      subtitle: 'TRADE-OFF SUBSYSTEM OPTIMIZATION',
+      icon: Wrench,
+      mascotMood: 'determined' as const,
+      color: 'text-amber-400',
+      description: 
+        'Install high-survivability solar arrays, batteries, and heaters. Respect the $65M budget cap and launch vehicle mass limits. Maintain balance across all subsystems.',
+      tip: 'Heavy batteries add mass; science instruments draw high continuous load.',
+    },
+    {
+      title: '5 : 3D ORBITAL FLIGHT SIMULATION',
+      subtitle: 'ECLIPSE SURVIVABILITY TEST',
+      icon: Rocket,
+      mascotMood: 'determined' as const,
+      color: 'text-blue-400',
+      description: 
+        'Fly your redesign through the asteroid shadow zone in real-time. Verify battery state-of-charge and survival heaters prevent UVLO bus cutoff.',
+      tip: 'Rotate the 3D spacecraft viewport by dragging with the mouse cursor.',
+    },
+    {
+      title: '6 : FLIGHT DEBRIEF & EVALUATION',
+      subtitle: 'NASA 5-PILLAR SYSTEM GRADING',
+      icon: Trophy,
+      mascotMood: 'celebrating' as const,
+      color: 'text-emerald-400',
+      description: 
+        'Receive performance grading across NASA five engineering pillars. Review the Ghost Replay curve and export your mission dossier.',
+      tip: 'Systems online and flight-ready, Explorer.',
+    },
+  ] : [
     {
       title: '1 : BRIEFING INSIDEN ASTER-9',
       subtitle: 'KEGAGALAN WAHANA ANTARIKSA',
@@ -197,12 +264,25 @@ export const WelcomeModal: React.FC = () => {
               </div>
             </div>
 
-            {/* Audio toggle */}
-            <button onClick={toggleAudio}
-              className="p-2 bg-[#14171E] border border-black hover:border-orange-500 text-slate-300 hover:text-white transition-colors cursor-pointer clip-chamfer-sm"
-            >
-              {audioEnabled ? <Volume2 className="w-5 h-5 text-orange-400"/> : <VolumeX className="w-5 h-5 text-slate-500"/>}
-            </button>
+            {/* Language & Audio toggles */}
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+                className="px-2.5 py-1.5 bg-[#14171E] border border-black hover:border-orange-500 text-xs font-mono font-bold text-slate-300 hover:text-white transition-colors cursor-pointer clip-chamfer-sm flex items-center gap-1.5"
+                title={language === 'en' ? 'Ganti ke Bahasa Indonesia' : 'Switch to English'}
+              >
+                <Globe className="w-4 h-4 text-orange-400" />
+                <span className={language === 'en' ? 'text-orange-400' : 'text-slate-500'}>EN</span>
+                <span className="text-slate-600">/</span>
+                <span className={language === 'id' ? 'text-orange-400' : 'text-slate-500'}>ID</span>
+              </button>
+
+              <button onClick={toggleAudio}
+                className="p-2 bg-[#14171E] border border-black hover:border-orange-500 text-slate-300 hover:text-white transition-colors cursor-pointer clip-chamfer-sm"
+              >
+                {audioEnabled ? <Volume2 className="w-5 h-5 text-orange-400"/> : <VolumeX className="w-5 h-5 text-slate-500"/>}
+              </button>
+            </div>
           </div>
 
           {/* Center: Big Title + Tagline + START Button */}
@@ -230,7 +310,7 @@ export const WelcomeModal: React.FC = () => {
 
             {/* Tagline */}
             <p className="text-slate-200 font-mono tracking-wide mt-5 text-sm sm:text-base">
-              Setiap Kegagalan Meninggalkan Jejak Sinyal.
+              {language === 'en' ? 'Every Failure Leaves a Forensic Signal Fingerprint.' : 'Setiap Kegagalan Meninggalkan Jejak Sinyal.'}
             </p>
 
             {/* START Button: Tactical Orange with Black Outline */}
@@ -246,7 +326,7 @@ export const WelcomeModal: React.FC = () => {
               }}
             >
               <Play className="w-5 h-5 fill-current"/>
-              <span>MULAI</span>
+              <span>{language === 'en' ? 'START MISSION' : 'MULAI'}</span>
             </button>
           </div>
 
@@ -311,15 +391,15 @@ export const WelcomeModal: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Star className="w-5 h-5 fill-orange-400 text-orange-400 drop-shadow-[0_0_8px_#f97316]"/>
                   <h2 className="text-lg sm:text-xl font-bold text-white tracking-wide font-display uppercase">
-                    Halo, Penjelajah!
+                    {language === 'en' ? 'Hello, Explorer!' : 'Halo, Penjelajah!'}
                   </h2>
                 </div>
 
                 <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-sans">
-                  Saya Nova, pemandu misi Anda.
+                  {language === 'en' ? 'I am Nova, your flight guidance system.' : 'Saya Nova, pemandu misi Anda.'}
                 </p>
                 <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-sans">
-                  Mari selidiki penyebab kegagalan wahana ini bersama.
+                  {language === 'en' ? "Let's investigate the spacecraft failure together." : 'Mari selidiki penyebab kegagalan wahana ini bersama.'}
                 </p>
 
                 <div className="flex justify-end pt-1">
@@ -340,7 +420,7 @@ export const WelcomeModal: React.FC = () => {
                       type="text"
                       value={inputName}
                       onChange={(e) => { setInputName(e.target.value); if (nameError) setNameError(''); }}
-                      placeholder="Masukkan nama Anda..."
+                      placeholder={language === 'en' ? 'Enter callsign / astronaut name...' : 'Masukkan nama Anda...'}
                       className="w-full bg-transparent font-mono text-sm sm:text-base text-white placeholder:text-slate-500 focus:outline-none"
                       autoFocus
                     />
@@ -357,14 +437,14 @@ export const WelcomeModal: React.FC = () => {
                     className="text-xs font-mono text-slate-400 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <ArrowLeft className="w-4 h-4"/>
-                    <span>KEMBALI</span>
+                    <span>{language === 'en' ? 'BACK' : 'KEMBALI'}</span>
                   </button>
 
                   <button type="submit"
                     className="btn-tactical-primary px-8 py-2.5 text-black font-display font-black text-sm tracking-wider cursor-pointer shadow-lg hover:scale-105 active:scale-95 transition-all"
                   >
                     <Play className="w-4 h-4 fill-current"/>
-                    <span>LANJUT</span>
+                    <span>{language === 'en' ? 'PROCEED' : 'LANJUT'}</span>
                   </button>
                 </div>
               </form>
@@ -393,7 +473,9 @@ export const WelcomeModal: React.FC = () => {
           <div className="relative z-10 flex justify-center px-6 pt-10 pb-4">
             <div className="max-w-xl w-full p-5 text-center bg-[#14171E] border border-black border-t-2 border-t-orange-500 clip-chamfer-md shadow-2xl">
               <h2 className="text-base sm:text-lg md:text-xl font-bold text-white font-display uppercase tracking-wide">
-                Sebelum mulai, apakah Anda sudah memahami alur investigasi?
+                {language === 'en' 
+                  ? 'SELECT YOUR FLIGHT PROTOCOL & DIFFICULTY' 
+                  : 'PILIH PROTOKOL & TINGKAT KESULITAN MISI'}
               </h2>
             </div>
           </div>
@@ -413,7 +495,7 @@ export const WelcomeModal: React.FC = () => {
             {/* Two choice cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-sm sm:max-w-md">
               
-              {/* Card 1: Not Yet */}
+              {/* Card 1: Cadet Mode */}
               <button
                 onClick={() => handleExperienceSelect(true)}
                 className="cursor-pointer p-6 flex flex-col items-center text-center space-y-4 bg-[#14171E] border border-black hover:border-orange-500 transition-all hover:scale-105 clip-chamfer-md shadow-xl group"
@@ -422,12 +504,18 @@ export const WelcomeModal: React.FC = () => {
                   <BookOpen className="w-8 h-8 text-orange-400 group-hover:text-orange-200 transition-colors"/>
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-white font-display uppercase">BELUM PAHAM</h3>
-                  <p className="text-xs text-slate-300 mt-1">Pelajari panduan dulu.</p>
+                  <h3 className="font-bold text-lg text-white font-display uppercase">
+                    {language === 'en' ? 'CADET MODE' : 'MODE KADET'}
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    {language === 'en' 
+                      ? 'Full guidance, telemetry hints & foundational tutorial.' 
+                      : 'Panduan, petunjuk telemetri & penjelasan lengkap.'}
+                  </p>
                 </div>
               </button>
 
-              {/* Card 2: Yes I'm Ready */}
+              {/* Card 2: Engineer Mode */}
               <button
                 onClick={() => handleExperienceSelect(false)}
                 className="cursor-pointer p-6 flex flex-col items-center text-center space-y-4 bg-[#14171E] border border-orange-500/80 hover:border-orange-400 transition-all hover:scale-105 clip-chamfer-md shadow-xl group"
@@ -436,8 +524,14 @@ export const WelcomeModal: React.FC = () => {
                   <Rocket className="w-8 h-8 text-black"/>
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-orange-400 font-display uppercase">SUDAH SIAP</h3>
-                  <p className="text-xs text-slate-300 mt-1">Langsung mulai misi.</p>
+                  <h3 className="font-bold text-lg text-orange-400 font-display uppercase">
+                    {language === 'en' ? 'ENGINEER MODE' : 'MODE INSINYUR'}
+                  </h3>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    {language === 'en' 
+                      ? 'Minimal hints, pure telemetry analysis & maximum challenge.' 
+                      : 'Petunjuk minimal, analisis murni & tantangan tinggi.'}
+                  </p>
                 </div>
               </button>
             </div>
@@ -450,11 +544,11 @@ export const WelcomeModal: React.FC = () => {
               className="flex items-center gap-2 font-mono font-bold text-sm text-white px-5 py-2 bg-[#14171E] border border-black hover:border-orange-500 clip-chamfer-sm transition-all hover:scale-105 cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4"/>
-              <span>KEMBALI</span>
+              <span>{language === 'en' ? 'BACK' : 'KEMBALI'}</span>
             </button>
 
             <div className="text-xs font-mono text-slate-400">
-              PENJELAJAH : <span className="text-orange-400 font-bold">{astronautName || 'PENJELAJAH'}</span>
+              {language === 'en' ? 'INVESTIGATOR' : 'PENJELAJAH'} : <span className="text-orange-400 font-bold">{astronautName || 'CADET'}</span>
             </div>
           </div>
         </div>
@@ -484,12 +578,14 @@ export const WelcomeModal: React.FC = () => {
             {/* Top: Progress badge + Skip */}
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <span className="font-mono text-[11px] uppercase px-3 py-1 font-bold bg-orange-500/15 text-orange-400 border border-orange-500/40 clip-chamfer-sm">
-                PANDUAN NOVA : LANGKAH {tutorialStep + 1} DARI {TUTORIAL_PAGES.length}
+                {language === 'en' 
+                  ? `NOVA BRIEFING : STEP ${tutorialStep + 1} OF ${TUTORIAL_PAGES.length}` 
+                  : `PANDUAN NOVA : LANGKAH ${tutorialStep + 1} DARI ${TUTORIAL_PAGES.length}`}
               </span>
               <button onClick={() => startGame()}
                 className="text-xs font-mono text-slate-400 hover:text-orange-300 underline transition-colors cursor-pointer"
               >
-                LEWATI PANDUAN
+                {language === 'en' ? 'SKIP TUTORIAL' : 'LEWATI PANDUAN'}
               </button>
             </div>
 
@@ -514,7 +610,9 @@ export const WelcomeModal: React.FC = () => {
                       <p className="text-sm text-slate-200 leading-relaxed font-sans">{page.description}</p>
                       <div className="p-3.5 bg-orange-500/10 border border-orange-500/30 flex items-start gap-2.5 clip-chamfer-sm">
                         <Sparkles className="w-4 h-4 text-orange-400 shrink-0 mt-0.5"/>
-                        <span className="text-xs font-mono text-orange-200"><strong>Petunjuk Nova :</strong> {page.tip}</span>
+                        <span className="text-xs font-mono text-orange-200">
+                          <strong>{language === 'en' ? 'Nova Directive :' : 'Petunjuk Nova :'}</strong> {page.tip}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -540,14 +638,18 @@ export const WelcomeModal: React.FC = () => {
                 className="text-xs font-mono text-slate-400 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4"/>
-                <span>{tutorialStep === 0 ? 'PILIHAN AWAL' : 'KEMBALI'}</span>
+                <span>
+                  {tutorialStep === 0 
+                    ? (language === 'en' ? 'INITIAL CHOICE' : 'PILIHAN AWAL') 
+                    : (language === 'en' ? 'PREVIOUS' : 'KEMBALI')}
+                </span>
               </button>
 
               {tutorialStep < TUTORIAL_PAGES.length - 1 ? (
                 <button onClick={() => setTutorialStep(tutorialStep + 1)}
                   className="btn-tactical-primary px-6 py-2.5 text-black font-display font-black text-xs tracking-wider flex items-center gap-2 cursor-pointer shadow-lg hover:scale-105 transition-all"
                 >
-                  <span>LANGKAH BERIKUTNYA</span>
+                  <span>{language === 'en' ? 'NEXT STEP' : 'LANGKAH BERIKUTNYA'}</span>
                   <ChevronRight className="w-4 h-4"/>
                 </button>
               ) : (
@@ -555,7 +657,7 @@ export const WelcomeModal: React.FC = () => {
                   className="btn-tactical-primary px-7 py-2.5 text-black font-display font-black text-xs tracking-wider flex items-center gap-2 cursor-pointer shadow-lg hover:scale-105 transition-all"
                 >
                   <Rocket className="w-4 h-4"/>
-                  <span>MULAI MISI</span>
+                  <span>{language === 'en' ? 'START MISSION' : 'MULAI MISI'}</span>
                 </button>
               )}
             </div>

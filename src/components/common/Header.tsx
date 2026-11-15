@@ -11,11 +11,14 @@ import {
   User,
   Lock,
   Activity,
-  Layers
+  Layers,
+  Globe,
+  RotateCcw
 } from 'lucide-react';
 import { useMissionStore, checkPhaseAccess } from '../../store/useMissionStore';
 import type { GamePhase } from '../../types/mission';
 import { sounds } from '../../utils/soundEngine';
+import { useTranslation } from '../../i18n';
 
 export const Header: React.FC = () => {
   const { 
@@ -32,6 +35,7 @@ export const Header: React.FC = () => {
     setCurrentView
   } = useMissionStore();
 
+  const { t, language, setLanguage } = useTranslation();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [lockedNotice, setLockedNotice] = useState<string | null>(null);
 
@@ -39,42 +43,49 @@ export const Header: React.FC = () => {
     { 
       id: 'briefing', 
       code: '01',
-      label: 'BRIEFING', 
+      label: t.header.briefing, 
       icon: Search,
       targetPhase: 'briefing' as GamePhase,
     },
     { 
       id: 'investigation', 
       code: '02',
-      label: 'INVESTIGASI', 
+      label: t.header.investigation, 
       icon: Activity,
       targetPhase: 'investigation' as GamePhase,
     },
     { 
       id: 'root_cause', 
       code: '03',
-      label: 'AKAR MASALAH', 
+      label: t.header.rootCause, 
       icon: Layers,
       targetPhase: 'root_cause' as GamePhase,
     },
     { 
+      id: 'rewind', 
+      code: '3B',
+      label: 'REWIND', 
+      icon: RotateCcw,
+      targetPhase: 'rewind' as GamePhase,
+    },
+    { 
       id: 'redesign', 
       code: '04',
-      label: 'DESAIN ULANG', 
+      label: t.header.redesign, 
       icon: Wrench,
       targetPhase: 'redesign' as GamePhase,
     },
     { 
       id: 'simulation', 
       code: '05',
-      label: 'SIMULASI', 
+      label: t.header.simulation, 
       icon: Rocket,
       targetPhase: 'simulation' as GamePhase,
     },
     { 
       id: 'debrief', 
       code: '06',
-      label: 'DEBRIEF', 
+      label: t.header.debrief, 
       icon: FileText,
       targetPhase: 'debrief' as GamePhase,
     },
@@ -85,7 +96,7 @@ export const Header: React.FC = () => {
       pinnedEvidences,
       hypothesisSubmitted,
       simulationResult,
-    });
+    }, language);
 
     if (!access.allowed) {
       sounds.playAlarm();
@@ -230,6 +241,18 @@ export const Header: React.FC = () => {
             }
           </button>
 
+          {/* Language Switcher */}
+          <button
+            onClick={() => setLanguage(language === 'en' ? 'id' : 'en')}
+            title={language === 'en' ? 'Switch to Bahasa Indonesia' : 'Switch to English'}
+            className="flex items-center gap-1.5 px-2 py-1 bg-[#1F2329] border border-slate-700 hover:border-[#EAB308] text-xs font-mono font-bold text-slate-300 hover:text-white transition-colors cursor-pointer"
+          >
+            <Globe className="w-3.5 h-3.5 text-[#EAB308]" />
+            <span className={language === 'en' ? 'text-[#EAB308]' : 'text-slate-500'}>EN</span>
+            <span className="text-slate-600">/</span>
+            <span className={language === 'id' ? 'text-[#EAB308]' : 'text-slate-500'}>ID</span>
+          </button>
+
           {/* Fullscreen */}
           <button
             onClick={toggleFullscreen}
@@ -245,7 +268,7 @@ export const Header: React.FC = () => {
       {lockedNotice && (
         <div className="bg-amber-500/10 border-t border-b border-amber-500/40 text-amber-300 py-1.5 px-4 text-center font-mono-tech text-xs flex items-center justify-center gap-2 animate-fadeIn">
           <Lock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-          <span className="font-bold">AKSES DITOLAK:</span>
+          <span className="font-bold">{language === 'en' ? 'ACCESS RESTRICTED:' : 'AKSES DITOLAK:'}</span>
           <span>{lockedNotice}</span>
         </div>
       )}
@@ -265,21 +288,21 @@ export const Header: React.FC = () => {
             onClick={() => { setShowUserMenu(false); setCurrentView('lobby'); }}
             className="w-full text-left py-1.5 px-2 bg-[#1C1F24] hover:bg-[#EAB308] hover:text-black text-[#EAB308] font-bold transition-colors cursor-pointer"
           >
-            KEMBALI KE HUB
+            {language === 'en' ? 'RETURN TO HUB' : 'KEMBALI KE HUB'}
           </button>
 
           <button
             onClick={() => { setShowUserMenu(false); setOnboardingStep('enter_name'); }}
             className="w-full text-left py-1.5 px-2 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
           >
-            GANTI NAMA
+            {language === 'en' ? 'CHANGE CALLSIGN' : 'GANTI NAMA'}
           </button>
 
           <button
             onClick={() => { setShowUserMenu(false); setOnboardingStep('tutorial'); }}
             className="w-full text-left py-1.5 px-2 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
           >
-            PANDUAN MISI
+            {language === 'en' ? 'MISSION TUTORIAL' : 'PANDUAN MISI'}
           </button>
         </div>
       )}

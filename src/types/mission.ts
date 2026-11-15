@@ -5,9 +5,19 @@ export type GamePhase =
   | 'briefing'       // Phase 1: Mission Briefing & Incident Alert
   | 'investigation'  // Phase 2: Black Box Telemetry Scrubbing
   | 'root_cause'     // Phase 3: Root Cause Analysis & Evidence Linking
+  | 'rewind'         // Phase 3b: Crisis Rewind Sandbox & Minigames
   | 'redesign'       // Phase 4: Systems Engineering & Spacecraft Builder
   | 'simulation'     // Phase 5: 3D Flight Operations & Real-time Simulation
   | 'debrief';       // Phase 6: Mission Debrief & NASA Scoring
+
+export type DiagnosisGrade = 'correct' | 'partial' | 'incorrect';
+
+export interface RewindResult {
+  survived: boolean;
+  finalSoc: number;
+  science: number;
+  reason?: string;
+}
 
 export type UserRole = 
   | 'flight_director'   // Overall mission oversight, go/no-go decisions
@@ -37,18 +47,23 @@ export interface AnomalyEvidence {
   timeMinutes: number;
   metric: 'voltage' | 'solar' | 'battery_soc' | 'battery_temp' | 'power_draw' | 'comms' | 'thermal';
   value: string;
+  valueEn?: string;
   observedText: string;
+  observedTextEn?: string;
   isRedHerring?: boolean;
 }
 
 export interface Hypothesis {
   id: string;
   title: string;
+  titleEn?: string;
   category: 'electrical' | 'thermal' | 'payload' | 'telecom' | 'propulsion';
   description: string;
+  descriptionEn?: string;
   requiredEvidenceIds: string[];
   isCorrect: boolean;
   engineeringExplanation: string;
+  engineeringExplanationEn?: string;
 }
 
 export type ComponentCategory = 
@@ -64,6 +79,7 @@ export type ComponentCategory =
 export interface SpacecraftComponent {
   id: string;
   name: string;
+  nameEn?: string;
   category: ComponentCategory;
   massKg: number;
   costMillion: number;
@@ -77,20 +93,27 @@ export interface SpacecraftComponent {
   dataRateKbps?: number;
   scienceValue?: number; // 0 - 100
   description: string;
+  descriptionEn?: string;
   specSummary: string;
+  specSummaryEn?: string;
   recommendedRole?: UserRole;
 }
 
 export interface CaseFile {
   id: string;
   missionName: string;
+  missionNameEn?: string;
   targetObject: string;
+  targetObjectEn?: string;
   targetDistanceAU: number; // Astronomical Units
   incidentTime: string;
+  incidentTimeEn?: string;
   budgetCapMillion: number;
   maxPayloadMassKg: number;
   objectiveSummary: string;
+  objectiveSummaryEn?: string;
   incidentSummary: string;
+  incidentSummaryEn?: string;
   legacyConfiguration: {
     solar: string;
     battery: string;

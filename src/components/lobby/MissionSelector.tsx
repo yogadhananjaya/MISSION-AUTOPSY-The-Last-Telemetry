@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Lock, Play, Sparkles } from 'lucide-react';
-import { MISSIONS_LIST, type MissionDossier } from '../../data/missionsData';
+import { MISSIONS_LIST, getLocalizedMission, type MissionDossier } from '../../data/missionsData';
 import { sounds } from '../../utils/soundEngine';
 import { useMissionStore } from '../../store/useMissionStore';
+import { useTranslation } from '../../i18n';
 
 interface MissionSelectorProps {
   onBack: () => void;
@@ -11,6 +12,7 @@ interface MissionSelectorProps {
 
 export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSelectMission }) => {
   const { currentPhase } = useMissionStore();
+  const { t, language } = useTranslation();
   const [hoveredMissionId, setHoveredMissionId] = useState<string>('aster-9');
   const [selectedMissionId, setSelectedMissionId] = useState<string>('aster-9');
 
@@ -24,7 +26,8 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
   };
   const aster9Progress = phaseProgressMap[currentPhase] ?? 0;
 
-  const activeMission = MISSIONS_LIST.find(m => m.id === (hoveredMissionId || selectedMissionId)) || MISSIONS_LIST[0];
+  const rawActiveMission = MISSIONS_LIST.find(m => m.id === (hoveredMissionId || selectedMissionId)) || MISSIONS_LIST[0];
+  const activeMission = getLocalizedMission(rawActiveMission, language);
 
   const handleCardClick = (m: MissionDossier) => {
     sounds.playClick(750);
@@ -47,16 +50,18 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
             className="flex items-center gap-2 px-3.5 py-1.5 bg-[#1F2329] border border-slate-700 text-xs font-mono text-amber-400 hover:text-white hover:border-amber-400 transition-colors cursor-pointer clip-chamfer-sm"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>KEMBALI</span>
+            <span>{t.common.back}</span>
           </button>
           
           <div className="h-5 w-px bg-slate-800" />
           
           <div>
             <h1 className="text-base sm:text-lg font-bold font-display tracking-wider uppercase flex items-center gap-2">
-              <span className="text-white">ARSIP BERKAS MISI</span>
+              <span className="text-white">
+                {language === 'en' ? 'MISSION DOSSIER ARCHIVE' : 'ARSIP BERKAS MISI'}
+              </span>
               <span className="text-[10px] px-2 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/40 font-mono">
-                REGISTRI MISI : 04
+                {language === 'en' ? 'MISSION REGISTRY : 04' : 'REGISTRI MISI : 04'}
               </span>
             </h1>
           </div>
@@ -69,15 +74,18 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
             <span className="text-slate-200 font-bold">{activeMission.targetObject}</span>
           </div>
           <div>
-            <span className="text-slate-500">BATAS ANGGARAN: </span>
+            <span className="text-slate-500">
+              {language === 'en' ? 'BUDGET CAP: ' : 'BATAS ANGGARAN: '}
+            </span>
             <span className="text-amber-400 font-bold">{activeMission.budgetLimit}</span>
           </div>
         </div>
       </header>
 
-      {/* Main 4-Column Vertical Split Banner Stage (Matching Reference Image 2) */}
+      {/* Main 4-Column Vertical Split Banner Stage */}
       <main className="relative flex-1 flex flex-col lg:flex-row w-full h-full overflow-hidden p-3 sm:p-5 gap-3 blueprint-grid-dark">
-        {MISSIONS_LIST.map((m) => {
+        {MISSIONS_LIST.map((rawM) => {
+          const m = getLocalizedMission(rawM, language);
           const isSelected = m.id === selectedMissionId;
           const isHovered = m.id === hoveredMissionId;
           const isLocked = m.status === 'locked';
@@ -125,12 +133,12 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
                 {isLocked ? (
                   <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-900 border border-slate-700 text-[10px] font-mono text-slate-400">
                     <Lock className="w-3 h-3" />
-                    <span>SEGERA HADIR</span>
+                    <span>{language === 'en' ? 'COMING SOON' : 'SEGERA HADIR'}</span>
                   </span>
                 ) : (
                   <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-amber-500/10 border border-amber-500 text-[10px] font-mono text-amber-400 font-bold">
                     <Sparkles className="w-3 h-3" />
-                    <span>MISI AKTIF</span>
+                    <span>{language === 'en' ? 'ACTIVE MISSION' : 'MISI AKTIF'}</span>
                   </span>
                 )}
               </div>
@@ -151,7 +159,9 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
                 {!isLocked && (
                   <div className="mt-6 space-y-1.5">
                     <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-slate-400">SINKRONISASI INVESTIGASI</span>
+                      <span className="text-slate-400">
+                        {language === 'en' ? 'INVESTIGATION SYNC' : 'SINKRONISASI INVESTIGASI'}
+                      </span>
                       <span className="font-bold text-amber-400">{aster9Progress}%</span>
                     </div>
                     <div className="w-full bg-black h-2 border border-slate-800">
@@ -167,7 +177,9 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
                 {(isHovered || isSelected) && !isLocked && (
                   <div className="mt-5 pt-4 border-t border-slate-800 space-y-3 text-xs animate-fadeIn">
                     <div className="text-slate-300 font-sans leading-relaxed bg-[#101215] p-3 border border-slate-800">
-                      <strong className="text-amber-400 font-mono block mb-1">TELEMETRI INSIDEN:</strong>
+                      <strong className="text-amber-400 font-mono block mb-1">
+                        {language === 'en' ? 'INCIDENT TELEMETRY:' : 'TELEMETRI INSIDEN:'}
+                      </strong>
                       {m.anomalySummary}
                     </div>
 
@@ -184,7 +196,8 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
               {/* Bottom Section: Action Button */}
               <div className="relative z-10 pt-4 flex items-center justify-between border-t border-slate-800">
                 <div className="text-xs font-mono text-slate-400">
-                  ANGGARAN: <span className="font-bold text-white">{m.budgetLimit}</span>
+                  {language === 'en' ? 'BUDGET: ' : 'ANGGARAN: '}
+                  <span className="font-bold text-white">{m.budgetLimit}</span>
                 </div>
 
                 {!isLocked ? (
@@ -197,13 +210,13 @@ export const MissionSelector: React.FC<MissionSelectorProps> = ({ onBack, onSele
                   >
                     <span className="flex items-center gap-1.5">
                       <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>BUKA BERKAS</span>
+                      <span>{language === 'en' ? 'OPEN DOSSIER' : 'BUKA BERKAS'}</span>
                     </span>
                   </button>
                 ) : (
                   <div className="text-xs font-mono text-slate-500 flex items-center gap-1.5">
                     <Lock className="w-3.5 h-3.5" />
-                    <span>SEGERA HADIR</span>
+                    <span>{language === 'en' ? 'COMING SOON' : 'SEGERA HADIR'}</span>
                   </div>
                 )}
               </div>

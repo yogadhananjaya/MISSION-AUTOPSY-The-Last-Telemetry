@@ -7,6 +7,7 @@ import {
   Moon
 } from 'lucide-react';
 import type { TelemetryPoint } from '../../types/mission';
+import { useTranslation } from '../../i18n';
 
 interface SatelliteVisualizerProps {
   currentPoint: TelemetryPoint;
@@ -14,6 +15,7 @@ interface SatelliteVisualizerProps {
 }
 
 export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ currentPoint, solarW = 160 }) => {
+  const { language } = useTranslation();
   const isFreezing = currentPoint.batteryTemp < 0;
   const isCryoDanger = currentPoint.batteryTemp < -10;
   const isUVLOBlackout = currentPoint.busVoltage < 22.0;
@@ -29,25 +31,25 @@ export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ curren
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 bg-[#EAB308] rotate-45" />
           <h3 className="font-display font-bold text-sm tracking-wide text-white uppercase">
-            DIAGNOSTIK FISIK WAHANA ASTER-9
+            {language === 'en' ? 'ASTER-9 PHYSICAL STATUS MONITOR' : 'DIAGNOSTIK FISIK WAHANA ASTER-9'}
           </h3>
         </div>
         <div className="flex items-center gap-2 font-mono-tech text-[10px]">
           {isUVLOBlackout ? (
             <span className="bg-rose-950 border border-rose-600 text-rose-300 px-2 py-0.5 animate-pulse font-bold">
-              KRITIS : MATI TOTAL
+              {language === 'en' ? 'CRITICAL : UVLO CUTOFF' : 'KRITIS : MATI TOTAL'}
             </span>
           ) : isCryoDanger ? (
             <span className="bg-cyan-950 border border-cyan-500 text-cyan-200 px-2 py-0.5 animate-pulse font-bold">
-              PERINGATAN : SUHU BEKU
+              {language === 'en' ? 'WARNING : CRYOGENIC FREEZE' : 'PERINGATAN : SUHU BEKU'}
             </span>
           ) : isEclipse ? (
             <span className="bg-purple-950 border border-purple-600 text-purple-300 px-2 py-0.5 font-bold">
-              STATUS : GERHANA BAYANGAN
+              {language === 'en' ? 'STATUS : ECLIPSE UMBRA' : 'STATUS : GERHANA BAYANGAN'}
             </span>
           ) : (
             <span className="bg-emerald-950 border border-emerald-600 text-emerald-300 px-2 py-0.5 font-bold">
-              STATUS : NORMAL MATAHARI
+              {language === 'en' ? 'STATUS : SUNLIT ORBIT' : 'STATUS : NORMAL MATAHARI'}
             </span>
           )}
         </div>
@@ -314,9 +316,13 @@ export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ curren
             {isEclipse ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </div>
           <div className="leading-tight">
-            <div className="font-bold text-white text-[11px]">{isEclipse ? 'FASE GERHANA' : 'DAYA MATAHARI'}</div>
+            <div className="font-bold text-white text-[11px]">
+              {isEclipse ? (language === 'en' ? 'ECLIPSE UMBRA' : 'FASE GERHANA') : (language === 'en' ? 'SOLAR GENERATION' : 'DAYA MATAHARI')}
+            </div>
             <div className="text-[10px] text-slate-400 mt-0.5">
-              {isEclipse ? 'Daya surya nol watt di bayangan.' : 'Penyerapan daya surya 160 watt.'}
+              {isEclipse 
+                ? (language === 'en' ? 'Zero solar array input in shadow.' : 'Daya surya nol watt di bayangan.') 
+                : (language === 'en' ? '160W active photovoltaic capture.' : 'Penyerapan daya surya 160 watt.')}
             </div>
           </div>
         </div>
@@ -334,10 +340,16 @@ export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ curren
           </div>
           <div className="leading-tight">
             <div className="font-bold text-white text-[11px]">
-              {isCryoDanger ? 'BEKU EKSTREM' : isFreezing ? 'SUHU DINGIN' : 'TERMAL NORMAL'}
+              {isCryoDanger 
+                ? (language === 'en' ? 'CRYOGENIC FREEZE' : 'BEKU EKSTREM') 
+                : isFreezing 
+                ? (language === 'en' ? 'COLD ANOMALY' : 'SUHU DINGIN') 
+                : (language === 'en' ? 'THERMAL NOMINAL' : 'TERMAL NORMAL')}
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">
-              {isCryoDanger ? 'Baterai membeku pada minus 28 derajat.' : 'Suhu baterai dalam rentang aman.'}
+              {isCryoDanger 
+                ? (language === 'en' ? 'Battery core freezing below -10°C.' : 'Baterai membeku pada minus 28 derajat.') 
+                : (language === 'en' ? 'Cell temperatures within limits.' : 'Suhu baterai dalam rentang aman.')}
             </div>
           </div>
         </div>
@@ -353,10 +365,14 @@ export const SatelliteVisualizer: React.FC<SatelliteVisualizerProps> = ({ curren
           </div>
           <div className="leading-tight">
             <div className="font-bold text-white text-[11px]">
-              {isUVLOBlackout ? 'PADAM TOTAL' : 'BUS DAYA 28V'}
+              {isUVLOBlackout 
+                ? (language === 'en' ? 'UVLO BLACKOUT' : 'PADAM TOTAL') 
+                : (language === 'en' ? 'MAIN 28V BUS' : 'BUS DAYA 28V')}
             </div>
             <div className="text-[10px] text-slate-400 mt-0.5">
-              {isUVLOBlackout ? 'Tegangan jatuh ke 21.0 volt.' : 'Tegangan bus listrik stabil normal.'}
+              {isUVLOBlackout 
+                ? (language === 'en' ? 'Bus voltage collapsed below 22V.' : 'Tegangan jatuh ke 21.0 volt.') 
+                : (language === 'en' ? 'Nominal regulated bus voltage.' : 'Tegangan bus listrik stabil normal.')}
             </div>
           </div>
         </div>

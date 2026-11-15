@@ -1,17 +1,39 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Header } from './components/common/Header';
 import { MissionBriefing } from './components/phase1_briefing/MissionBriefing';
 import { TelemetryStudio } from './components/phase2_investigation/TelemetryStudio';
 import { HypothesisMatrix } from './components/phase3_root_cause/HypothesisMatrix';
+import { RewindStage } from './components/phase3b_rewind/RewindStage';
 import { SpacecraftBuilder } from './components/phase4_redesign/SpacecraftBuilder';
 import { FlightSimulator } from './components/phase5_simulation/FlightSimulator';
 import { MissionDebrief } from './components/phase6_debrief/MissionDebrief';
 import { WelcomeModal } from './components/onboarding/WelcomeModal';
 import { MainLobby } from './components/lobby/MainLobby';
+import { MinigameLab } from './components/minigames/MinigameLab';
+import { CoopLanding } from './components/coop/CoopLanding';
+import { LobbyScreen } from './components/coop/LobbyScreen';
+import { LastStand } from './components/coop/LastStand';
+import { ComicViewer } from './components/story/ComicViewer';
+import { SpaceMap } from './components/story/SpaceMap';
+import { EpisodeStage } from './components/story/EpisodeStage';
+import { LeaderboardScreen } from './components/leaderboard/LeaderboardScreen';
+import { AcademyScreen } from './components/academy/AcademyScreen';
 import { useMissionStore } from './store/useMissionStore';
+import { useCoopStore } from './store/useCoopStore';
+import { FEATURES } from './config/features';
+import type { EpisodeDef } from './engine/crisis/episodes';
+import type { AgentDef } from './data/agents';
 
 export const App: React.FC = () => {
   const { currentPhase, gameStarted, onboardingStep, currentView, setCurrentView, setPhase } = useMissionStore();
+  const { lobby, leave: leaveCoop } = useCoopStore();
+  const [activeEpisode, setActiveEpisode] = useState<{ episode: EpisodeDef; companion: AgentDef } | null>(null);
+  const [showLeaderboard, setShowLeaderboard] = useState<boolean>(false);
+
+  // Route for Minigame Lab testing
+  if (typeof window !== 'undefined' && window.location.search.includes('lab=1')) {
+    return <MinigameLab />;
+  }
 
   const showOnboarding = !gameStarted || onboardingStep !== 'ready';
 
@@ -21,17 +43,94 @@ export const App: React.FC = () => {
       {/* Interactive Welcoming Screen & Mascot Tutorial Modal */}
       {showOnboarding && <WelcomeModal />}
 
+      {/* Leaderboard Modal / Fullscreen Terminal */}
+      {showLeaderboard && (
+        <LeaderboardScreen onBack={() => setShowLeaderboard(false)} />
+      )}
+
       {/* Main Lobby / Hub (Matching Gacha RPG Sci-Fi Home Screen Reference) */}
       {!showOnboarding && currentView === 'lobby' && (
         <MainLobby 
           onStartNewGame={() => {
-            setPhase('briefing');
-            setCurrentView('mission');
+            if (FEATURES.comic) {
+              setCurrentView('comic');
+            } else {
+              setPhase('briefing');
+              setCurrentView('mission');
+            }
           }}
           onResumeGame={() => {
             setCurrentView('mission');
           }}
+          onOpenLeaderboard={() => setShowLeaderboard(true)}
         />
+      )}
+
+      {/* Story Narrative Comic View */}
+      {!showOnboarding && currentView === 'comic' && (
+        <ComicViewer
+          onDone={() => {
+            setPhase('briefing');
+            setCurrentView('mission');
+          }}
+        />
+      )}
+
+      {/* Celestial Space Map & Episodes 02-06 */}
+      {!showOnboarding && currentView === 'map' && (
+        activeEpisode ? (
+          <EpisodeStage
+            episode={activeEpisode.episode}
+            companion={activeEpisode.companion}
+            onExitToMap={() => setActiveEpisode(null)}
+          />
+        ) : (
+          <SpaceMap
+            onBackToHub={() => setCurrentView('lobby')}
+            onLaunchEpisode={(ep, companion) => {
+              if (ep.id === 'ep01') {
+                setPhase('briefing');
+                setCurrentView('mission');
+              } else {
+                setActiveEpisode({ episode: ep, companion });
+              }
+            }}
+          />
+        )
+      )}
+
+      {/* Space Academy Learning Center View */}
+      {!showOnboarding && currentView === 'academy' && (
+        <AcademyScreen onBack={() => setCurrentView('lobby')} />
+      )}
+
+      {/* Real-time Co-op Multiplayer View (WebRTC PeerJS + BroadcastChannel) */}
+      {!showOnboarding && currentView === 'coop' && (
+        <div className="min-h-screen flex flex-col bg-[#0b0d12] text-white selection:bg-amber-400 selection:text-black">
+          <header className="border-b border-gray-800 bg-[#141619] py-3 px-6 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+              <span className="font-mono text-xs font-bold text-amber-400 uppercase tracking-wider">
+                ORBITA NOVA : CO-OP NETWORK
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                leaveCoop();
+                setCurrentView('lobby');
+              }}
+              className="text-xs font-mono text-gray-400 hover:text-white underline cursor-pointer"
+            >
+              KEMBALI KE MENU UTAMA
+            </button>
+          </header>
+
+          <main className="flex-1 p-3 sm:p-5 md:p-6">
+            {!lobby && <CoopLanding onBackToHub={() => setCurrentView('lobby')} />}
+            {lobby && lobby.status !== 'IN_GAME' && <LobbyScreen />}
+            {lobby && lobby.status === 'IN_GAME' && <LastStand />}
+          </main>
+        </div>
       )}
 
       {/* Active Mission Investigation Mode (Header + 6 Phase Viewport) */}
@@ -53,6 +152,7 @@ export const App: React.FC = () => {
             {currentPhase === 'briefing' && <MissionBriefing />}
             {currentPhase === 'investigation' && <TelemetryStudio />}
             {currentPhase === 'root_cause' && <HypothesisMatrix />}
+            {currentPhase === 'rewind' && <RewindStage />}
             {currentPhase === 'redesign' && <SpacecraftBuilder />}
             {currentPhase === 'simulation' && <FlightSimulator />}
             {currentPhase === 'debrief' && <MissionDebrief />}

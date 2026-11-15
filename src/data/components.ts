@@ -11,7 +11,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     powerGenerationW: 160,
     powerConsumptionW: 0,
     description: 'Sel surya silikon standar. Murah dan teruji namun efisiensi rendah dan daya terbatas.',
+    descriptionEn: 'Standard body-mounted silicon cells. Low cost and heritage proven, but low 18% efficiency.',
     specSummary: 'Output 160W, efisiensi 18%, sudut tetap',
+    specSummaryEn: '160W generation, 18% efficiency, fixed mount',
   },
   {
     id: 'solar_gaas_deployable',
@@ -22,7 +24,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     powerGenerationW: 420,
     powerConsumptionW: 5,
     description: 'Panel surya lipat efisiensi tinggi dengan mekanisme pelacak matahari otomatis.',
+    descriptionEn: 'High-efficiency deployable wings with motorized solar tracking gimbals.',
     specSummary: 'Output 420W, efisiensi 32%, gimbal pelacak',
+    specSummaryEn: '420W generation, 32% efficiency, active sun tracking',
   },
   {
     id: 'power_nextgen_rtg',
@@ -33,7 +37,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     powerGenerationW: 280,
     powerConsumptionW: 0,
     description: 'Sumber daya nuklir plutonium. Menghasilkan daya konstan tanpa bergantung sinar matahari.',
+    descriptionEn: 'Plutonium-238 radioisotope power system. Provides steady power immune to eclipses.',
     specSummary: 'Output 280W stabil, kebal gerhana, massa tinggi',
+    specSummaryEn: '280W constant output, 100% eclipse immunity',
   },
 
   // --- ENERGY STORAGE (BATTERY) ---
@@ -47,7 +53,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     minTempOperable: -10,
     maxTempOperable: 45,
     description: 'Pak baterai standar ASTER-9. Kapasitas anjlok drastis pada suhu beku ekstrem.',
+    descriptionEn: 'Legacy ASTER-9 battery pack. Anodes degrade rapidly in sub-zero shadow transits.',
     specSummary: 'Kapasitas 400 Wh, 12 kg, batas beku -10°C',
+    specSummaryEn: '400 Wh capacity, 12 kg, freeze cutoff -10°C',
   },
   {
     id: 'battery_li_ion_extended',
@@ -59,7 +67,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     minTempOperable: -15,
     maxTempOperable: 50,
     description: 'Kapasitas ganda dengan penyeimbang sel redundan. Mampu menopang muatan selama gerhana panjang.',
+    descriptionEn: 'Double-capacity space-qualified cells with autonomous bypass balancing for long eclipses.',
     specSummary: 'Kapasitas 850 Wh, 22 kg, sistem bus ganda',
+    specSummaryEn: '850 Wh capacity, 22 kg, dual bus management',
   },
   {
     id: 'battery_solid_state_cryo',
@@ -71,7 +81,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     minTempOperable: -40,
     maxTempOperable: 60,
     description: 'Elektrolit padat mutakhir. Tahan suhu beku ekstrem tanpa penurunan tegangan tiba-tiba.',
+    descriptionEn: 'Advanced solid ceramic electrolyte. Survives deep vacuum freezing down to -40°C.',
     specSummary: 'Kapasitas 700 Wh, operasi stabil hingga -40°C',
+    specSummaryEn: '700 Wh capacity, operational down to -40°C',
   },
 
   // --- THERMAL CONTROL ---
@@ -84,7 +96,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     heaterPowerW: 0,
     thermalProtection: 'Minimal',
     description: 'Lapisan pasif bawaan ASTER-9. Tanpa insulasi tebal dan tanpa pemanas aktif.',
+    descriptionEn: 'Legacy minimal passive coating. Lacks thermal blankets or active survival heaters.',
     specSummary: 'Perlindungan pasif minimal, tanpa pemanas',
+    specSummaryEn: 'Minimal passive protection, zero heaters',
   },
   {
     id: 'thermal_mli_blanket',
@@ -95,18 +109,22 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     heaterPowerW: 0,
     thermalProtection: 'Moderate Passive',
     description: 'Selimut reflektif multilapis. Mencegah pelepasan panas radiatif ke ruang hampa.',
+    descriptionEn: 'Gold Kapton reflective blanket. Retains core avionics heat during deep shadow.',
     specSummary: 'Lapisan emas kapton, retensi panas 85%',
+    specSummaryEn: 'Multi-layer gold Kapton, 85% heat retention',
   },
   {
     id: 'thermal_active_rhu',
-    name: 'MLI dan Radioisotope Heater Units RHU Strip Heaters',
+    name: 'MLI and Radioisotope Heater Units RHU Strip Heaters',
     category: 'thermal_control',
     massKg: 14,
     costMillion: 9.0,
     heaterPowerW: 25,
     thermalProtection: 'Active Space-Grade',
     description: 'Selimut insulasi dengan pemanas elektrik dan pelet radioisotop independen. Baterai tetap hangat.',
+    descriptionEn: 'MLI blanket combined with autonomous RHU radioisotope heaters. Keeps cells above +5°C.',
     specSummary: 'Pemanas radioisotop aktif, suhu baterai di atas 5°C',
+    specSummaryEn: 'Active radioisotope heaters, maintains battery above +5°C',
   },
 
   // --- SCIENTIFIC PAYLOAD ---
@@ -120,7 +138,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     dataRateKbps: 450,
     scienceValue: 45,
     description: 'Alat pendeteksi mineral asteroid. Membutuhkan daya tinggi saat pengambilan sampel data.',
+    descriptionEn: 'Multispectral mineral mapping sensor. Demands high electrical power during data capture.',
     specSummary: 'Puncak 95W, aliran 450 kbps, 45 Poin Sains',
+    specSummaryEn: '95W peak draw, 450 kbps telemetry, 45 Science Pts',
   },
   {
     id: 'payload_lidar_altimeter',
@@ -132,7 +152,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     dataRateKbps: 300,
     scienceValue: 30,
     description: 'Pemeta kontur tiga dimensi asteroid untuk navigasi dan analisis geologi.',
+    descriptionEn: 'Precision 3D surface topography altimeter for hazard mapping and geological science.',
     specSummary: 'Puncak 65W, aliran 300 kbps, 30 Poin Sains',
+    specSummaryEn: '65W peak draw, 300 kbps telemetry, 30 Science Pts',
   },
   {
     id: 'payload_magnetometer_plasma',
@@ -144,7 +166,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     dataRateKbps: 20,
     scienceValue: 20,
     description: 'Sensor medan magnet dan debu antariksa. Sangat hemat daya dan stabil.',
+    descriptionEn: 'Low-power magnetic field and solar wind plasma probe. Highly energy efficient.',
     specSummary: 'Daya 15W konstan, 20 kbps, 20 Poin Sains',
+    specSummaryEn: '15W nominal draw, 20 kbps telemetry, 20 Science Pts',
   },
   {
     id: 'payload_subsurface_radar',
@@ -156,7 +180,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     dataRateKbps: 600,
     scienceValue: 50,
     description: 'Radar penembus struktur interior asteroid. Membutuhkan alokasi daya besar.',
+    descriptionEn: 'Ground-penetrating radar assessing inner asteroid void density. Demands high surge power.',
     specSummary: 'Beban 140W, aliran 600 kbps, 50 Poin Sains',
+    specSummaryEn: '140W surge draw, 600 kbps telemetry, 50 Science Pts',
   },
 
   // --- COMMUNICATIONS ---
@@ -169,7 +195,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     powerConsumptionW: 20,
     dataRateKbps: 40,
     description: 'Antena cadangan pancaran lebar. Mudah diarahkan namun laju data lambat.',
+    descriptionEn: 'Omnidirectional backup antenna. Low pointing requirements but constrained data rate.',
     specSummary: 'Tautan 40 kbps, daya 20W, pancaran lebar',
+    specSummaryEn: '40 kbps downlink, 20W power, wide beam',
   },
   {
     id: 'comms_x_band_dish',
@@ -180,7 +208,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     powerConsumptionW: 55,
     dataRateKbps: 500,
     description: 'Antena piringan terarah standar jaringan antariksa. Laju transmisi seimbang dan stabil.',
+    descriptionEn: 'Heritage parabolic dish antenna. Stable deep space telemetry downlink.',
     specSummary: 'Tautan 500 kbps, daya 55W, pelacak gimbal',
+    specSummaryEn: '500 kbps downlink, 55W power, gimbal pointing',
   },
   {
     id: 'comms_optical_laser',
@@ -191,7 +221,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     powerConsumptionW: 90,
     dataRateKbps: 4000,
     description: 'Teknologi komunikasi laser optik generasi baru. Kecepatan transmisi data sepuluh kali lipat.',
+    descriptionEn: 'Next-generation optical communications transceiver. Gigabit downlink capacity.',
     specSummary: 'Bandwidth tinggi 4000 kbps, daya 90W',
+    specSummaryEn: 'High bandwidth 4000 kbps, 90W power, laser comms',
   },
 
   // --- ATTITUDE DETERMINATION & CONTROL (ADCS) ---
@@ -203,7 +235,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     costMillion: 4.0,
     powerConsumptionW: 25,
     description: 'Sistem orientasi tiga sumbu dengan empat roda reaksi dan pendorong gas dingin.',
+    descriptionEn: 'Heritage 3-axis reaction wheel assembly coupled with cold-gas RCS thruster nozzles.',
     specSummary: 'Presisi pointing 0.05 derajat, daya 25W',
+    specSummaryEn: '0.05° pointing accuracy, 25W power draw',
   },
   {
     id: 'adcs_star_tracker_cmas',
@@ -213,7 +247,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     costMillion: 8.5,
     powerConsumptionW: 40,
     description: 'Sistem navigasi bintang ganda otonom untuk manuver cepat dan stabilisasi presisi.',
+    descriptionEn: 'Dual star-tracker cameras paired with control moment gyroscopes for rapid slewing.',
     specSummary: 'Presisi pointing 0.005 derajat, daya 40W',
+    specSummaryEn: '0.005° pointing accuracy, 40W power draw',
   },
 
   // --- LAUNCH VEHICLES ---
@@ -221,10 +257,12 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     id: 'launch_smallsat_rideshare',
     name: 'Commercial SmallSat Rideshare',
     category: 'launch_vehicle',
-    massKg: 0, // launch vehicle capacity limit
+    massKg: 0,
     costMillion: 8.0,
     description: 'Peluncuran tumpangan hemat biaya. Batas total bobot wahana maksimal 140 kg.',
+    descriptionEn: 'Economical rideshare slot. Spacecraft dry mass strictly capped at 140 kg.',
     specSummary: 'Batas massa wahana 140 kg, biaya 8 juta dolar',
+    specSummaryEn: '140 kg payload limit, $8M launch cost',
   },
   {
     id: 'launch_dedicated_medium',
@@ -233,7 +271,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     massKg: 0,
     costMillion: 22.0,
     description: 'Peluncuran roket khusus berdedikasi penuh. Kapasitas muatan longgar hingga 350 kg.',
+    descriptionEn: 'Dedicated commercial launch booster. Generous mass budget allowance up to 350 kg.',
     specSummary: 'Batas massa wahana 350 kg, biaya 22 juta dolar',
+    specSummaryEn: '350 kg payload limit, $22M launch cost',
   },
 
   // --- ORBIT PROFILES ---
@@ -244,7 +284,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     massKg: 0,
     costMillion: 2.0,
     description: 'Orbit di garis batas siang malam. Menghindari bayangan panjang gerhana asteroid.',
+    descriptionEn: 'Sun-synchronous terminator plane orbit. Avoids deep asteroid shadow transits.',
     specSummary: 'Gerhana singkat 15 menit, resolusi tinggi',
+    specSummaryEn: 'Brief 15-min eclipse, high science resolution',
   },
   {
     id: 'orbit_equatorial_close',
@@ -253,7 +295,9 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     massKg: 0,
     costMillion: 4.0,
     description: 'Orbit ekuatorial dekat ASTER-9 lama. Melewati bayangan dingin lebih dari 75 menit.',
+    descriptionEn: 'Legacy close equatorial orbit. Deep 75-minute freezing shadow each orbital revolution.',
     specSummary: 'Gerhana dalam 75 menit, stres termal tinggi',
+    specSummaryEn: '75-min deep eclipse, severe thermal stress',
   },
   {
     id: 'orbit_distant_quasi',
@@ -262,6 +306,19 @@ export const SPACECRAFT_COMPONENTS: SpacecraftComponent[] = [
     massKg: 0,
     costMillion: 1.0,
     description: 'Orbit jarak jauh stabil dengan sinar matahari penuh. Resolusi instrumen sains menurun.',
+    descriptionEn: 'Distant high-altitude holding trajectory. Continuous solar lighting with lower science resolution.',
     specSummary: 'Tanpa gerhana, lingkungan termal aman',
+    specSummaryEn: 'Zero eclipse, benign thermal environment',
   },
 ];
+
+export function getLocalizedComponent(comp: SpacecraftComponent, lang: 'en' | 'id'): SpacecraftComponent {
+  if (lang === 'en') {
+    return {
+      ...comp,
+      description: comp.descriptionEn || comp.description,
+      specSummary: comp.specSummaryEn || comp.specSummary,
+    };
+  }
+  return comp;
+}
